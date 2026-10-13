@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NeonFrame, NeonPanel } from '@/components/ui/neon';
 
 type TimeLeft = {
   days: number;
@@ -107,27 +106,16 @@ export default function Countdown({
       ];
 
   return (
-    <div className="flex flex-col gap-3">
-      <p className="section-kicker">{t('hero.countdownLabel')}</p>
-
-      <div className="grid grid-cols-4 gap-2 sm:gap-3">
+    <div className="landing-countdown">
+      <p>{t('hero.countdownLabel')}</p>
+      <dl>
         {units.map((unit, index) => (
-          <NeonFrame key={index} size="sm" interactive className="sm:gap-2 sm:p-3 sm:pb-4">
-            <NeonPanel
-              position="top"
-              className="neon-text flex items-center justify-center py-2 text-[clamp(1.75rem,0.9rem+2.6vw,4rem)] leading-none font-bold text-white tabular-nums sm:py-4"
-            >
-              {unit.value === null ? '--' : String(unit.value).padStart(2, '0')}
-            </NeonPanel>
-            <NeonPanel
-              position="bottom"
-              className="neon-text truncate px-1 pt-1 pb-1.5 text-center text-[clamp(0.75rem,0.45rem+0.9vw,2rem)] font-semibold text-white lowercase sm:pb-2"
-            >
-              {unit.label}
-            </NeonPanel>
-          </NeonFrame>
+          <div key={index}>
+            <dd>{unit.value === null ? '--' : String(unit.value).padStart(2, '0')}</dd>
+            <dt>{unit.label}</dt>
+          </div>
         ))}
-      </div>
+      </dl>
     </div>
   );
 }

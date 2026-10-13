@@ -5,16 +5,17 @@ import { cva, type VariantProps } from 'class-variance-authority';
  * non-component export there breaks React Fast Refresh.
  */
 export const buttonVariants = cva(
-  'inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap font-medium no-underline transition-all duration-300 outline-none select-none focus-visible:ring-2 focus-visible:ring-whd-pink-bright focus-visible:ring-offset-2 focus-visible:ring-offset-whd-dark disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap font-medium no-underline transition-colors duration-150 outline-none select-none focus-visible:ring-2 focus-visible:ring-whd-pink-bright focus-visible:ring-offset-2 focus-visible:ring-offset-whd-dark disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        primary: 'neon-button font-semibold text-white',
+        primary: 'neon-button min-h-11 font-semibold',
         solid:
-          'rounded-xl bg-whd-pink font-semibold text-whd-purple-deep hover:bg-whd-pink-bright hover:shadow-[0_0_24px_rgb(253_92_195/0.6)]',
-        outline:
-          'rounded-2xl border-2 border-whd-pink/60 text-white hover:border-whd-pink hover:bg-whd-purple/40',
-        ghost: 'rounded-lg text-white/80 hover:bg-white/10 hover:text-white',
+          'min-h-11 rounded-xl bg-whd-pink font-semibold text-whd-dark hover:bg-whd-pink-bright active:bg-whd-pink-soft',
+        secondary:
+          'min-h-11 rounded-xl bg-white/10 text-white hover:bg-white/15 active:bg-white/20',
+        ghost:
+          'min-h-11 rounded-lg text-white/80 hover:bg-white/10 hover:text-white active:bg-white/15',
         link: 'text-whd-pink-soft hover:text-whd-pink-bright',
       },
       size: {

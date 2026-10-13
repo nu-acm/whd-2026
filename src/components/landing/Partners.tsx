@@ -1,13 +1,4 @@
 import { useTranslation } from 'react-i18next';
-import { motion } from 'motion/react';
-import SectionHeading from '@/components/landing/SectionHeading';
-
-const reveal = {
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: '-60px' },
-  transition: { duration: 0.6 },
-} as const;
 
 /** Freedom Broker wordmark: the shield + FREEDOM lockup with BROKER set beneath. */
 function FreedomBrokerLogo({ alt }: { alt: string }) {
@@ -35,31 +26,19 @@ export default function Partners() {
   const { t } = useTranslation();
 
   return (
-    <section id="partners" className="w-full overflow-x-hidden py-16 md:py-24">
-      <div className="mx-auto max-w-[90rem] px-4 sm:px-8 lg:px-12">
-        <SectionHeading
-          kicker={t('partners.kicker')}
-          title={t('partners.title')}
-          className="mb-10 md:mb-14"
+    <section id="partners" className="bento-sponsors" aria-labelledby="partners-title">
+      <h3 id="partners-title">{t('partners.title')}</h3>
+      <div className="partner-logos">
+        <div>
+          <FreedomBrokerLogo alt={t('partners.generalSponsorAlt')} />
+        </div>
+        <img
+          src="/whd/sponsor-nu-impact.webp"
+          alt={t('partners.nuImpactAlt')}
+          width={1440}
+          height={522}
+          loading="lazy"
         />
-
-        {/* Sponsors — logos straight on the dark ground, as in the design */}
-        <motion.div
-          {...reveal}
-          className="grid grid-cols-1 items-center gap-10 sm:grid-cols-2 md:gap-16"
-        >
-          <div className="max-w-[36rem] transition-transform duration-300 hover:scale-[1.03]">
-            <FreedomBrokerLogo alt={t('partners.generalSponsorAlt')} />
-          </div>
-          <img
-            src="/whd/sponsor-nu-impact.webp"
-            alt={t('partners.nuImpactAlt')}
-            width={1440}
-            height={522}
-            loading="lazy"
-            className="h-auto w-full max-w-[45rem] transition-transform duration-300 hover:scale-[1.03]"
-          />
-        </motion.div>
       </div>
     </section>
   );

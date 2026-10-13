@@ -29,7 +29,7 @@ export function ConfirmButton({
   disabled = false,
   loading = false,
   loadingLabel,
-  variant = 'outline',
+  variant = 'secondary',
   size = 'sm',
   className,
   armedClassName = 'border-red-500/70 text-red-300 hover:border-red-500 hover:bg-red-500/10',

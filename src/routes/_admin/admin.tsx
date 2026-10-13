@@ -257,7 +257,7 @@ function AdminPage() {
     <main className="mx-auto w-full max-w-[100rem] flex-1 px-6 py-10 sm:px-8 lg:px-12">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-bold text-white md:text-4xl">{t('admin.title')}</h1>
-        <Button variant="outline" size="sm" onClick={exportCsv}>
+        <Button variant="secondary" size="sm" onClick={exportCsv}>
           {t('admin.exportCsv')}
         </Button>
       </div>

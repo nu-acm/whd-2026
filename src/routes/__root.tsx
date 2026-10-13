@@ -52,7 +52,7 @@ function RootErrorPage({ error, reset }: ErrorComponentProps) {
           </p>
         )}
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Button variant="outline" className="flex-1" onClick={() => reset()}>
+          <Button variant="secondary" className="flex-1" onClick={() => reset()}>
             {t('errorPage.retry')}
           </Button>
           <Link to="/" className={buttonVariants({ className: 'flex-1' })}>
@@ -116,7 +116,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         {children}
         {import.meta.env.DEV && (
           <TanStackDevtools
-            config={{ position: 'bottom-right' }}
+            config={{ position: 'middle-right', hideUntilHover: true }}
             plugins={[{ name: 'TanStack Router', render: <TanStackRouterDevtoolsPanel /> }]}
           />
         )}

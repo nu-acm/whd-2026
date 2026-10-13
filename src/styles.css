@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@import './styles/landing.css';
+@import './styles/spy-theme.css';
 @import '@fontsource-variable/lexend';
 @import '@fontsource-variable/montserrat';
 @import '@fontsource-variable/jetbrains-mono';
@@ -41,11 +43,6 @@
   --whd-text-dim: #6c6c6c;
 
   --whd-radius: 1.25rem;
-
-  /* The neon frame: hairline inner bevel plus a pink-to-violet halo */
-  --whd-bevel: inset 0 -4px 4px rgb(0 0 0 / 0.25), inset 0 4px 4px rgb(0 0 0 / 0.25);
-  --whd-halo: 0 0 32px rgb(253 92 195 / 0.55), 0 18px 48px rgb(96 42 175 / 0.6);
-  --whd-halo-strong: 0 0 44px rgb(253 92 195 / 0.75), 0 22px 60px rgb(96 42 175 / 0.75);
 }
 
 @theme inline {
@@ -77,7 +74,7 @@
 /* `clip`, not `hidden`: hidden on body turns it into a second scroll container
    (overflow-y computes to auto), so the wheel scrolls body a few px before the page. */
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   overflow-x: clip;
   /* Offset anchor scrolling so sections clear the fixed header */
   scroll-padding-top: 7rem;
@@ -111,185 +108,51 @@ body {
   opacity: 0.1;
 }
 
-/* ===== Neon components ===== */
-
+/* Shared controls use filled surfaces; focus rings remain available. */
 @layer components {
-  /* Outer pink frame. Children are .neon-panel blocks separated by the frame colour. */
   .neon-frame {
-    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 12px 12px 16px;
-    border-radius: 20px;
-    background-color: var(--whd-pink);
-    box-shadow: var(--whd-bevel), var(--whd-halo);
-    transition:
-      box-shadow 300ms ease,
-      transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    gap: 0;
+    padding: 0;
+    border-radius: 16px;
+    background: var(--whd-surface-raised);
   }
   .neon-frame-sm {
-    padding: 8px 8px 10px;
-    gap: 6px;
-    border-radius: 16px;
-  }
-  .neon-frame-flat {
-    box-shadow: var(--whd-bevel);
-  }
-  .neon-frame-interactive:hover,
-  .neon-frame-interactive:focus-within {
-    box-shadow: var(--whd-bevel), var(--whd-halo-strong);
-    transform: translateY(-3px);
-  }
-
-  /* Violet panel inside a frame. Top/bottom variants square off the shared edge. */
-  .neon-panel {
-    position: relative;
     border-radius: 12px;
-    background-color: var(--whd-purple);
-    box-shadow: inset 0 4px 12px rgb(0 0 0 / 0.25);
   }
-  /* Grey secondary text vanishes on violet; lift it to translucent white there. */
-  .neon-panel,
-  [data-slot='card'] {
-    --whd-text-muted: rgb(255 255 255 / 0.8);
-    --whd-text-dim: rgb(255 255 255 / 0.6);
+  .neon-panel {
+    border-radius: inherit;
+    background: transparent;
   }
   .neon-panel-top {
-    border-radius: 12px 12px 0 0;
+    border-radius: 16px 16px 0 0;
   }
   .neon-panel-bottom {
-    border-radius: 0 0 12px 12px;
-    box-shadow: inset 0 -4px 12px rgb(0 0 0 / 0.25);
+    border-radius: 0 0 16px 16px;
   }
-  .neon-frame-sm .neon-panel {
-    border-radius: 10px;
-  }
-  .neon-frame-sm .neon-panel-top {
-    border-radius: 10px 10px 0 0;
-  }
-  .neon-frame-sm .neon-panel-bottom {
-    border-radius: 0 0 10px 10px;
-  }
-
-  /* Single-element version of the frame for buttons: the pink border is the frame. */
   .neon-button {
-    border: 5px solid var(--whd-pink);
-    border-radius: 18px;
-    background-color: var(--whd-purple);
-    box-shadow:
-      inset 0 4px 12px rgb(0 0 0 / 0.3),
-      var(--whd-halo);
-    text-shadow: 0 2px 8px rgb(0 0 0 / 0.25);
-    transition:
-      box-shadow 300ms ease,
-      background-color 200ms ease,
-      transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    border: 0;
+    border-radius: 12px;
+    background: var(--whd-pink);
+    color: var(--whd-dark);
   }
   .neon-button:hover {
-    background-color: var(--whd-purple-soft);
-    box-shadow:
-      inset 0 4px 12px rgb(0 0 0 / 0.2),
-      var(--whd-halo-strong);
-    transform: translateY(-2px);
+    background: var(--whd-pink-bright);
   }
   .neon-button:active {
-    transform: translateY(1px);
-    box-shadow:
-      inset 0 6px 14px rgb(0 0 0 / 0.4),
-      var(--whd-halo);
+    background: var(--whd-pink-soft);
   }
-
   .neon-text {
-    text-shadow: 0 2px 8px rgb(0 0 0 / 0.25);
+    text-shadow: none;
   }
-
-  /* Oversized left-aligned section titles */
   .whd-display {
     font-weight: 800;
-    line-height: 0.92;
-    letter-spacing: -0.01em;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
     color: var(--whd-text);
     text-wrap: balance;
   }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .neon-frame-interactive:hover,
-  .neon-frame-interactive:focus-within {
-    transform: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-}
-
-/* ===== Animations ===== */
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes blink {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  51%,
-  100% {
-    opacity: 0;
-  }
-}
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-/* ===== Utility Classes ===== */
-
-/* Soft pink halo used behind illustrations and cards */
-.whd-glow {
-  box-shadow: 0px 5px 80px 0px rgba(253, 92, 195, 0.4);
-}
-
-.gradient-text-primary {
-  background: linear-gradient(135deg, #66ce3c, #39c6f1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.gradient-text-secondary {
-  background: linear-gradient(135deg, #f687c1, #f03b1b);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.gradient-text-pink {
-  background: linear-gradient(135deg, var(--whd-pink-bright), var(--whd-pink));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Section eyebrow label — the small centred kicker above every section title */
-.section-kicker {
-  font-size: clamp(0.75rem, 0.65rem + 0.25vw, 0.95rem);
-  font-weight: 600;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--whd-pink-soft);
 }
 
 /* Scrollbar styling */
@@ -332,16 +195,5 @@ body {
   100% {
     background-color: rgb(253 92 195 / 0);
     outline-color: rgb(255 184 232 / 0);
-  }
-}
-
-/* Hero mascot: a slow bob so the star feels alive without pulling focus */
-@keyframes whd-float {
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-14px) rotate(1.2deg);
   }
 }

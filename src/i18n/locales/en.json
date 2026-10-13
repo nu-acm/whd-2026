@@ -20,11 +20,13 @@
     "register": "Registration",
     "toggleMenu": "Toggle menu",
     "dashboard": "Dashboard",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "navigation": "Main navigation"
   },
   "hero": {
     "title": "Women’s Hack Day",
-    "tagline": "A three-round team competition for girls who dream of conquering the world of IT.",
+    "tagline": "One team. Three challenges. A whole day to make your move in IT.",
+    "registrationOpen": "Registration is open",
     "countdownLabel": "Registration closes in",
     "imageAlt": "Women’s Hack Day illustration",
     "cta": {
@@ -36,7 +38,7 @@
       "signIn": "Sign in"
     },
     "status": {
-      "onboarding": "You are signed in — fill in your details to complete registration.",
+      "onboarding": "You are signed in. fill in your details to complete registration.",
       "team": "Your details are saved. Next, create or join a team.",
       "ready": "You are registered with a team. See you at the event!",
       "incomplete": "Your team needs at least {{min}} members to compete. Invite more teammates."
@@ -45,7 +47,7 @@
       "register": "Already registered? Sign in to see your team.",
       "onboarding": "Registration closed before you finished your details.",
       "team": "Registration is closed, and you are not in a team.",
-      "incomplete": "Registration is closed. Your team has fewer than {{min}} members — contact the organisers."
+      "incomplete": "Registration is closed. Your team has fewer than {{min}} members. contact the organisers."
     }
   },
   "countdown": {
@@ -68,8 +70,13 @@
     "whereDetail": "Astana",
     "whereAction": "map",
     "how": "How?",
-    "howAnswer": "Teams of 3–4",
-    "howDetail": "sign up, then build your team"
+    "howAnswer": "Teams of 3-4",
+    "howDetail": "Register, then build your team",
+    "label": "Event details",
+    "monthYear": "October 2026",
+    "mapLink": "View on map",
+    "teamLabel": "Team",
+    "teamMembers": "participants per team"
   },
   "about": {
     "kicker": "About",
@@ -80,14 +87,14 @@
     "prizeAmount": "1 000 000",
     "prizeUnit": "₸",
     "prizePool": "prize pool",
-    "title": "The biggest competition for girls",
-    "titleHighlight": "who dream of conquering IT",
-    "description": "<pink>Women’s Hack Day</pink> is a one-day team competition for high school, college and university girls. Teams of 3–4 go through <pink>three rounds: mathematics, competitive programming and product design</pink>.",
-    "organizers": "Organised by the NU ACM-W Student Chapter — the first ACM-W chapter in Kazakhstan and Central Asia, supporting women in STEM and IT."
+    "title": "One day.",
+    "titleHighlight": "Three challenges.",
+    "description": "For high school, college and university girls. Bring your curiosity and a team of 3-4. No professional experience needed.",
+    "organizers": "Organised by NU ACM-W Student Chapter, the first ACM-W chapter in Kazakhstan and Central Asia."
   },
   "timeline": {
     "kicker": "Dates",
-    "title": "WHD 2026 Timeline",
+    "title": "Save the dates",
     "items": {
       "registration": "October 6-20",
       "registrationLabel": "Registration Period",
@@ -99,7 +106,7 @@
   },
   "schedule": {
     "kicker": "Event day",
-    "title": "WHD 2026 Schedule",
+    "title": "Your day at WHD",
     "events": {
       "registration": "Registration",
       "opening": "Opening Ceremony",
@@ -109,11 +116,13 @@
       "productDesign": "Product Design",
       "pitching": "Pitching",
       "closing": "Closing Ceremony"
-    }
+    },
+    "morning": "Morning",
+    "afternoon": "Afternoon"
   },
   "benefits": {
     "kicker": "What you get",
-    "title": "Benefits",
+    "title": "More than a competition",
     "prizePool": "1,000,000 ₸ Prize Pool",
     "welcomePackage": "Welcome Package",
     "merchandise": "Exclusive Merchandise",
@@ -121,12 +130,17 @@
   },
   "gallery": {
     "kicker": "Moments",
-    "title": "Gallery",
-    "imageAlt": "Photo from Women’s Hack Day {{index}}"
+    "title": "This is WHD",
+    "imageAlt": "Photo from Women’s Hack Day {{index}}",
+    "viewPhotos": "View photos",
+    "openPhoto": "Open photo {{index}}",
+    "close": "Close gallery",
+    "previous": "Previous photo",
+    "next": "Next photo"
   },
   "faq": {
     "kicker": "Questions",
-    "title": "FAQ",
+    "title": "Good questions. Clear answers.",
     "categories": {
       "general": "General",
       "participation": "Participation",
@@ -136,15 +150,15 @@
     "questions": {
       "whatIs": {
         "q": "What is Women’s Hack Day?",
-        "a": "Women’s Hack Day (WHD) is an annual three-round team competition in mathematics, competitive programming, and product design - the biggest competition for girls who dream of conquering the world of IT."
+        "a": "WHD is an annual team competition for girls with three rounds: mathematics, competitive programming and product design."
       },
       "organizers": {
         "q": "Who are the organisers of WHD?",
-        "a": "The organizer is the NU ACM-W Student Chapter - the first and only branch of ACM-Women in Kazakhstan and Central Asia. Our mission is to support women in STEM fields, especially in IT, through initiatives that foster social, professional, and technical growth."
+        "a": "NU ACM-W Student Chapter, the first ACM-W chapter in Kazakhstan and Central Asia. The chapter supports women in STEM and IT."
       },
       "otherEvents": {
         "q": "Are there any other events for girls?",
-        "a": "Yes! ACM-W annually organizes events for girls such as CodeW - an individual competitive programming contest, and Code Girl Summer - a two-week web development camp. You can find more details and information on our Telegram and Instagram pages."
+        "a": "Yes! CodeW is an individual programming contest. Code Girl Summer is a two-week web development camp. Follow our Telegram and Instagram for details."
       },
       "whoCanParticipate": {
         "q": "Who can participate?",
@@ -174,16 +188,17 @@
         "q": "I didn't find an answer to my question. What should I do?",
         "a": "Join our <link href=\"https://t.me/WHD_chat\">Telegram chat</link> and ask your questions there, or contact us via email: <link href=\"https://mail.google.com/mail/u/0/?fs=1&to=acm_w@nu.edu.kz&su&body&tf=cm\">acm_w@nu.edu.kz.</link>"
       }
-    }
+    },
+    "chatLink": "Ask us in Telegram"
   },
   "partners": {
     "kicker": "Supported by",
-    "title": "Our Sponsors",
+    "title": "With the support of",
     "generalSponsorAlt": "Freedom Broker",
     "nuImpactAlt": "NU Impact Foundation"
   },
   "footer": {
-    "readyToJoin": "Ready to join?",
+    "readyToJoin": "Your team. Your next move.",
     "register": "Register",
     "instagram": "Instagram",
     "telegram": "Telegram",
@@ -194,7 +209,10 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "signIn": "Sign in",
-    "registrationClosed": "Registration is closed"
+    "registrationClosed": "Registration is closed",
+    "follow": "Stay in touch",
+    "explore": "Explore",
+    "documents": "Legal"
   },
   "login": {
     "title": "Sign in",
@@ -415,5 +433,8 @@
     "errorTooLarge": "The file is larger than {{mb}} MB.",
     "errorNoProfile": "Fill in your details first.",
     "errorFailed": "Could not save your CV. Please try again."
+  },
+  "closingCta": {
+    "title": "See you at <pink>WHD</pink>."
   }
 }

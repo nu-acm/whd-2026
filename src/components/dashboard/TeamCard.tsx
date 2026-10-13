@@ -123,7 +123,7 @@ export function TeamCard({
               <span className="text-sm font-medium text-white">{t('dashboard.inviteLink')}</span>
               <div className="flex gap-2">
                 <Input readOnly value={inviteUrl} onFocus={(e) => e.currentTarget.select()} />
-                <Button variant="outline" onClick={copyInvite} className="shrink-0">
+                <Button variant="secondary" onClick={copyInvite} className="shrink-0">
                   {copied ? t('common.copied') : t('common.copy')}
                 </Button>
               </div>

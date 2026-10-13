@@ -32,7 +32,9 @@ if (isBrowser) {
 }
 
 instance.init({
-  lng: isBrowser ? undefined : 'en',
+  // Hydrate in the language already rendered by the server. A first-visit
+  // navigator preference must not replace that markup before hydration.
+  lng: isBrowser ? document.documentElement.lang || 'en' : 'en',
   resources,
   fallbackLng: 'en',
   supportedLngs: [...supportedLngs],

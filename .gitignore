@@ -10,3 +10,8 @@ dist
 .wrangler
 .dev.vars
 worker-configuration.d.ts
+
+# Local preview configuration and generated review artifacts
+/vite.config.local.ts
+/output/
+/.playwright-cli/

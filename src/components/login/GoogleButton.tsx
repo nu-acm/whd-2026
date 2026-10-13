@@ -39,7 +39,7 @@ export function GoogleButton({ redirect }: { redirect?: string }) {
     <div className="flex flex-col gap-2">
       <Button
         type="button"
-        variant="outline"
+        variant="secondary"
         disabled={pending}
         onClick={signIn}
         className="w-full"

@@ -36,13 +36,13 @@ export function LanguageSwitcher({
             type="button"
             onClick={() => changeLanguage(lng)}
             aria-pressed={isActive}
-            aria-label={`${t('common.switchLanguage')} — ${languageNames[lng]}`}
+            aria-label={`${t('common.switchLanguage')} / ${languageNames[lng]}`}
             className={cn(
-              'cursor-pointer rounded-lg font-medium transition-all duration-200',
+              'focus-visible:outline-whd-pink-bright min-h-11 cursor-pointer rounded-lg font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-80',
               size === 'sm' ? 'px-2.5 py-1 text-xs' : 'flex-1 px-3 py-1.5 text-sm',
               isActive
-                ? 'bg-whd-pink text-whd-purple-deep shadow-[0_0_14px_rgb(253_92_195/0.5)]'
-                : 'bg-white/10 text-white hover:bg-white/20',
+                ? 'bg-whd-pink/15 text-whd-pink-bright'
+                : 'text-whd-text-muted hover:bg-white/10 hover:text-white',
             )}
           >
             {languageNames[lng]}

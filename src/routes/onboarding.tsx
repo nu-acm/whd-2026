@@ -81,7 +81,7 @@ function OnboardingPage() {
               {t('dashboard.title')}
             </LinkButton>
           ) : (
-            <LinkButton href="/" variant="outline" className="w-full">
+            <LinkButton href="/" variant="secondary" className="w-full">
               {t('onboarding.backHome')}
             </LinkButton>
           )}

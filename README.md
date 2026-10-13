@@ -1,14 +1,18 @@
-# Women's Hack Day — landing page
+# whd-2026
 
 Landing page for Women's Hack Day, the annual three-round team competition
 organized by the NU ACM-W Student Chapter.
 
-It is built from two existing projects:
+The 2026 landing uses a dark neon style inspired by Totally Spies, with a mascot
+countdown, optimized photo gallery, responsive event sections, and RU/KK/EN copy.
+Design context is recorded in `PRODUCT.md` and `DESIGN.md`.
+
+It originated from two existing projects:
 
 - **Structure and features** come from `hacknu-2026` — the section composition
   (fixed navbar → hero → when/where/how band → about → … → footer CTA), the
-  `react-i18next` setup, the animated hexagon hero backdrop, the `DecryptedText`
-  scramble-on-scroll headings, the WebGL cursor trail, and the UI primitives.
+  `react-i18next` setup, and the UI primitives. The current design uses a static
+  hexagon background and a lightweight WebP flower cursor trail.
 - **Design, copy and content** come from `acm@nu/WHD` — the pink-on-black palette
   (`#BB046C`), Montserrat, the illustrations and partner logos, and every string
   in all three languages.

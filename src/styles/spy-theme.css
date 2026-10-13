@@ -1,0 +1,415 @@
+/* The hero's neon gadget language, scoped to the public WHD landing. */
+.landing-page {
+  --spy-lime: #e7ff91;
+  --spy-panel: #21152e;
+  --spy-highlight: #ffb0e8;
+  background-image:
+    radial-gradient(ellipse at 0% 27%, #7025980e, transparent 30%),
+    radial-gradient(ellipse at 100% 63%, #fa35b908, transparent 26%);
+}
+.landing-page .landing-heading,
+.footer-two-brand h2 {
+  font-family: 'Montserrat Variable', sans-serif;
+  font-style: italic;
+  font-weight: 850;
+  letter-spacing: -0.045em;
+  text-shadow: 0 0 22px #ef48c21a;
+}
+.landing-page .landing-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--spy-highlight);
+}
+.landing-page .landing-eyebrow::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  background: url('/whd/trail-flower-pink.webp') center / contain no-repeat;
+}
+/* The same pink casing and lime arrow as the hero button. */
+.landing-page .landing-cta:not(.hero-spy-cta),
+.landing-page .feature-two-action,
+.landing-page .nav-cta {
+  border: 0;
+  border-radius: 24px 8px 24px 8px;
+  background: linear-gradient(165deg, #ffb0e8, #ff64d0 34%, #f32aaa);
+  color: #250d28;
+  font-weight: 800;
+  font-style: italic;
+  box-shadow:
+    inset 0 2px 0 #ffe6f799,
+    inset 0 -3px 0 #ba117480,
+    0 4px 22px #fa35b921;
+  transition:
+    box-shadow 180ms,
+    background 180ms;
+}
+.landing-page .landing-cta:not(.hero-spy-cta):hover,
+.landing-page .feature-two-action:hover,
+.landing-page .nav-cta:hover {
+  background: linear-gradient(165deg, #ffd0f1, #ff82d9 34%, #fb40ba);
+  box-shadow:
+    inset 0 2px 0 #fff0,
+    inset 0 -3px 0 #ba117480,
+    0 4px 26px #fa35b943;
+}
+.landing-page .landing-cta:not(.hero-spy-cta) > svg,
+.landing-page .landing-cta:not(.hero-spy-cta) > span[aria-hidden],
+.landing-page .feature-two-action > span {
+  display: inline-flex;
+  flex: 0 0 32px;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #3b103d;
+  color: var(--spy-lime);
+  font-style: normal;
+}
+.landing-page .landing-cta:not(.hero-spy-cta) > svg {
+  padding: 6px;
+}
+.landing-page .landing-cta:not(.hero-spy-cta) {
+  padding-block: 12px;
+}
+.landing-page .landing-nav {
+  background: #100d16;
+  box-shadow:
+    0 1px 0 #a757cf1c,
+    0 6px 24px #08050f35;
+}
+.desktop-nav a:hover {
+  text-shadow: 0 0 14px #ff64d066;
+}
+.mobile-nav {
+  background: #191021;
+}
+/* Event facts become compact gadget screens. */
+.event-stat-card {
+  border-radius: 28px 10px 28px 10px;
+  background: linear-gradient(145deg, #2d1b3e, #19121f 78%);
+  box-shadow:
+    inset 0 1px 0 #e5b6ff26,
+    0 12px 28px #09050f33;
+}
+.event-stat-glow {
+  opacity: 0.7;
+}
+.event-stat-accent {
+  top: 28px;
+  height: 48px;
+  width: 2px;
+  box-shadow: 0 0 12px var(--stat-accent);
+}
+.event-stat-badge {
+  border-radius: 12px 4px 12px 4px;
+}
+.event-stat-metric {
+  color: var(--stat-accent);
+  font-style: italic;
+  text-shadow: 0 0 24px var(--stat-tint);
+}
+.event-stat-subtitle > span {
+  width: 20px;
+  box-shadow: 0 0 10px var(--stat-tint);
+}
+/* Three challenge cards retain the chosen staggered layout. */
+.feature-two-visual {
+  position: relative;
+  isolation: isolate;
+  background: radial-gradient(ellipse at 65% 50%, #a038aa26, transparent 70%);
+  border-radius: 40px 12px 40px 12px;
+}
+.feature-two-visual::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url('/whd/hero-grid.svg') center / 96px 166px repeat;
+  opacity: 0.3;
+  mask-image: radial-gradient(ellipse, #000 30%, transparent 74%);
+}
+.feature-two-visual::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  top: 0;
+  width: 76px;
+  height: 76px;
+  background: url('/whd/trail-flower-purple.webp') center / contain no-repeat;
+  rotate: 16deg;
+  pointer-events: none;
+  z-index: -1;
+}
+.feature-two-card {
+  border-radius: 24px 8px 24px 8px;
+  background: linear-gradient(135deg, #372148, #20172c);
+  box-shadow:
+    inset 0 1px 0 #e9b5ff24,
+    0 12px 28px #09050f45;
+}
+.feature-two-card-top > svg {
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--round-accent) 35%, transparent));
+}
+.feature-two-number {
+  font-size: 1.375rem;
+  font-style: italic;
+  font-weight: 750;
+}
+.feature-two-time {
+  color: var(--round-accent);
+}
+.feature-two-question {
+  border-radius: 18px 6px 18px 6px;
+  background: #24172f;
+}
+.feature-two-question[data-state='open'] {
+  background: #321d41;
+}
+/* Dates and schedule share the watch's luminous digits. */
+.date-stat {
+  border-radius: 26px 8px 26px 8px;
+  background: linear-gradient(155deg, #2a1a37, #17121f);
+  box-shadow: inset 0 1px 0 #ddb2ff20;
+}
+.date-stat-value {
+  color: var(--date-accent);
+  font-style: italic;
+  text-shadow: 0 0 16px color-mix(in srgb, var(--date-accent) 18%, transparent);
+}
+.date-stat-icon {
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--date-accent) 25%, transparent));
+}
+.schedule-columns {
+  gap: 24px;
+}
+.schedule-columns > div {
+  padding: 24px 12px 12px;
+  border-radius: 28px 10px 28px 10px;
+  background: linear-gradient(155deg, #23162f, #15101c 80%);
+  box-shadow: inset 0 1px 0 #dca7ff1a;
+}
+.schedule-period {
+  color: var(--spy-highlight);
+  font-style: italic;
+  font-weight: 750;
+}
+.schedule-list li {
+  border-radius: 18px 6px 18px 6px;
+}
+.schedule-time {
+  color: #dcc4ed;
+}
+.schedule-round {
+  background: linear-gradient(110deg, #57236f80, #321d4280);
+  box-shadow: inset 2px 0 0 #e36dc080;
+}
+.schedule-round .schedule-time {
+  color: var(--spy-lime);
+  text-shadow: 0 0 10px #dfff7933;
+}
+/* Bento: prize safe, welcome kit, and sponsor panel. */
+.whd-bento-card {
+  border-radius: 30px 10px 30px 10px;
+  box-shadow: inset 0 1px 0 #e7bcff24;
+}
+.whd-bento-prize {
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(130deg, #6229a8, #351344);
+}
+.whd-bento-prize::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: url('/whd/hero-grid.svg') center / 110px 190px repeat;
+  opacity: 0.3;
+}
+.bento-prize-amount {
+  font-style: italic;
+  color: #ffd1f0;
+  text-shadow: 0 0 26px #fd5cc340;
+}
+.bento-trophy {
+  color: var(--spy-lime);
+  filter: drop-shadow(0 0 12px #e4ff9433);
+}
+.whd-bento-welcome {
+  background: radial-gradient(ellipse at 50% 30%, #d2389a24, transparent 70%), #2a1738;
+}
+.bento-gift {
+  color: #ff88d5;
+  filter: drop-shadow(0 0 12px #fd5cc340);
+}
+.whd-bento-experience {
+  background: linear-gradient(145deg, #27213b, #191622);
+}
+.bento-extras svg {
+  filter: drop-shadow(0 0 8px #e4ff9426);
+}
+.whd-bento-partners {
+  background: linear-gradient(150deg, #291b38, #19131f);
+}
+/* Photographs read as loose snapshots, with restrained neon edges. */
+.gallery-frame {
+  border-radius: 18px 5px 18px 5px;
+  box-shadow:
+    0 0 0 1px #ca6bef45,
+    0 0 20px #a229ac14,
+    0 16px 32px #0005;
+}
+.gallery-frame-1,
+.gallery-frame-4 {
+  rotate: -3deg;
+}
+.gallery-frame-2,
+.gallery-frame-5 {
+  rotate: 3deg;
+}
+.gallery-frame-3 {
+  rotate: 2deg;
+}
+.gallery-frame-6 {
+  rotate: -2deg;
+}
+.gallery-open {
+  border-radius: 18px 6px 18px 6px;
+  background: #301c41;
+  color: var(--spy-highlight);
+  box-shadow: inset 0 1px 0 #dd89f22b;
+}
+.gallery-dialog {
+  border-radius: 24px 8px 24px 8px;
+  background: #1d1229;
+  box-shadow: 0 0 48px #a938c22b;
+}
+.gallery-close,
+.gallery-controls button {
+  border-radius: 14px 5px 14px 5px;
+  color: var(--spy-highlight);
+}
+/* FAQ uses quiet rows; only the active answer lights up. */
+.faq-six-number {
+  color: var(--spy-lime);
+}
+.faq-six-item {
+  padding-inline: 16px;
+  border-bottom-color: #b371ce30;
+  border-radius: 18px 6px 18px 6px;
+}
+.faq-six-item[data-state='open'] {
+  background: linear-gradient(110deg, #50245b5c, #28193266);
+  border-bottom-color: transparent;
+}
+.faq-six-toggle {
+  border-radius: 12px 4px 12px 4px;
+  background: #3c1d4a;
+  box-shadow: inset 0 1px 0 #dd89f22b;
+}
+.faq-six-trigger[data-state='open'] .faq-six-toggle {
+  box-shadow: 0 0 16px #fd5cc333;
+}
+.faq-contact {
+  font-weight: 600;
+}
+/* Closing CTA and footer carry the same shell silhouette. */
+.cta-four {
+  border-radius: 36px 12px 36px 12px;
+  background: linear-gradient(120deg, #271731, #251634);
+  box-shadow:
+    inset 0 1px 0 #e7bcff24,
+    0 14px 50px #12061755;
+}
+.footer-two-brand,
+.footer-two-content {
+  border-radius: 32px 10px 32px 10px;
+  box-shadow: inset 0 1px 0 #e7bcff20;
+}
+.footer-two-brand {
+  background:
+    radial-gradient(ellipse at 5% 90%, #ef36982b, transparent 70%),
+    linear-gradient(140deg, #6327a4, #341446);
+}
+.footer-two-brand h2 {
+  color: #ffe7f8;
+}
+.footer-two-logo img {
+  filter: drop-shadow(0 0 10px #fa36aa3d);
+}
+.footer-two-content {
+  background: linear-gradient(140deg, #281936, #17101f);
+}
+.footer-two-groups h3 {
+  color: var(--spy-highlight);
+  font-weight: 600;
+}
+.footer-two-socials a {
+  border-radius: 14px 5px 14px 5px;
+  background: #210f30;
+  color: var(--spy-lime);
+}
+@media (max-width: 767px) {
+  .landing-page .landing-heading {
+    letter-spacing: -0.035em;
+  }
+  .schedule-columns > div {
+    padding: 20px 6px 8px;
+  }
+  .schedule-list li {
+    padding-inline: 12px;
+    gap: 12px;
+  }
+  .faq-six-item {
+    padding-inline: 8px;
+  }
+  .faq-six-trigger {
+    gap: 10px;
+  }
+  .faq-six-answer {
+    padding-left: 36px;
+  }
+  .gallery-frame-1,
+  .gallery-frame-4 {
+    rotate: -2deg;
+  }
+  .gallery-frame-2,
+  .gallery-frame-5 {
+    rotate: 2deg;
+  }
+  .event-stat-card,
+  .whd-bento-card,
+  .footer-two-brand,
+  .footer-two-content,
+  .cta-four {
+    border-radius: 24px 8px 24px 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-page .landing-cta:not(.hero-spy-cta),
+  .landing-page .feature-two-action,
+  .landing-page .nav-cta {
+    transition: none;
+  }
+}
+/* Keep long event names inside the gadget panels on compact screens. */
+.schedule-columns > div {
+  min-width: 0;
+}
+.schedule-list li {
+  grid-template-columns: 142px minmax(0, 1fr);
+}
+.schedule-list li > span:last-child {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1023px) {
+  .schedule-list li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+}

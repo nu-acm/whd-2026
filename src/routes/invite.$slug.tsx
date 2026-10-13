@@ -113,7 +113,7 @@ function InvitePage() {
           </div>
         ) : (
           <Button
-            variant="outline"
+            variant="secondary"
             className="w-full"
             onClick={() => navigate({ to: '/dashboard' })}
           >

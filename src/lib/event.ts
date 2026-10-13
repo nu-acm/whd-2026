@@ -17,3 +17,15 @@ export const SOCIAL_LINKS = {
 
 /** Participant chat — used by the FAQ answers. */
 export const TELEGRAM_CHAT_URL = 'https://t.me/WHD_chat';
+
+/** Shared program for the schedule and the three challenge cards. */
+export const EVENT_SCHEDULE = [
+  { time: '09:00 - 10:00', id: 'registration' },
+  { time: '10:00 - 11:00', id: 'opening' },
+  { time: '11:00 - 12:00', id: 'mathematics' },
+  { time: '12:00 - 13:00', id: 'programming' },
+  { time: '13:00 - 14:00', id: 'coffeeBreak' },
+  { time: '14:00 - 16:00', id: 'productDesign' },
+  { time: '16:00 - 17:00', id: 'pitching' },
+  { time: '17:30 - 18:30', id: 'closing' },
+] as const;

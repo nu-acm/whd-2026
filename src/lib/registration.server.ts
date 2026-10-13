@@ -1,6 +1,10 @@
 import { env } from 'cloudflare:workers';
 
-import { REGISTRATION_CLOSED_I18N_KEY, type RegistrationStatus } from './registration';
+import {
+  DEFAULT_REGISTRATION_DEADLINE,
+  REGISTRATION_CLOSED_I18N_KEY,
+  type RegistrationStatus,
+} from './registration';
 
 export { REGISTRATION_CLOSED_I18N_KEY };
 
@@ -8,28 +12,27 @@ interface AppEnv {
   REGISTRATION_DEADLINE?: string;
 }
 
-/** Parsed REGISTRATION_DEADLINE, or null when unset/unparseable. */
-export function getRegistrationDeadline(): Date | null {
+/** An explicit environment override takes precedence over the event deadline. */
+export function getRegistrationDeadline(): Date {
   const raw = (env as unknown as AppEnv).REGISTRATION_DEADLINE?.trim();
-  if (!raw) return null;
+  if (!raw) return new Date(DEFAULT_REGISTRATION_DEADLINE);
   const d = new Date(raw);
   if (isNaN(d.getTime())) {
-    console.warn(
-      '[registration] REGISTRATION_DEADLINE is set but unparseable; treating registration as open.',
-      { raw },
-    );
-    return null;
+    console.warn('[registration] REGISTRATION_DEADLINE is unparseable; using the event deadline.', {
+      raw,
+    });
+    return new Date(DEFAULT_REGISTRATION_DEADLINE);
   }
   return d;
 }
 
-/** Registration is open when no deadline is configured, or it has not passed. */
+/** Use the same deadline for the UI and server-side registration checks. */
 export function isRegistrationOpen(): boolean {
   const deadline = getRegistrationDeadline();
-  return deadline ? Date.now() < deadline.getTime() : true;
+  return Date.now() < deadline.getTime();
 }
 
 /** What the UI needs: whether sign-ups are open, and the deadline for the countdown. */
 export function getRegistrationStatus(): RegistrationStatus {
-  return { open: isRegistrationOpen(), deadline: getRegistrationDeadline()?.toISOString() ?? null };
+  return { open: isRegistrationOpen(), deadline: getRegistrationDeadline().toISOString() };
 }

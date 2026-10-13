@@ -213,7 +213,7 @@ export function NoTeamCard({
               />
             )}
           </Field>
-          <Button type="submit" variant="outline" disabled={pending}>
+          <Button type="submit" variant="secondary" disabled={pending}>
             {t('dashboard.joinTeam')}
           </Button>
         </form>

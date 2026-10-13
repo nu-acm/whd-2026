@@ -11,9 +11,9 @@ import Schedule from '@/components/landing/Schedule';
 import Benefits from '@/components/landing/Benefits';
 import Gallery from '@/components/landing/Gallery';
 import FAQ from '@/components/landing/FAQ';
-import Partners from '@/components/landing/Partners';
+import ClosingCTA from '@/components/landing/ClosingCTA';
 import Footer from '@/components/landing/Footer';
-import StarTrail from '@/components/landing/StarTrail';
+import FlowerTrail from '@/components/landing/FlowerTrail';
 import { getSession } from '@/lib/auth.server';
 import { getParticipant } from '@/lib/onboarding.server';
 import { getTeamByParticipant } from '@/lib/team.server';
@@ -48,20 +48,20 @@ function LandingPage() {
   const { session, nextStep, registration } = Route.useLoaderData();
 
   return (
-    <div className="bg-whd-dark whd-grid-bg relative min-h-screen overflow-clip">
-      {/* Neon star cursor trail — mouse only */}
-      <StarTrail />
-
+    <div className="landing-page">
+      <FlowerTrail />
       <Navbar session={session} registrationOpen={registration.open} />
-      <Hero nextStep={nextStep} registration={registration} />
-      <InfoCards />
-      <About />
-      <Timeline />
-      <Schedule />
-      <Partners />
-      <Benefits />
-      <Gallery />
-      <FAQ />
+      <main>
+        <Hero nextStep={nextStep} registration={registration} />
+        <InfoCards />
+        <About />
+        <Timeline />
+        <Schedule />
+        <Benefits />
+        <Gallery />
+        <FAQ />
+        <ClosingCTA nextStep={nextStep} registration={registration} />
+      </main>
       <Footer session={session} registrationOpen={registration.open} />
     </div>
   );
