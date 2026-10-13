@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWebHaptics } from 'web-haptics/react';
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router';
+import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
 import { z } from 'zod';
 
-import { AuthHeader } from '@/components/AuthHeader';
+import { AccountShell } from '@/components/AccountShell';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { TeamCard, type PendingTeamAction } from '@/components/dashboard/TeamCard';
 import { NoTeamCard } from '@/components/dashboard/NoTeamCard';
-import { DashboardStats } from '@/components/dashboard/DashboardStats';
 import { CvCard } from '@/components/dashboard/CvCard';
 import { ensureSession } from '@/lib/auth.server';
 import { getParticipant } from '@/lib/onboarding.server';
@@ -143,37 +143,36 @@ function DashboardPage() {
   };
 
   return (
-    <div className="bg-whd-dark flex min-h-screen flex-col">
-      <AuthHeader showSignOut email={email} />
-
-      <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-10 sm:px-8 md:py-16">
-        <div className="mb-8 flex flex-wrap items-baseline justify-between gap-3">
-          <h1 className="text-3xl font-bold text-white md:text-4xl">
-            {t('dashboard.greeting', { name: fullName })}
-          </h1>
-          <Link
-            to="/onboarding"
-            className="text-whd-pink-soft hover:text-whd-pink-bright text-sm transition-colors"
-          >
-            {t('dashboard.editProfile')}
-          </Link>
-        </div>
-
-        <DashboardStats team={team} />
-
-        {feedback && (
-          <p
-            role={feedback.type === 'error' ? 'alert' : 'status'}
-            className={
-              feedback.type === 'error'
-                ? 'mb-6 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300'
-                : 'border-whd-pink/40 bg-whd-pink/10 text-whd-pink-bright mb-6 rounded-lg border px-4 py-3 text-sm'
-            }
-          >
-            {t(feedback.message)}
-          </p>
-        )}
-
+    <AccountShell email={email} showHelp>
+      <DashboardLayout
+        fullName={fullName}
+        team={team}
+        feedback={
+          feedback && (
+            <p
+              role={feedback.type === 'error' ? 'alert' : 'status'}
+              className={
+                feedback.type === 'error'
+                  ? 'account-feedback account-feedback-error'
+                  : 'account-feedback account-feedback-success'
+              }
+            >
+              {t(feedback.message)}
+            </p>
+          )
+        }
+        sidebar={
+          <CvCard
+            hasCv={hasCv}
+            registrationOpen={registrationOpen}
+            onDone={succeed}
+            onError={(message) => {
+              trigger('error');
+              setFeedback({ type: 'error', message });
+            }}
+          />
+        }
+      >
         {team ? (
           <TeamCard
             team={team}
@@ -207,17 +206,7 @@ function DashboardPage() {
             onGenerate={() => generateTeamNameFn()}
           />
         )}
-
-        <CvCard
-          hasCv={hasCv}
-          registrationOpen={registrationOpen}
-          onDone={succeed}
-          onError={(message) => {
-            trigger('error');
-            setFeedback({ type: 'error', message });
-          }}
-        />
-      </main>
-    </div>
+      </DashboardLayout>
+    </AccountShell>
   );
 }

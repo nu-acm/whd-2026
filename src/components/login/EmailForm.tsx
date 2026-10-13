@@ -1,3 +1,4 @@
+import { ArrowUpRight } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWebHaptics } from 'web-haptics/react';
@@ -60,7 +61,8 @@ export function EmailForm({ onSent }: { onSent: (email: string) => void }) {
       </Field>
 
       <Button type="submit" disabled={pending} className="w-full">
-        {pending ? t('common.loading') : t('login.sendCode')}
+        <span>{pending ? t('common.loading') : t('login.sendCode')}</span>
+        <ArrowUpRight className="account-button-arrow" aria-hidden="true" />
       </Button>
     </form>
   );

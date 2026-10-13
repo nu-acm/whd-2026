@@ -145,3 +145,33 @@ Defined the missing shared accordion animations (280 ms open / 220 ms close), cr
 Verified accordion computed open/close animation names and durations, mobile menu open/Escape/rapid toggle at 390 px, gallery next-photo controls and Escape dismissal. Native dialog stays displayed during exit, then becomes display:none; its image persists for the fade. The shared confirmation-dialog class uses the same native-dialog CSS; destructive confirmation was not submitted during visual QA. TypeScript, targeted ESLint, local production build and diff whitespace checks passed.
 
 BeUniq raw audit: AI slop 100, copy slop 58, taste 18, design quality 76. The global style/copy audit is not passing; neon/gradient/eyebrow findings belong to the approved custom brand and unchanged content. TASTE-A11Y-001 flags in motion.css/accordion/Gallery are scanner false positives: CSS has an explicit reduced-motion block, accordion chevrons have motion-reduce utilities, and Gallery uses useReducedMotion. Existing unrelated findings remain outside this interaction-only change. Functional motion verification: passed.
+
+
+## Login and dashboard — 2026-10-13
+
+Reviewed live /login at desktop 1440, tablet 768 and mobile 390/320 px, including Russian/Kazakh text and invalid-email feedback. Reviewed the actual dashboard components in an isolated local Vite fixture harness: no team, team ready, registration locked, CV present/absent, invite layout and OTP entry. English tablet and Kazakh narrow-phone text checked. Fixed narrow member actions so full names have a readable column. Closed state retains informational content and removes team mutation controls. Fixture create/validation interactions were exercised; no actual account, Google OAuth, email delivery, team mutations or CV upload were performed. The fixture code is ignored and does not add routes/auth bypasses to the production app.
+
+Six existing email/OTP tests, TypeScript, targeted ESLint, production build and git diff --check passed. Existing TanStack deprecation and bundle-size warnings remain. Raw BeUniq full-workspace scores: AI slop 100, copy 79, taste 26, design quality 76; scanner includes local fixture sources. It is not a passing global audit. Brand-specific bold/italic headings, pink gradients, glow and asymmetric cards are intentional under the custom profile. Missing-alt reports for multiline decorative images are false positives (alt is provided); reduced-motion rules are present. Typography, responsive layout and real component behavior were visually reviewed separately.
+
+Screenshots: output/account-redesign/login.png and dashboard.png. Implementation/visual QA: passed.
+
+Account form animation is keyed by the stable email/OTP step, not translated titles; switching language preserves the mounted form and entered values. Browser DOM confirmed the filled input remained populated after language switch.
+
+## CV file drop — 2026-10-13
+
+- Installed Watermelon `file-upload-2` via shadcn and adapted it to the account design; preserved custom Button/Card/utils. Removed the unused generated Badge dependency file.
+- Single-PDF drag/drop and native picker, 5 MB limit, inline errors, real pending filename/status, duplicate-request guard, replacement and confirmed deletion. Locked registration hides upload controls. RU/EN/KK copy; reduced-motion support.
+- Four component tests cover dropped files, concurrent drops, invalid format/size/multiple files, same-file retry after network failure, deletion confirmation and closed registration. All passed; TypeScript and production build passed. External Drive upload was mocked in tests.
+- Visual check: desktop preview, Russian 390 px and Kazakh 320 px. No horizontal overflow in either mobile view. Proof: `output/account-redesign/file-drop-mobile.png` (isolated UI fixture, no live account mutation).
+
+## Dashboard support navigation — 2026-10-13
+
+- Removed the separate help card; moved FAQ and Telegram contact links into the dashboard header via the explicit `showHelp` option. Login and other auth pages keep their existing header.
+- Desktop inline navigation; mobile second row with 44 px link targets. Checked at 1440 and 320 px in the local dashboard fixture; no horizontal overflow. TypeScript, targeted ESLint and diff checks passed.
+- Screenshot: `output/account-redesign/dashboard-header.png`.
+
+## Login OTP — 2026-10-13
+
+- Installed Watermelon `input-otp-7` with the requested pnpm/shadcn command, corrected its registry import paths and wired it to the existing OtpForm state and shared Field label/error.
+- Two groups of three digits, WHD filled surfaces, thin pink active ring, error borders, reduced-motion caret. Paste strips spaces/separators; native one-time-code autocomplete and numeric keyboard retained. No auto-submit or authentication changes.
+- Four OTP tests passed: digit entry, formatted paste/correction/pending state, failed verification, resend cooldown/retry. TypeScript, targeted ESLint and production build passed. Browser review of the local fixture at desktop and narrow viewport; no real code requested or submitted. Proof: `output/account-redesign/otp-input.png`.

@@ -1,7 +1,8 @@
+import { FileText, CircleCheck } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { FileUpload } from '@/components/ui/file-upload-2';
 import { ConfirmButton } from '@/components/ui/confirm-button';
 import { CV_ERRORS, CV_MAX_BYTES, CV_MAX_MB } from '@/lib/cv';
 
@@ -37,10 +38,19 @@ export function CvCard({
   onError: (message: string) => void;
 }) {
   const { t } = useTranslation();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const busyRef = useRef(false);
+  const [uploadName, setUploadName] = useState('');
+  const [error, setError] = useState('');
+  const reportError = (message: string) => {
+    setError(message);
+    onError(message);
+  };
   const [pending, setPending] = useState<Pending>(null);
 
   const run = async (key: Exclude<Pending, null>, action: () => Promise<void>, done: string) => {
+    if (busyRef.current || !registrationOpen) return;
+    busyRef.current = true;
+    setError('');
     setPending(key);
     try {
       await action();
@@ -48,27 +58,40 @@ export function CvCard({
     } catch (err) {
       // Error messages are i18n keys from /api/cv; t() passes anything else through.
       const key = err instanceof Error ? err.message : CV_ERRORS.failed;
-      onError(t(key, { mb: CV_MAX_MB }));
+      reportError(t(key, { mb: CV_MAX_MB }));
     } finally {
+      busyRef.current = false;
       setPending(null);
+      setUploadName('');
     }
   };
 
-  const upload = (file: File) => {
+  const upload = (files: File[]) => {
+    if (busyRef.current || !registrationOpen) return;
+    if (files.length !== 1) return reportError(t('cv.errorSingleFile'));
+    const file = files[0];
     // Checked again on the server; this just saves a pointless upload.
-    if (file.size > CV_MAX_BYTES) return onError(t(CV_ERRORS.tooLarge, { mb: CV_MAX_MB }));
-    if (file.type && file.type !== 'application/pdf') return onError(t(CV_ERRORS.notPdf));
+    if (file.size > CV_MAX_BYTES) return reportError(t(CV_ERRORS.tooLarge, { mb: CV_MAX_MB }));
+    if (
+      (file.type && file.type !== 'application/pdf') ||
+      (!file.type && !/\.pdf$/i.test(file.name))
+    ) {
+      return reportError(t(CV_ERRORS.notPdf));
+    }
+    setUploadName(file.name);
     const body = new FormData();
     body.append('file', file);
     return run('upload', () => requestCv({ method: 'POST', body }), t('cv.feedbackUploaded'));
   };
 
   return (
-    <Card className="mt-6">
+    <Card className="account-cv-card">
       <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-xl font-bold text-white md:text-2xl">{t('cv.title')}</h2>
-          <span className={hasCv ? 'text-whd-pink-bright text-sm' : 'text-whd-text-muted text-sm'}>
+        <FileText className="account-section-icon" aria-hidden="true" />
+        <div className="account-card-heading">
+          <h2 className="account-card-title">{t('cv.title')}</h2>
+          <span className={hasCv ? 'account-status-tag is-complete' : 'account-status-tag'}>
+            {hasCv && <CircleCheck size={14} aria-hidden="true" />}
             {hasCv ? t('cv.uploaded') : t('cv.none')}
           </span>
         </div>
@@ -78,23 +101,19 @@ export function CvCard({
         </p>
 
         {registrationOpen && (
-          <div className="flex flex-wrap gap-3">
-            <input
-              ref={inputRef}
-              type="file"
+          <div className="account-cv-upload">
+            <FileUpload
               accept="application/pdf,.pdf"
-              className="sr-only"
-              tabIndex={-1}
-              aria-hidden="true"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                e.target.value = ''; // Picking the same file again should still fire.
-                if (file) upload(file);
-              }}
+              onFilesAdded={upload}
+              disabled={pending !== null}
+              uploading={pending === 'upload'}
+              fileName={uploadName}
+              title={t('cv.dropTitle')}
+              hint={t('cv.dropHint', { mb: CV_MAX_MB })}
+              buttonLabel={hasCv ? t('cv.replace') : t('cv.chooseFile')}
+              uploadingLabel={t('cv.uploading')}
+              error={error}
             />
-            <Button size="sm" disabled={pending !== null} onClick={() => inputRef.current?.click()}>
-              {pending === 'upload' ? t('cv.uploading') : hasCv ? t('cv.replace') : t('cv.upload')}
-            </Button>
             {hasCv && (
               <ConfirmButton
                 label={t('cv.delete')}

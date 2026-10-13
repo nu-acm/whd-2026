@@ -136,7 +136,7 @@ scroll-native. Нативные якоря, учёт высоты шапки, б
 
 Основной экран: публичный лендинг /. Повторное действие регистрации в конце длинной страницы допустимо, если ведёт к тому же следующему шагу.
 
-/login, /onboarding, /dashboard, /invite/$slug, /admin и /checkin сохраняют рабочие сценарии. При изменении общих токенов и примитивов проверить их читаемость, состояния и доступность. Полный редизайн этих экранов не входит в первый проход лендинга.
+/login и /dashboard по запросу пользователя от 13 октября 2026 используют стиль лендинга и существующие компоненты (см. Account pages ниже). /onboarding, /invite/$slug, /admin и /checkin сохраняют рабочие сценарии и прежнюю композицию. Изменения AuthCard и AuthHeader обратно совместимы; новое оформление ограничено .account-page.
 
 ## BeUniq Rule Priorities
 
@@ -269,3 +269,12 @@ Visual checks: desktop 1440 px and mobile 320/390 px, Russian and Kazakh narrow-
 ## FAQ showcase and full page — 2026-10-13
 
 The supplied split FAQ reference informs the structure: an illustrated left panel and five separate accordion cards on the right. The landing shows participation, experience, team, registration and online-format questions, with “Все вопросы” linking to /faq and the existing Telegram contact. The public /faq route contains all ten existing localized answers, a home link and language controls. The supplied mascot is stored as a 45 KB WebP. Pink/purple styling, hex grid and soft corners intentionally follow the approved WHD theme rather than the reference’s gold palette. Mobile stacks the illustration/actions above the questions; full-page sidebar stays sticky only on desktop.
+
+
+## Account pages — 2026-10-13
+
+Login and dashboard now use the approved WHD language: Montserrat italic display, pink gadget buttons, purple filled panels, subtle hex grids and the supplied FAQ mascot. AccountShell reuses AuthHeader and supplies legal/FAQ navigation. AuthCard accepts an optional illustration slot for split login/OTP layouts; its existing onboarding/invite layout is preserved. All form controls still use Button, Input, Field and existing validation.
+
+DashboardLayout places the greeting, profile action and three real status facts above the team area. Team management is the main column; optional CV and FAQ/contact form the secondary column. NoTeamCard retains both create/join forms and name generation. TeamCard now shows readable member names, roles, initials, available slots and a labeled invite field. On narrow phones member actions move below names. Existing login redirects, Google/OTP operations, registration checks, team callbacks and CV requests remain intact. RU/EN/KK additions cover only new introductory labels.
+
+Responsive checks: 320/390/768/1440 px. No persistent decorative animation; form/feedback transitions respect reduced motion. No new UI dependency. Proof: output/account-redesign/login.png and dashboard.png (local component fixtures).

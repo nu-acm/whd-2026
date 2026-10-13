@@ -1,4 +1,5 @@
-import { useState, useSyncExternalStore } from 'react';
+import { Users, Plus, Crown, Copy, Check } from 'lucide-react';
+import { useId, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWebHaptics } from 'web-haptics/react';
 import { Button } from '@/components/ui/button';
@@ -47,6 +48,7 @@ export function TeamCard({
   const { t } = useTranslation();
   const { trigger } = useWebHaptics(webHapticsOptions);
   const [copied, setCopied] = useState(false);
+  const inviteId = useId();
 
   const isCaptain = team.captainId === currentUserId;
   const busy = pendingAction !== null;
@@ -66,11 +68,15 @@ export function TeamCard({
   };
 
   return (
-    <Card>
-      <CardContent className="flex flex-col gap-6">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-2xl font-bold text-white md:text-3xl">{team.name}</h2>
-          <span className="text-whd-text-muted text-sm">
+    <Card className="account-team-card">
+      <CardContent className="account-team-content">
+        <p className="account-eyebrow">
+          <Users size={16} aria-hidden="true" />
+          {t('dashboard.yourTeam')}
+        </p>
+        <div className="account-team-heading">
+          <h2 className="account-team-name">{team.name}</h2>
+          <span className="account-status-tag">
             {t('dashboard.membersCount', { count: team.members.length, max: MAX_TEAM_SIZE })}
           </span>
         </div>
@@ -82,15 +88,16 @@ export function TeamCard({
         )}
 
         {/* Members, then the slots still open */}
-        <ul className="flex flex-col gap-2">
+        <ul className="account-members">
           {team.members.map((member) => (
-            <li
-              key={member.id}
-              className="border-whd-border bg-whd-dark/50 flex items-center justify-between gap-3 rounded-lg border px-4 py-3"
-            >
-              <span className="min-w-0 flex-1 truncate text-white">
+            <li key={member.id} className="account-member">
+              <span className="account-member-avatar" aria-hidden="true">
+                {member.fullName.trim().charAt(0).toLocaleUpperCase()}
+              </span>
+              <span className="account-member-name">
                 {member.fullName}
-                <span className="text-whd-pink-soft ml-2 text-xs">
+                <span className="account-member-role">
+                  {member.isCaptain && <Crown size={12} aria-hidden="true" />}
                   {member.isCaptain ? t('dashboard.captain') : t('dashboard.member')}
                 </span>
               </span>
@@ -107,10 +114,10 @@ export function TeamCard({
             </li>
           ))}
           {Array.from({ length: openSlots }, (_, i) => (
-            <li
-              key={`open-${i}`}
-              className="border-whd-border text-whd-text-dim rounded-lg border border-dashed px-4 py-3 text-sm"
-            >
+            <li key={`open-${i}`} className="account-member account-member-empty">
+              <span className="account-member-avatar" aria-hidden="true">
+                <Plus size={18} />
+              </span>
               {t('dashboard.emptySlot')}
             </li>
           ))}
@@ -119,18 +126,28 @@ export function TeamCard({
         {registrationOpen && (
           <>
             {/* Invite link */}
-            <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-white">{t('dashboard.inviteLink')}</span>
-              <div className="flex gap-2">
-                <Input readOnly value={inviteUrl} onFocus={(e) => e.currentTarget.select()} />
+            <div className="account-invite">
+              <label htmlFor={inviteId}>{t('dashboard.inviteLink')}</label>
+              <div className="account-invite-input">
+                <Input
+                  id={inviteId}
+                  readOnly
+                  value={inviteUrl}
+                  onFocus={(e) => e.currentTarget.select()}
+                />
                 <Button variant="secondary" onClick={copyInvite} className="shrink-0">
+                  {copied ? (
+                    <Check size={16} aria-hidden="true" />
+                  ) : (
+                    <Copy size={16} aria-hidden="true" />
+                  )}
                   {copied ? t('common.copied') : t('common.copy')}
                 </Button>
               </div>
-              <p className="text-whd-text-dim text-sm">{t('dashboard.inviteHint')}</p>
+              <p className="text-whd-text-muted text-sm">{t('dashboard.inviteHint')}</p>
             </div>
 
-            <div>
+            <div className="account-team-danger">
               {isCaptain ? (
                 <ConfirmButton
                   size="md"

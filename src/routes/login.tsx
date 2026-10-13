@@ -4,7 +4,8 @@ import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
 
-import { AuthHeader } from '@/components/AuthHeader';
+import { AccountShell } from '@/components/AccountShell';
+import { LoginVisual } from '@/components/login/LoginVisual';
 import { AuthCard } from '@/components/ui/auth-card';
 import { EmailForm } from '@/components/login/EmailForm';
 import { OtpForm } from '@/components/login/OtpForm';
@@ -62,19 +63,21 @@ function LoginPage() {
   };
 
   return (
-    <div className="bg-whd-dark flex min-h-screen flex-col">
-      <AuthHeader />
+    <AccountShell>
       {email === null ? (
-        <AuthCard title={t('login.title')} subtitle={t('login.subtitle')}>
+        <AuthCard
+          title={t('login.title')}
+          contentKey="email"
+          subtitle={t('login.subtitle')}
+          illustration={<LoginVisual />}
+        >
           {!registrationOpen && <Notice className="mb-5">{t('login.registrationClosed')}</Notice>}
           {googleEnabled && (
             <>
               <GoogleButton redirect={search.redirect} />
-              <div className="my-5 flex items-center gap-3">
+              <div className="account-form-divider">
                 <span className="bg-whd-border h-px flex-1" />
-                <span className="text-whd-text-dim text-xs tracking-widest uppercase">
-                  {t('login.or')}
-                </span>
+                <span className="text-whd-text-muted text-sm">{t('login.or')}</span>
                 <span className="bg-whd-border h-px flex-1" />
               </div>
             </>
@@ -83,12 +86,17 @@ function LoginPage() {
           {demo && <DemoHint label={t('login.demoAccount')} value={demo.email} />}
         </AuthCard>
       ) : (
-        <AuthCard title={t('login.otpTitle')} subtitle={t('login.otpSubtitle', { email })}>
+        <AuthCard
+          title={t('login.otpTitle')}
+          contentKey="otp"
+          subtitle={t('login.otpSubtitle', { email })}
+          illustration={<LoginVisual />}
+        >
           {isDemo && <DemoHint label={t('login.demoCode')} value={demo.code} mono />}
           <OtpForm email={email} onVerified={handleVerified} onChangeEmail={() => setEmail(null)} />
         </AuthCard>
       )}
-    </div>
+    </AccountShell>
   );
 }
 

@@ -237,7 +237,9 @@
     "verifyFailed": "That code is not right. Please try again.",
     "demoAccount": "Demo admin account:",
     "demoCode": "Demo code:",
-    "registrationClosed": "Registration is closed. If you already registered, you can still sign in to see your team."
+    "registrationClosed": "Registration is closed. If you already registered, you can still sign in to see your team.",
+    "welcome": "Your team. Your next step.",
+    "welcomeHint": "Sign in to get ready for Women’s Hack Day."
   },
   "onboarding": {
     "title": "Your details",
@@ -305,7 +307,9 @@
     "feedbackKicked": "{{name}} was removed from the team.",
     "feedbackLeft": "You left the team.",
     "feedbackDissolved": "The team was dissolved.",
-    "generateRateLimited": "Too many name suggestions. Please try again later."
+    "generateRateLimited": "Too many name suggestions. Please try again later.",
+    "newTeamTitle": "Start a team",
+    "invitedTitle": "Have an invitation?"
   },
   "validation": {
     "emailRequired": "Email is required",
@@ -437,7 +441,11 @@
     "errorNotPdf": "Please choose a PDF file.",
     "errorTooLarge": "The file is larger than {{mb}} MB.",
     "errorNoProfile": "Fill in your details first.",
-    "errorFailed": "Could not save your CV. Please try again."
+    "errorFailed": "Could not save your CV. Please try again.",
+    "dropTitle": "Drop your CV here",
+    "dropHint": "One PDF · up to {{mb}} MB",
+    "chooseFile": "Choose file",
+    "errorSingleFile": "Please upload one PDF file at a time."
   },
   "closingCta": {
     "title": "See you at <pink>WHD</pink>."

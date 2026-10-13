@@ -1,8 +1,9 @@
+import { ArrowUpRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWebHaptics } from 'web-haptics/react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import InputOtp7 from '@/components/watermelon/input-otp-7';
 import { Field } from '@/components/ui/field';
 import { authClient, sendSignInCode } from '@/lib/auth-client';
 import { otpSchema } from '@/lib/validation';
@@ -83,27 +84,25 @@ export function OtpForm({
     <form onSubmit={submit} className="flex flex-col gap-5" noValidate>
       <Field label={t('login.otpTitle')} error={error ?? undefined} required>
         {(fieldProps) => (
-          <Input
+          <InputOtp7
             {...fieldProps}
             name="otp"
             inputMode="numeric"
             autoComplete="one-time-code"
-            maxLength={6}
             autoFocus
-            placeholder="000000"
-            className="text-center text-2xl tracking-[0.5em]"
             value={otp}
-            onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            onChange={setOtp}
             disabled={pending}
           />
         )}
       </Field>
 
       <Button type="submit" disabled={pending || otp.length !== 6} className="w-full">
-        {pending ? t('common.loading') : t('login.verify')}
+        <span>{pending ? t('common.loading') : t('login.verify')}</span>
+        <ArrowUpRight className="account-button-arrow" aria-hidden="true" />
       </Button>
 
-      <div className="flex items-center justify-between text-sm">
+      <div className="account-otp-actions flex items-center justify-between text-sm">
         <button
           type="button"
           onClick={onChangeEmail}

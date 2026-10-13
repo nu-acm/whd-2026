@@ -16,6 +16,8 @@ vi.mock('@/lib/auth-client', () => ({
 vi.mock('web-haptics/react', () => ({ useWebHaptics: () => ({ trigger: vi.fn() }) }));
 const email = 'participant@example.com';
 beforeEach(() => {
+  // jsdom has no layout hit-testing; input-otp uses this to detect password-manager badges.
+  Object.defineProperty(document, 'elementFromPoint', { configurable: true, value: () => null });
   verifyOtp.mockReset().mockResolvedValue({ error: null });
   sendSignInCode.mockReset().mockResolvedValue(undefined);
 });
@@ -33,6 +35,31 @@ describe('OTP form', () => {
     await user.type(screen.getByRole('textbox', { name: /enter the code/i }), '12a3456');
     await user.click(screen.getByRole('button', { name: 'Verify' }));
     expect(verifyOtp).toHaveBeenCalledWith({ email, otp: '123456' });
+    expect(onVerified).toHaveBeenCalledOnce();
+  });
+
+  it('pastes a formatted code, supports correction, and locks the input during verification', async () => {
+    const user = userEvent.setup();
+    let finish!: (value: { error: null }) => void;
+    verifyOtp.mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+    const onVerified = vi.fn();
+    renderWithI18n(<OtpForm email={email} onVerified={onVerified} onChangeEmail={vi.fn()} />);
+    const input = screen.getByRole('textbox', { name: /enter the code/i });
+    await user.paste('123-456');
+    expect(input).toHaveProperty('value', '123456');
+    await user.keyboard('{Backspace}');
+    expect(input).toHaveProperty('value', '12345');
+    expect(screen.getByRole('button', { name: 'Verify' })).toHaveProperty('disabled', true);
+    await user.keyboard('7');
+    await user.click(screen.getByRole('button', { name: 'Verify' }));
+    expect(verifyOtp).toHaveBeenCalledWith({ email, otp: '123457' });
+    expect(input).toHaveProperty('disabled', true);
+    expect(onVerified).not.toHaveBeenCalled();
+    await act(async () => finish({ error: null }));
     expect(onVerified).toHaveBeenCalledOnce();
   });
 

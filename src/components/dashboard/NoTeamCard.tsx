@@ -1,3 +1,4 @@
+import { Users, Sparkles, Square, ArrowUpRight, Link as LinkIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWebHaptics } from 'web-haptics/react';
@@ -11,22 +12,6 @@ import { AI_COOLDOWN_MS } from '@/lib/ai';
 
 /** Pause after each generation (and a shorter one after cancelling) to spare Workers AI. */
 const CANCEL_COOLDOWN_MS = 3000;
-
-function SparkleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="h-4 w-4">
-      <path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zm7 12l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9L19 14z" />
-    </svg>
-  );
-}
-
-function StopIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="h-3.5 w-3.5">
-      <rect x="5" y="5" width="14" height="14" rx="2" />
-    </svg>
-  );
-}
 
 /** Seconds left until `until`, ticking while a cooldown is running. */
 function useCountdown(until: number) {
@@ -139,9 +124,10 @@ export function NoTeamCard({
 
   if (!registrationOpen) {
     return (
-      <Card>
-        <CardContent>
-          <h2 className="text-xl font-bold text-white md:text-2xl">{t('dashboard.noTeam')}</h2>
+      <Card className="account-team-card">
+        <CardContent className="account-no-team-content">
+          <Users className="account-section-icon" aria-hidden="true" />
+          <h2>{t('dashboard.noTeam')}</h2>
           <p className="mt-3 text-sm text-amber-200">{t('dashboard.registrationClosedNoTeam')}</p>
         </CardContent>
       </Card>
@@ -149,77 +135,83 @@ export function NoTeamCard({
   }
 
   return (
-    <Card>
-      <CardContent className="flex flex-col gap-8">
+    <Card className="account-team-card">
+      <CardContent className="account-no-team-content">
         <div>
-          <h2 className="text-xl font-bold text-white md:text-2xl">{t('dashboard.noTeam')}</h2>
+          <Users className="account-section-icon" aria-hidden="true" />
+          <h2>{t('dashboard.noTeam')}</h2>
           <p className="text-whd-text-muted mt-2 text-sm leading-relaxed">
             {t('dashboard.noTeamHint')}
           </p>
         </div>
 
-        <form onSubmit={submitCreate} className="flex flex-col gap-3" noValidate>
-          <Field label={t('dashboard.teamNameLabel')} error={nameError ? t(nameError) : undefined}>
-            {(p) => (
-              <div className="relative">
+        <div className="account-team-forms">
+          <form onSubmit={submitCreate} className="account-team-form" noValidate>
+            <h3>{t('dashboard.newTeamTitle')}</h3>
+            <Field
+              label={t('dashboard.teamNameLabel')}
+              error={nameError ? t(nameError) : undefined}
+            >
+              {(p) => (
+                <div className="relative">
+                  <Input
+                    {...p}
+                    value={name}
+                    placeholder={t('dashboard.teamNamePlaceholder')}
+                    onChange={(e) => setName(e.target.value)}
+                    disabled={pending || generating}
+                    className="pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={generating ? cancelGenerate : generate}
+                    disabled={pending || (!generating && cooldownSeconds > 0)}
+                    aria-label={generateLabel}
+                    title={generateLabel}
+                    className="text-whd-pink-soft hover:text-whd-pink-bright absolute inset-y-0 right-0 flex w-11 cursor-pointer items-center justify-center rounded-r-lg transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {generating ? (
+                      <Square size={16} aria-hidden="true" />
+                    ) : (
+                      <Sparkles size={18} aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
+              )}
+            </Field>
+            {generating && (
+              <p className="text-whd-text-muted -mt-1 text-sm" aria-live="polite">
+                {t('dashboard.generating')}
+              </p>
+            )}
+            <Button type="submit" disabled={pending || generating}>
+              <span>{t('dashboard.createTeam')}</span>
+              <ArrowUpRight className="account-button-arrow" aria-hidden="true" />
+            </Button>
+          </form>
+
+          <form onSubmit={submitJoin} className="account-team-form account-join-form" noValidate>
+            <h3>{t('dashboard.invitedTitle')}</h3>
+            <Field
+              label={t('dashboard.inviteCodeLabel')}
+              error={slugError ? t(slugError) : undefined}
+            >
+              {(p) => (
                 <Input
                   {...p}
-                  value={name}
-                  placeholder={t('dashboard.teamNamePlaceholder')}
-                  onChange={(e) => setName(e.target.value)}
-                  disabled={pending || generating}
-                  className="pr-12"
+                  value={slug}
+                  placeholder="binary-blossoms"
+                  onChange={(e) => setSlug(e.target.value)}
+                  disabled={pending}
                 />
-                <button
-                  type="button"
-                  onClick={generating ? cancelGenerate : generate}
-                  disabled={pending || (!generating && cooldownSeconds > 0)}
-                  aria-label={generateLabel}
-                  title={generateLabel}
-                  className="text-whd-pink-soft hover:text-whd-pink-bright absolute inset-y-0 right-0 flex w-11 cursor-pointer items-center justify-center rounded-r-lg transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  {generating ? <StopIcon /> : <SparkleIcon />}
-                </button>
-              </div>
-            )}
-          </Field>
-          {generating && (
-            <p className="text-whd-text-muted -mt-1 text-sm" aria-live="polite">
-              {t('dashboard.generating')}
-            </p>
-          )}
-          <Button type="submit" disabled={pending || generating}>
-            {t('dashboard.createTeam')}
-          </Button>
-        </form>
-
-        <div className="flex items-center gap-3">
-          <span className="bg-whd-border h-px flex-1" />
-          <span className="text-whd-text-dim text-xs tracking-widest uppercase">
-            {t('login.or')}
-          </span>
-          <span className="bg-whd-border h-px flex-1" />
+              )}
+            </Field>
+            <Button type="submit" variant="secondary" disabled={pending}>
+              <LinkIcon size={18} aria-hidden="true" />
+              {t('dashboard.joinTeam')}
+            </Button>
+          </form>
         </div>
-
-        <form onSubmit={submitJoin} className="flex flex-col gap-3" noValidate>
-          <Field
-            label={t('dashboard.inviteCodeLabel')}
-            error={slugError ? t(slugError) : undefined}
-          >
-            {(p) => (
-              <Input
-                {...p}
-                value={slug}
-                placeholder="binary-blossoms"
-                onChange={(e) => setSlug(e.target.value)}
-                disabled={pending}
-              />
-            )}
-          </Field>
-          <Button type="submit" variant="secondary" disabled={pending}>
-            {t('dashboard.joinTeam')}
-          </Button>
-        </form>
       </CardContent>
     </Card>
   );

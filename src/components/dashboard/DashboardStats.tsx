@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { MAX_TEAM_SIZE, MIN_TEAM_SIZE } from '@/db/schema';
 import type { TeamData } from '@/lib/team.server';
+import { CircleCheck, CircleAlert, Users, CalendarDays, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function StatTile({
@@ -9,18 +10,21 @@ function StatTile({
   value,
   detail,
   valueClassName,
+  icon: Icon,
 }: {
   label: string;
   value: string;
   detail: string;
   valueClassName?: string;
+  icon: LucideIcon;
 }) {
   return (
-    <Card>
-      <CardContent className="p-5 md:p-6">
-        <p className="text-whd-text-muted text-xs tracking-widest uppercase">{label}</p>
-        <p className={cn('mt-2 truncate text-2xl font-bold text-white', valueClassName)}>{value}</p>
-        <p className="text-whd-text-muted mt-1 text-sm">{detail}</p>
+    <Card className="dashboard-stat">
+      <CardContent className="dashboard-stat-content">
+        <Icon className="dashboard-stat-icon" aria-hidden="true" />
+        <p className="dashboard-stat-label">{label}</p>
+        <p className={cn('dashboard-stat-value', valueClassName)}>{value}</p>
+        <p className="dashboard-stat-detail">{detail}</p>
       </CardContent>
     </Card>
   );
@@ -32,8 +36,9 @@ export function DashboardStats({ team }: { team: TeamData | null }) {
   const ready = !!team && team.members.length >= MIN_TEAM_SIZE;
 
   return (
-    <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="dashboard-stats">
       <StatTile
+        icon={ready ? CircleCheck : CircleAlert}
         label={t('dashboard.statusLabel')}
         value={ready ? t('dashboard.statusReady') : t('dashboard.statusWarning')}
         detail={
@@ -46,6 +51,7 @@ export function DashboardStats({ team }: { team: TeamData | null }) {
         valueClassName={ready ? 'text-whd-pink-bright' : 'text-amber-300'}
       />
       <StatTile
+        icon={Users}
         label={t('dashboard.teamLabel')}
         value={team?.name ?? '—'}
         detail={
@@ -55,6 +61,7 @@ export function DashboardStats({ team }: { team: TeamData | null }) {
         }
       />
       <StatTile
+        icon={CalendarDays}
         label={t('dashboard.eventLabel')}
         value={t('timeline.items.event')}
         detail={t('infoCards.whereAnswer')}

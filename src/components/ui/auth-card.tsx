@@ -1,3 +1,4 @@
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { NeonFrame, NeonPanel } from '@/components/ui/neon';
 
@@ -7,12 +8,30 @@ export function AuthCard({
   subtitle,
   className,
   children,
+  illustration,
+  contentKey,
 }: {
   title: string;
   subtitle?: string;
   className?: string;
   children: React.ReactNode;
+  illustration?: React.ReactNode;
+  contentKey?: string;
 }) {
+  if (illustration) {
+    return (
+      <main className="account-login-grid">
+        {illustration}
+        <Card className={cn('account-login-card', className)}>
+          <CardContent key={contentKey} className="account-login-content">
+            <h1>{title}</h1>
+            {subtitle && <p className="account-form-subtitle">{subtitle}</p>}
+            {children}
+          </CardContent>
+        </Card>
+      </main>
+    );
+  }
   return (
     <div className="whd-grid-bg relative flex flex-1 items-center justify-center overflow-hidden px-4 py-12 sm:px-6">
       {/* Star glow, echoing the landing hero */}
