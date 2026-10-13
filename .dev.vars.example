@@ -2,8 +2,8 @@
 # Loaded by wrangler during `npm run dev`. Copy to .dev.vars and fill in.
 
 # Where the app is served from.
-# local: http://localhost:3001   remote: https://whd.nuacmw.kz
-BETTER_AUTH_URL=http://localhost:3001
+# local: http://localhost:3000   remote: https://whd.nuacmw.kz
+BETTER_AUTH_URL=http://localhost:3000
 
 # Any long random string. Generate one with: openssl rand -base64 32
 BETTER_AUTH_SECRET=

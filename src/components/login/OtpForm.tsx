@@ -4,7 +4,7 @@ import { useWebHaptics } from 'web-haptics/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Field } from '@/components/ui/field';
-import { authClient } from '@/lib/auth-client';
+import { authClient, sendSignInCode } from '@/lib/auth-client';
 import { otpSchema } from '@/lib/validation';
 import { webHapticsOptions } from '@/lib/web-haptics';
 
@@ -23,6 +23,7 @@ export function OtpForm({
   const [otp, setOtp] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [resending, setResending] = useState(false);
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
   const { trigger } = useWebHaptics(webHapticsOptions);
 
@@ -65,13 +66,16 @@ export function OtpForm({
   };
 
   const resend = async () => {
-    if (cooldown > 0) return;
+    if (cooldown > 0 || resending || pending) return;
     setError(null);
+    setResending(true);
     try {
-      await authClient.emailOtp.sendVerificationOtp({ email, type: 'sign-in' });
+      await sendSignInCode(email);
       setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch {
       setError(t('login.sendFailed'));
+    } finally {
+      setResending(false);
     }
   };
 
@@ -110,7 +114,7 @@ export function OtpForm({
         <button
           type="button"
           onClick={resend}
-          disabled={cooldown > 0}
+          disabled={cooldown > 0 || resending || pending}
           className="text-whd-pink-soft hover:text-whd-pink-bright disabled:text-whd-text-dim cursor-pointer transition-colors disabled:cursor-not-allowed"
         >
           {cooldown > 0 ? t('login.resendIn', { seconds: cooldown }) : t('login.resend')}

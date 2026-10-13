@@ -1,5 +1,5 @@
 import { env } from 'cloudflare:workers';
-import { eq, isNotNull, sql } from 'drizzle-orm';
+import { count, eq, gte, isNotNull, sql } from 'drizzle-orm';
 import { getDb } from '@/db';
 import { MIN_TEAM_SIZE, participant, team } from '@/db/schema';
 
@@ -50,14 +50,16 @@ export async function getCheckinData(): Promise<CheckinData> {
   const db = getAppDb();
 
   // Eligible teams are computed in SQL, so ineligible rosters are never read.
-  const eligible = db.$with('eligible').as(
-    db
-      .select({ teamId: participant.teamId })
-      .from(participant)
-      .where(isNotNull(participant.teamId))
-      .groupBy(participant.teamId)
-      .having(sql`count(*) >= ${MIN_TEAM_SIZE}`),
-  );
+  const eligible = db
+    .$with('eligible')
+    .as(
+      db
+        .select({ teamId: participant.teamId })
+        .from(participant)
+        .where(isNotNull(participant.teamId))
+        .groupBy(participant.teamId)
+        .having(gte(count(), MIN_TEAM_SIZE)),
+    );
 
   const teamsQuery = db
     .with(eligible)

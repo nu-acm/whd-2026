@@ -300,7 +300,8 @@
     "feedbackJoined": "You joined the team.",
     "feedbackKicked": "{{name}} was removed from the team.",
     "feedbackLeft": "You left the team.",
-    "feedbackDissolved": "The team was dissolved."
+    "feedbackDissolved": "The team was dissolved.",
+    "generateRateLimited": "Too many name suggestions. Please try again later."
   },
   "validation": {
     "emailRequired": "Email is required",
@@ -436,5 +437,21 @@
   },
   "closingCta": {
     "title": "See you at <pink>WHD</pink>."
+  },
+  "teamErrors": {
+    "noProfile": "Finish your profile first.",
+    "alreadyInTeam": "You are already in a team.",
+    "nameTaken": "That team name is taken.",
+    "nameNeedsLetters": "Use at least one Latin or Cyrillic letter or digit in the team name.",
+    "slugUnavailable": "Could not create an invite link. Try a different team name.",
+    "invalidInvite": "That invite link is invalid or the team no longer exists.",
+    "full": "This team is already full.",
+    "notInTeam": "You are not in a team.",
+    "notFound": "Team not found.",
+    "cannotRemoveSelf": "You cannot remove yourself.",
+    "captainOnlyRemove": "Only the captain can remove members.",
+    "memberNotInTeam": "This participant is not in your team.",
+    "captainCannotLeave": "The captain must dissolve the team to leave.",
+    "captainOnlyDissolve": "Only the captain can dissolve the team."
   }
 }

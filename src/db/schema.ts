@@ -70,6 +70,16 @@ export const participant = sqliteTable(
 export type Participant = typeof participant.$inferSelect;
 export type NewParticipant = typeof participant.$inferInsert;
 
+/** Persistent per-user allowance for paid team-name suggestions. */
+export const aiGenerationLimit = sqliteTable('ai_generation_limit', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  nextAllowedAt: integer('next_allowed_at').notNull(),
+  windowStartedAt: integer('window_started_at').notNull(),
+  requests: integer('requests').notNull(),
+});
+
 // ── Relations ────────────────────────────────────────────────────────────────
 
 export const teamRelations = relations(team, ({ many, one }) => ({

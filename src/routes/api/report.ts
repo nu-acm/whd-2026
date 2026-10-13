@@ -35,13 +35,19 @@ export const Route = createFileRoute('/api/report')({
         const secret = (env as unknown as AppEnv).GAS_SECRET;
         if (!secret) return json({ error: 'Report API not configured' }, 500);
 
-        let body: { secret?: unknown };
+        let body: unknown;
         try {
-          body = (await request.json()) as { secret?: unknown };
+          body = await request.json();
         } catch {
           return json({ error: 'Invalid JSON body' }, 400);
         }
-        if (typeof body.secret !== 'string' || !safeEqual(body.secret, secret)) {
+        if (
+          typeof body !== 'object' ||
+          body === null ||
+          !('secret' in body) ||
+          typeof body.secret !== 'string' ||
+          !safeEqual(body.secret, secret)
+        ) {
           return json({ error: 'Unauthorized' }, 401);
         }
 

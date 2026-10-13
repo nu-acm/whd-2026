@@ -4,7 +4,7 @@ import { useWebHaptics } from 'web-haptics/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Field } from '@/components/ui/field';
-import { authClient } from '@/lib/auth-client';
+import { sendSignInCode } from '@/lib/auth-client';
 import { emailSchema } from '@/lib/validation';
 import { webHapticsOptions } from '@/lib/web-haptics';
 
@@ -29,15 +29,7 @@ export function EmailForm({ onSent }: { onSent: (email: string) => void }) {
 
     setPending(true);
     try {
-      const { error: sendError } = await authClient.emailOtp.sendVerificationOtp({
-        email: parsed.data.email,
-        type: 'sign-in',
-      });
-      if (sendError) {
-        trigger('error');
-        setError(t('login.sendFailed'));
-        return;
-      }
+      await sendSignInCode(parsed.data.email);
       trigger('success');
       onSent(parsed.data.email);
     } catch {

@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { emailOTP } from 'better-auth/plugins';
+import { APIError } from 'better-auth/api';
 import { env } from 'cloudflare:workers';
 import { getDb } from '@/db';
 import { user, session, account, verification } from '@/db/auth-schema';
@@ -89,6 +90,7 @@ export function getAuth() {
             await callGas('send-otp', { email, otp, type });
           } catch (err) {
             console.error('[OTP] failed to send the code:', err);
+            throw new APIError('BAD_GATEWAY', { message: 'Could not send the sign-in code' });
           }
         },
       }),

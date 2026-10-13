@@ -1,4 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query';
+import type { i18n } from 'i18next';
 import {
   HeadContent,
   Link,
@@ -16,12 +17,13 @@ import { AuthHeader } from '@/components/AuthHeader';
 import { AuthCard } from '@/components/ui/auth-card';
 import { Button } from '@/components/ui/button';
 import { buttonVariants } from '@/components/ui/button-variants';
-import i18n from '@/i18n';
+import { supportedLngs } from '@/i18n';
 import appCss from '@/styles.css?url';
 
 /** The locale is read from a cookie so the server renders the right language. */
 const getServerLocale = createServerFn({ method: 'GET' }).handler(async () => {
-  return getCookie('locale') || 'en';
+  const locale = getCookie('locale');
+  return supportedLngs.find((lng) => lng === locale) ?? 'en';
 });
 
 function NotFoundPage() {
@@ -64,13 +66,13 @@ function RootErrorPage({ error, reset }: ErrorComponentProps) {
   );
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient; i18n: i18n }>()({
   notFoundComponent: NotFoundPage,
   errorComponent: RootErrorPage,
-  beforeLoad: async () => {
+  beforeLoad: async ({ context }) => {
     const locale = await getServerLocale();
-    if (i18n.language !== locale) {
-      await i18n.changeLanguage(locale);
+    if (context.i18n.language !== locale) {
+      await context.i18n.changeLanguage(locale);
     }
   },
   head: () => ({

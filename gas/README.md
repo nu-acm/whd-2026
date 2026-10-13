@@ -23,6 +23,7 @@ opening the `/exec` URL.
    - Who has access: **Anyone**
 
    Copy the URL ending in `/exec`.
+
 5. Open that URL in a browser — it should show `{"ok":true,...}`.
 
 ## Connect the site

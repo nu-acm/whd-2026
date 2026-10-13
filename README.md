@@ -23,14 +23,14 @@ It originated from two existing projects:
 npm install
 cp .dev.vars.example .dev.vars     # then fill in BETTER_AUTH_SECRET
 npm run db:migrate:local           # create the local D1 tables
-npm run dev                        # http://localhost:3001
+npm run dev                        # http://localhost:3000
 ```
 
-Port 3001, because `hacknu-2026` runs on 3000.
+Local development runs at `http://localhost:3000`.
 
 | Script                            | What it does                                            |
 | --------------------------------- | ------------------------------------------------------- |
-| `npm run dev`                     | Vite + Workers dev server on port 3001                  |
+| `npm run dev`                     | Vite + Workers dev server on port 3000                  |
 | `npm run build`                   | Build the client and the Worker                         |
 | `npm run deploy`                  | Build and `wrangler deploy`                             |
 | `npm run db:generate`             | Generate a migration from the schema                    |
@@ -89,8 +89,10 @@ database is keyed on it, so a new id starts from an empty database.
 The dashboard's "suggest a team name" button uses **Workers AI** through the `AI`
 binding in `wrangler.jsonc`. AI bindings always call Cloudflare, even in local
 dev, so they need `wrangler login` and are billed to the account (a few tokens per
-click; the button has a cooldown). Without it the button shows a friendly error
-and nothing else breaks.
+click). The server allows one request per five seconds and 30 suggestions per
+hour for each participant. The allowance is stored in D1 and applies across tabs
+and Worker instances. Without AI access the button shows a friendly error and
+nothing else breaks.
 
 ### Dashboard and admin
 

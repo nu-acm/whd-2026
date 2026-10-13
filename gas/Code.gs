@@ -50,7 +50,11 @@ function doPost(e) {
 
 /** Visiting the /exec URL in a browser shows this — handy to confirm the deployment is live. */
 function doGet() {
-  return reply({ ok: true, service: BRAND.name + ' mailer', quotaLeft: MailApp.getRemainingDailyQuota() });
+  return reply({
+    ok: true,
+    service: BRAND.name + ' mailer',
+    quotaLeft: MailApp.getRemainingDailyQuota(),
+  });
 }
 
 function sendOtp(body) {
@@ -63,8 +67,14 @@ function sendOtp(body) {
     to: email,
     subject: otp + ' is your ' + BRAND.name + ' code',
     body:
-      'Your ' + BRAND.name + ' sign-in code is ' + otp + '.\n\n' +
-      'It expires in ' + CODE_LIFETIME_MINUTES + ' minutes. ' +
+      'Your ' +
+      BRAND.name +
+      ' sign-in code is ' +
+      otp +
+      '.\n\n' +
+      'It expires in ' +
+      CODE_LIFETIME_MINUTES +
+      ' minutes. ' +
       "If you didn't request it, you can ignore this email.",
     htmlBody: otpHtml(otp),
     name: BRAND.name,
@@ -75,18 +85,31 @@ function sendOtp(body) {
 
 function otpHtml(otp) {
   return (
-    '<div style="background:' + BRAND.dark + ';padding:32px 16px;font-family:Arial,sans-serif">' +
-      '<div style="max-width:420px;margin:0 auto;background:' + BRAND.pink + ';border-radius:20px;padding:12px 12px 16px">' +
-        '<div style="background:' + BRAND.purple + ';border-radius:12px 12px 0 0;padding:20px;color:#fff">' +
-          '<div style="font-size:20px;font-weight:bold">' + BRAND.name + '</div>' +
-          '<div style="font-size:14px;opacity:.85;margin-top:4px">Your sign-in code</div>' +
-        '</div>' +
-        '<div style="background:' + BRAND.purple + ';border-radius:0 0 12px 12px;margin-top:8px;padding:20px;color:#fff;text-align:center">' +
-          '<div style="font-size:40px;font-weight:bold;letter-spacing:10px">' + otp + '</div>' +
-          '<div style="font-size:13px;opacity:.8;margin-top:12px">Expires in ' + CODE_LIFETIME_MINUTES +
-            " minutes. If you didn't request it, ignore this email.</div>" +
-        '</div>' +
-      '</div>' +
+    '<div style="background:' +
+    BRAND.dark +
+    ';padding:32px 16px;font-family:Arial,sans-serif">' +
+    '<div style="max-width:420px;margin:0 auto;background:' +
+    BRAND.pink +
+    ';border-radius:20px;padding:12px 12px 16px">' +
+    '<div style="background:' +
+    BRAND.purple +
+    ';border-radius:12px 12px 0 0;padding:20px;color:#fff">' +
+    '<div style="font-size:20px;font-weight:bold">' +
+    BRAND.name +
+    '</div>' +
+    '<div style="font-size:14px;opacity:.85;margin-top:4px">Your sign-in code</div>' +
+    '</div>' +
+    '<div style="background:' +
+    BRAND.purple +
+    ';border-radius:0 0 12px 12px;margin-top:8px;padding:20px;color:#fff;text-align:center">' +
+    '<div style="font-size:40px;font-weight:bold;letter-spacing:10px">' +
+    otp +
+    '</div>' +
+    '<div style="font-size:13px;opacity:.8;margin-top:12px">Expires in ' +
+    CODE_LIFETIME_MINUTES +
+    " minutes. If you didn't request it, ignore this email.</div>" +
+    '</div>' +
+    '</div>' +
     '</div>'
   );
 }
@@ -109,7 +132,8 @@ function uploadCv(body) {
   if (!/\.pdf$/i.test(fileName)) return reply({ ok: false, error: 'Invalid file name' });
 
   const bytes = Utilities.base64Decode(String(body.base64 || ''));
-  if (bytes.length === 0 || bytes.length > CV_MAX_BYTES) return reply({ ok: false, error: 'Invalid file size' });
+  if (bytes.length === 0 || bytes.length > CV_MAX_BYTES)
+    return reply({ ok: false, error: 'Invalid file size' });
 
   const blob = Utilities.newBlob(bytes, 'application/pdf', fileName);
   const file = getCvFolder().createFile(blob);
@@ -140,7 +164,9 @@ function deleteCv(body) {
 }
 
 function reply(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(
+    ContentService.MimeType.JSON,
+  );
 }
 
 /**
@@ -151,5 +177,7 @@ function testSendToMe() {
   const me = Session.getActiveUser().getEmail();
   sendOtp({ email: me, otp: '123456' });
   console.log('CV folder: ' + getCvFolder().getUrl());
-  console.log('Sent a test code to ' + me + '. Remaining daily quota: ' + MailApp.getRemainingDailyQuota());
+  console.log(
+    'Sent a test code to ' + me + '. Remaining daily quota: ' + MailApp.getRemainingDailyQuota(),
+  );
 }
