@@ -230,10 +230,17 @@ function CheckinPage() {
       queryClient.setQueryData<CheckinData>(checkinQueryKey, (d) =>
         withAttendance(d, participantId, attended),
       );
-      return { previous };
+      return {
+        previousAttended: previous?.participants.find((p) => p.id === participantId)?.attended,
+      };
     },
-    onError: (err, _vars, context) => {
-      if (context?.previous) queryClient.setQueryData(checkinQueryKey, context.previous);
+    onError: (err, { participantId }, context) => {
+      if (context?.previousAttended !== undefined) {
+        const previousAttended = context.previousAttended;
+        queryClient.setQueryData<CheckinData>(checkinQueryKey, (d) =>
+          withAttendance(d, participantId, previousAttended),
+        );
+      }
       setError(err instanceof Error ? err.message : t('admin.attendanceFailed'));
     },
     onSuccess: (row) => {

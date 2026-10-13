@@ -25,6 +25,33 @@ describe('onboardingSchema', () => {
     const result = onboardingSchema.parse(base);
     expect(result.phone).toBe('77001234567');
   });
+
+  it.each(['1-----', '12 (3)', '12345'])('rejects too few phone digits: %s', (phone) => {
+    const result = onboardingSchema.safeParse({ ...base, phone });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0].message).toBe('validation.phoneInvalid');
+  });
+
+  it('rejects a guardian phone containing too few digits', () => {
+    const result = onboardingSchema.safeParse({
+      ...base,
+      educationLevel: 'School',
+      parentPhone: '1-----',
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0].path).toEqual(['parentPhone']);
+    expect(result.error?.issues[0].message).toBe('validation.parentPhoneInvalid');
+  });
+
+  it('accepts normalized output when validated again on the server', () => {
+    const result = onboardingSchema.parse({
+      ...base,
+      educationLevel: 'School',
+      phone: '1 (234) 56',
+      parentPhone: '+7 (700) 123-45-67',
+    });
+    expect(onboardingSchema.parse(result)).toEqual(result);
+  });
 });
 
 describe('team schemas', () => {
