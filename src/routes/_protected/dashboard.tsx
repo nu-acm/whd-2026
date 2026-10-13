@@ -83,10 +83,10 @@ const dissolveTeamFn = createServerFn({ method: 'POST' }).handler(async () => {
 });
 
 const generateTeamNameFn = createServerFn({ method: 'POST' }).handler(async () => {
-  await ensureSession(getRequest());
+  const session = await ensureSession(getRequest());
   // Imported lazily so the AI binding is only touched when someone asks.
-  const { generateTeamName } = await import('@/lib/ai.server');
-  return generateTeamName();
+  const { generateTeamNameForParticipant } = await import('@/lib/ai.server');
+  return generateTeamNameForParticipant(session.user.id);
 });
 
 export const Route = createFileRoute('/_protected/dashboard')({
@@ -135,7 +135,7 @@ function DashboardPage() {
       // Server errors may be i18n keys (registration closed); t() passes plain text through.
       setFeedback({
         type: 'error',
-        message: err instanceof Error ? t(err.message) : t('dashboard.actionFailed'),
+        message: err instanceof Error ? err.message : 'dashboard.actionFailed',
       });
     } finally {
       setPendingAction(null);
@@ -170,7 +170,7 @@ function DashboardPage() {
                 : 'border-whd-pink/40 bg-whd-pink/10 text-whd-pink-bright mb-6 rounded-lg border px-4 py-3 text-sm'
             }
           >
-            {feedback.message}
+            {t(feedback.message)}
           </p>
         )}
 

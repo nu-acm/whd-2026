@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { createInstance } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
@@ -22,32 +22,29 @@ const resources = {
   kk: { translation: kk },
 };
 
-const isBrowser = typeof window !== 'undefined';
-
-const instance = i18n.use(initReactI18next);
-// The detector touches document/navigator, so it is browser-only. On the
-// server the locale comes from the `locale` cookie, applied in __root.tsx.
-if (isBrowser) {
-  instance.use(LanguageDetector);
+/** Each router owns its translations, including each concurrent SSR request. */
+export function createI18n() {
+  const isBrowser = typeof window !== 'undefined';
+  const instance = createInstance().use(initReactI18next);
+  if (isBrowser) instance.use(LanguageDetector);
+  void instance.init({
+    // Hydrate in the language already rendered by the server. A first-visit
+    // navigator preference must not replace that markup before hydration.
+    lng: isBrowser ? document.documentElement.lang || 'en' : 'en',
+    initImmediate: false,
+    resources,
+    fallbackLng: 'en',
+    supportedLngs: [...supportedLngs],
+    ...(isBrowser && {
+      detection: {
+        order: ['cookie', 'navigator'],
+        lookupCookie: 'locale',
+        caches: ['cookie'],
+        cookieOptions: { path: '/', maxAge: 365 * 24 * 60 * 60 },
+      },
+    }),
+    interpolation: { escapeValue: false },
+    react: { useSuspense: false },
+  });
+  return instance;
 }
-
-instance.init({
-  // Hydrate in the language already rendered by the server. A first-visit
-  // navigator preference must not replace that markup before hydration.
-  lng: isBrowser ? document.documentElement.lang || 'en' : 'en',
-  resources,
-  fallbackLng: 'en',
-  supportedLngs: [...supportedLngs],
-  ...(isBrowser && {
-    detection: {
-      order: ['cookie', 'navigator'],
-      lookupCookie: 'locale',
-      caches: ['cookie'],
-      cookieOptions: { path: '/', maxAge: 365 * 24 * 60 * 60 },
-    },
-  }),
-  interpolation: { escapeValue: false },
-  react: { useSuspense: false },
-});
-
-export default i18n;

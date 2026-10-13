@@ -8,3 +8,9 @@ export const authClient = createAuthClient({
 });
 
 export const { signIn, signOut, useSession } = authClient;
+
+/** Better Auth resolves HTTP failures with an error object instead of rejecting. */
+export async function sendSignInCode(email: string) {
+  const { error } = await authClient.emailOtp.sendVerificationOtp({ email, type: 'sign-in' });
+  if (error) throw new Error('login.sendFailed');
+}

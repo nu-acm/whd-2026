@@ -7,9 +7,9 @@ import { Field } from '@/components/ui/field';
 import { Card, CardContent } from '@/components/ui/card';
 import { createTeamSchema, inviteSlugSchema } from '@/lib/validation';
 import { webHapticsOptions } from '@/lib/web-haptics';
+import { AI_COOLDOWN_MS } from '@/lib/ai';
 
 /** Pause after each generation (and a shorter one after cancelling) to spare Workers AI. */
-const GENERATE_COOLDOWN_MS = 5000;
 const CANCEL_COOLDOWN_MS = 3000;
 
 function SparkleIcon() {
@@ -78,13 +78,13 @@ export function NoTeamCard({
     e.preventDefault();
     setNameError(null);
     const parsed = createTeamSchema.safeParse({ name });
-    if (!parsed.success) return fail(setNameError, t(parsed.error.issues[0].message));
+    if (!parsed.success) return fail(setNameError, parsed.error.issues[0].message);
     setPending(true);
     try {
       await onCreate(parsed.data.name);
     } catch (err) {
       // Server errors may be i18n keys (registration closed); t() passes plain text through.
-      fail(setNameError, err instanceof Error ? t(err.message) : t('dashboard.actionFailed'));
+      fail(setNameError, err instanceof Error ? err.message : 'dashboard.actionFailed');
     } finally {
       setPending(false);
     }
@@ -96,12 +96,12 @@ export function NoTeamCard({
     // Accept a full invite URL as well as a bare code.
     const cleaned = slug.trim().replace(/^.*\/invite\//, '');
     const parsed = inviteSlugSchema.safeParse({ slug: cleaned });
-    if (!parsed.success) return fail(setSlugError, t(parsed.error.issues[0].message));
+    if (!parsed.success) return fail(setSlugError, parsed.error.issues[0].message);
     setPending(true);
     try {
       await onJoin(parsed.data.slug);
     } catch (err) {
-      fail(setSlugError, err instanceof Error ? t(err.message) : t('dashboard.actionFailed'));
+      fail(setSlugError, err instanceof Error ? err.message : 'dashboard.actionFailed');
     } finally {
       setPending(false);
     }
@@ -111,15 +111,15 @@ export function NoTeamCard({
     const id = ++generationRef.current;
     setNameError(null);
     setGenerating(true);
-    setCooldownUntil(Date.now() + GENERATE_COOLDOWN_MS);
+    setCooldownUntil(Date.now() + AI_COOLDOWN_MS);
     try {
       const suggestion = await onGenerate();
       if (id !== generationRef.current) return;
       setName(suggestion);
       trigger('success');
-    } catch {
+    } catch (err) {
       if (id !== generationRef.current) return;
-      fail(setNameError, t('dashboard.generateFailed'));
+      fail(setNameError, err instanceof Error ? err.message : 'dashboard.generateFailed');
     } finally {
       if (id === generationRef.current) setGenerating(false);
     }
@@ -159,7 +159,7 @@ export function NoTeamCard({
         </div>
 
         <form onSubmit={submitCreate} className="flex flex-col gap-3" noValidate>
-          <Field label={t('dashboard.teamNameLabel')} error={nameError ?? undefined}>
+          <Field label={t('dashboard.teamNameLabel')} error={nameError ? t(nameError) : undefined}>
             {(p) => (
               <div className="relative">
                 <Input
@@ -202,7 +202,10 @@ export function NoTeamCard({
         </div>
 
         <form onSubmit={submitJoin} className="flex flex-col gap-3" noValidate>
-          <Field label={t('dashboard.inviteCodeLabel')} error={slugError ?? undefined}>
+          <Field
+            label={t('dashboard.inviteCodeLabel')}
+            error={slugError ? t(slugError) : undefined}
+          >
             {(p) => (
               <Input
                 {...p}

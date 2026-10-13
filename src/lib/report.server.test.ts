@@ -37,4 +37,24 @@ describe('participantsToCsv', () => {
     expect(line).toContain('77001234567,Astana,"NIS, Astana",,School');
     expect(line).toContain(',yes,');
   });
+
+  it.each(['=1+1', '+1+1', '-1+1', '@SUM(1)', '  =1+1', '\u0000=1+1', '\t=1+1'])(
+    'exports %j as literal text instead of a formula',
+    (fullName) => {
+      const line = participantsToCsv([{ ...row, fullName }]).split('\n')[1];
+      expect(line.startsWith(`'${fullName},`)).toBe(true);
+    },
+  );
+
+  it('quotes carriage returns and newlines after neutralizing formula prefixes', () => {
+    const csv = participantsToCsv([{ ...row, fullName: '\r=1+1', city: '\n=1+1' }]);
+    expect(csv).toContain('"\'\r=1+1"');
+    expect(csv).toContain('"\'\n=1+1"');
+  });
+
+  it('preserves a leading-zero IIN as text without constructing a formula', () => {
+    const csv = participantsToCsv([{ ...row, iin: '050919501086' }]);
+    expect(csv).toContain(",'050919501086,");
+    expect(csv).not.toContain('="050919501086"');
+  });
 });

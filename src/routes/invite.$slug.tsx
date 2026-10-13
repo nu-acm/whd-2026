@@ -77,7 +77,7 @@ function InvitePage() {
     } catch (err) {
       trigger('error');
       // Server errors may be i18n keys (registration closed); t() passes plain text through.
-      setError(err instanceof Error ? t(err.message) : t('dashboard.actionFailed'));
+      setError(err instanceof Error ? err.message : 'dashboard.actionFailed');
       setPending(false);
     }
   };
@@ -107,7 +107,7 @@ function InvitePage() {
             </Button>
             {error && (
               <p role="alert" className="text-sm text-red-400">
-                {error}
+                {t(error)}
               </p>
             )}
           </div>

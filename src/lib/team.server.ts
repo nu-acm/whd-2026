@@ -1,7 +1,8 @@
 import { env } from 'cloudflare:workers';
-import { eq } from 'drizzle-orm';
+import { and, eq, exists, isNull, lt, sql } from 'drizzle-orm';
 import { getDb } from '@/db';
 import { team, participant, MAX_TEAM_SIZE } from '@/db/schema';
+import { TEAM_ERRORS } from '@/lib/team-errors';
 
 interface AppEnv {
   DB: D1Database;
@@ -86,7 +87,7 @@ export async function generateUniqueSlug(name: string): Promise<string> {
   const db = getAppDb();
   const base = slugify(name);
 
-  if (!base) throw new Error('Team name needs at least one letter or digit');
+  if (!base) throw new Error(TEAM_ERRORS.nameNeedsLetters);
 
   const existing = await db.query.team.findFirst({
     where: eq(team.inviteSlug, base),
@@ -103,7 +104,7 @@ export async function generateUniqueSlug(name: string): Promise<string> {
     if (!collision) return candidate;
   }
 
-  throw new Error('Could not generate a unique invite link — try a different team name');
+  throw new Error(TEAM_ERRORS.slugUnavailable);
 }
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -180,47 +181,85 @@ export async function createTeam(userId: string, name: string): Promise<TeamData
     where: eq(participant.id, userId),
     columns: { id: true, teamId: true },
   });
-  if (!p) throw new Error('Finish your profile first');
-  if (p.teamId) throw new Error('You are already in a team');
+  if (!p) throw new Error(TEAM_ERRORS.noProfile);
+  if (p.teamId) throw new Error(TEAM_ERRORS.alreadyInTeam);
 
   const existing = await db.query.team.findFirst({
     where: eq(team.nameCanonical, canonicalName),
     columns: { id: true },
   });
-  if (existing) throw new Error('That team name is taken');
+  if (existing) throw new Error(TEAM_ERRORS.nameTaken);
 
-  const inviteSlug = await generateUniqueSlug(name);
   const id = crypto.randomUUID();
   const now = new Date();
 
-  try {
-    await db.insert(team).values({
-      id,
-      name,
-      nameCanonical: canonicalName,
-      inviteSlug,
-      captainId: userId,
-      createdAt: now,
-      updatedAt: now,
-    });
-  } catch (error) {
-    // The unique constraint is the real guard against a race between the
-    // check above and this insert.
-    const message =
-      error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
-    if (message.includes('name_canonical') || message.includes('team_name_canonical_unique')) {
-      throw new Error('That team name is taken', { cause: error });
+  // D1 batches are transactions. Only insert while the captain is teamless,
+  // then attach her in the same batch so no other create/join can intervene.
+  for (let attempt = 0; attempt < 11; attempt++) {
+    const inviteSlug = await generateUniqueSlug(name);
+    try {
+      const [insert] = await db.batch([
+        db
+          .insert(team)
+          .select(
+            db
+              .select({
+                id: sql<string>`${id}`.as('id'),
+                name: sql<string>`${name}`.as('name'),
+                nameCanonical: sql<string>`${canonicalName}`.as('name_canonical'),
+                inviteSlug: sql<string>`${inviteSlug}`.as('invite_slug'),
+                captainId: participant.id,
+                createdAt: sql<number>`${now.getTime()}`.as('created_at'),
+                updatedAt: sql<number>`${now.getTime()}`.as('updated_at'),
+              })
+              .from(participant)
+              .where(and(eq(participant.id, userId), isNull(participant.teamId))),
+          )
+          .returning({ id: team.id }),
+        db
+          .update(participant)
+          .set({ teamId: id, updatedAt: now })
+          .where(
+            and(
+              eq(participant.id, userId),
+              isNull(participant.teamId),
+              exists(db.select({ id: team.id }).from(team).where(eq(team.id, id))),
+            ),
+          ),
+      ]);
+      if (!insert.length) {
+        const current = await db.query.participant.findFirst({
+          where: eq(participant.id, userId),
+          columns: { id: true },
+        });
+        throw new Error(current ? TEAM_ERRORS.alreadyInTeam : TEAM_ERRORS.noProfile);
+      }
+      break;
+    } catch (error) {
+      // Drizzle/D1 may wrap the SQLite constraint error in a cause.
+      const messages: string[] = [];
+      let cause: unknown = error;
+      while (cause instanceof Error) {
+        messages.push(cause.message.toLowerCase());
+        cause = cause.cause;
+      }
+      const message = messages.join(' ');
+      if (
+        message.includes('unique') &&
+        (message.includes('name_canonical') || message.includes('team.name'))
+      ) {
+        throw new Error(TEAM_ERRORS.nameTaken, { cause: error });
+      }
+      if (message.includes('unique') && message.includes('invite_slug')) {
+        if (attempt < 10) continue;
+        throw new Error(TEAM_ERRORS.slugUnavailable, { cause: error });
+      }
+      throw error;
     }
-    throw error;
   }
 
-  await db
-    .update(participant)
-    .set({ teamId: id, updatedAt: now })
-    .where(eq(participant.id, userId));
-
   const result = await getTeamByParticipant(userId);
-  if (!result) throw new Error('Failed to create team');
+  if (!result) throw new Error(TEAM_ERRORS.failed);
   return result;
 }
 
@@ -232,24 +271,43 @@ export async function joinTeamBySlug(userId: string, slug: string): Promise<Team
     where: eq(participant.id, userId),
     columns: { id: true, teamId: true },
   });
-  if (!p) throw new Error('Finish your profile first');
-  if (p.teamId) throw new Error('You are already in a team');
+  if (!p) throw new Error(TEAM_ERRORS.noProfile);
+  if (p.teamId) throw new Error(TEAM_ERRORS.alreadyInTeam);
 
   const t = await db.query.team.findFirst({
     where: eq(team.inviteSlug, slug),
     with: { members: { columns: { id: true } } },
   });
-  if (!t) throw new Error('That invite link is invalid or the team no longer exists');
-  if (t.members.length >= MAX_TEAM_SIZE)
-    throw new Error(`That team is full (max ${MAX_TEAM_SIZE})`);
+  if (!t) throw new Error(TEAM_ERRORS.invalidInvite);
+  if (t.members.length >= MAX_TEAM_SIZE) throw new Error(TEAM_ERRORS.full);
 
-  await db
+  // The count and membership condition are evaluated inside this single write.
+  const joined = await db
     .update(participant)
     .set({ teamId: t.id, updatedAt: new Date() })
-    .where(eq(participant.id, userId));
+    .where(
+      and(
+        eq(participant.id, userId),
+        isNull(participant.teamId),
+        exists(db.select({ id: team.id }).from(team).where(eq(team.id, t.id))),
+        lt(db.$count(participant, eq(participant.teamId, t.id)), MAX_TEAM_SIZE),
+      ),
+    )
+    .returning({ id: participant.id });
+
+  if (!joined.length) {
+    const current = await db.query.participant.findFirst({
+      where: eq(participant.id, userId),
+      columns: { teamId: true },
+    });
+    if (!current) throw new Error(TEAM_ERRORS.noProfile);
+    if (current.teamId) throw new Error(TEAM_ERRORS.alreadyInTeam);
+    const currentTeam = await getTeamBySlug(slug);
+    throw new Error(currentTeam ? TEAM_ERRORS.full : TEAM_ERRORS.invalidInvite);
+  }
 
   const result = await getTeamByParticipant(userId);
-  if (!result) throw new Error('Failed to join team');
+  if (!result) throw new Error(TEAM_ERRORS.failed);
   return result;
 }
 
@@ -257,31 +315,31 @@ export async function joinTeamBySlug(userId: string, slug: string): Promise<Team
 export async function kickMember(captainId: string, targetUserId: string): Promise<void> {
   const db = getAppDb();
 
-  if (targetUserId === captainId) throw new Error('You cannot remove yourself');
+  if (targetUserId === captainId) throw new Error(TEAM_ERRORS.cannotRemoveSelf);
 
   const captainParticipant = await db.query.participant.findFirst({
     where: eq(participant.id, captainId),
     columns: { teamId: true },
   });
-  if (!captainParticipant?.teamId) throw new Error('You are not in a team');
+  if (!captainParticipant?.teamId) throw new Error(TEAM_ERRORS.notInTeam);
 
   const t = await db.query.team.findFirst({
     where: eq(team.id, captainParticipant.teamId),
     columns: { id: true, captainId: true },
   });
-  if (!t) throw new Error('Team not found');
-  if (t.captainId !== captainId) throw new Error('Only the captain can remove members');
+  if (!t) throw new Error(TEAM_ERRORS.notFound);
+  if (t.captainId !== captainId) throw new Error(TEAM_ERRORS.captainOnlyRemove);
 
   const target = await db.query.participant.findFirst({
     where: eq(participant.id, targetUserId),
     columns: { teamId: true },
   });
-  if (!target || target.teamId !== t.id) throw new Error('She is not in your team');
+  if (!target || target.teamId !== t.id) throw new Error(TEAM_ERRORS.memberNotInTeam);
 
   await db
     .update(participant)
     .set({ teamId: null, updatedAt: new Date() })
-    .where(eq(participant.id, targetUserId));
+    .where(and(eq(participant.id, targetUserId), eq(participant.teamId, t.id)));
 }
 
 /** Leave a team. Captains must dissolve instead. */
@@ -292,20 +350,19 @@ export async function leaveTeam(userId: string): Promise<void> {
     where: eq(participant.id, userId),
     columns: { teamId: true },
   });
-  if (!p?.teamId) throw new Error('You are not in a team');
+  if (!p?.teamId) throw new Error(TEAM_ERRORS.notInTeam);
 
   const t = await db.query.team.findFirst({
     where: eq(team.id, p.teamId),
     columns: { captainId: true },
   });
-  if (!t) throw new Error('Team not found');
-  if (t.captainId === userId)
-    throw new Error('The captain cannot leave — dissolve the team instead');
+  if (!t) throw new Error(TEAM_ERRORS.notFound);
+  if (t.captainId === userId) throw new Error(TEAM_ERRORS.captainCannotLeave);
 
   await db
     .update(participant)
     .set({ teamId: null, updatedAt: new Date() })
-    .where(eq(participant.id, userId));
+    .where(and(eq(participant.id, userId), eq(participant.teamId, p.teamId)));
 }
 
 /** Dissolve a team. Captain only: detach every member, then delete the row. */
@@ -316,19 +373,15 @@ export async function dissolveTeam(userId: string): Promise<void> {
     where: eq(participant.id, userId),
     columns: { teamId: true },
   });
-  if (!p?.teamId) throw new Error('You are not in a team');
+  if (!p?.teamId) throw new Error(TEAM_ERRORS.notInTeam);
 
   const t = await db.query.team.findFirst({
     where: eq(team.id, p.teamId),
     columns: { id: true, captainId: true },
   });
-  if (!t) throw new Error('Team not found');
-  if (t.captainId !== userId) throw new Error('Only the captain can dissolve the team');
+  if (!t) throw new Error(TEAM_ERRORS.notFound);
+  if (t.captainId !== userId) throw new Error(TEAM_ERRORS.captainOnlyDissolve);
 
-  await db
-    .update(participant)
-    .set({ teamId: null, updatedAt: new Date() })
-    .where(eq(participant.teamId, t.id));
-
-  await db.delete(team).where(eq(team.id, t.id));
+  // ON DELETE SET NULL detaches all members atomically with the deletion.
+  await db.delete(team).where(and(eq(team.id, t.id), eq(team.captainId, userId)));
 }
