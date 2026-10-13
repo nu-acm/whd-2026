@@ -79,7 +79,8 @@ export const onboardingSchema = z
       .string()
       .min(1, { error: V.phoneRequired })
       .regex(phoneRegex, { error: V.phoneInvalid })
-      .transform(stripPhoneDigits),
+      .transform(stripPhoneDigits)
+      .pipe(z.string().min(6, { error: V.phoneInvalid }).max(25, { error: V.phoneInvalid })),
     city: z.string().trim().min(1, { error: V.cityRequired }).max(100, { error: V.cityMax }),
     placeOfStudy: z
       .string()
@@ -91,7 +92,9 @@ export const onboardingSchema = z
       .trim()
       .optional()
       .transform((v) => v || undefined)
-      .refine((v) => !v || phoneRegex.test(v), { message: V.parentPhoneInvalid })
+      .refine((v) => !v || (phoneRegex.test(v) && stripPhoneDigits(v).length >= 6), {
+        message: V.parentPhoneInvalid,
+      })
       .transform((v) => (v ? stripPhoneDigits(v) : undefined)),
     educationLevel: z.enum(EDUCATION_LEVELS, { error: V.educationInvalid }),
   })

@@ -12,6 +12,7 @@ import {
   type OnboardingInput,
 } from '@/lib/validation';
 import { webHapticsOptions } from '@/lib/web-haptics';
+import { REGISTRATION_CLOSED_I18N_KEY } from '@/lib/registration';
 
 export type OnboardingDefaults = Partial<Record<keyof OnboardingInput, string>>;
 
@@ -67,8 +68,37 @@ export function OnboardingForm({
       trigger('success');
     } catch (err) {
       trigger('error');
-      // Server errors may be i18n keys (e.g. registration closed); t() passes plain text through.
-      setErrors({ form: err instanceof Error ? t(err.message) : t('onboarding.saveFailed') });
+      // Server validation errors serialize their issues into Error.message.
+      const next: Errors = {};
+      if (err instanceof Error) {
+        try {
+          const issues: unknown = JSON.parse(err.message);
+          if (Array.isArray(issues)) {
+            for (const issue of issues) {
+              const key = issue?.path?.[0];
+              if (
+                typeof key === 'string' &&
+                Object.hasOwn(values, key) &&
+                typeof issue.message === 'string' &&
+                issue.message.startsWith('validation.') &&
+                t(issue.message) !== issue.message
+              ) {
+                const field = key as keyof OnboardingInput;
+                if (!next[field]) next[field] = t(issue.message);
+              }
+            }
+          }
+        } catch {
+          // Plain errors can contain a translated registration status key.
+        }
+      }
+      if (Object.keys(next).length === 0) {
+        next.form =
+          err instanceof Error && err.message === REGISTRATION_CLOSED_I18N_KEY
+            ? t(err.message)
+            : t('onboarding.saveFailed');
+      }
+      setErrors(next);
     } finally {
       setPending(false);
     }

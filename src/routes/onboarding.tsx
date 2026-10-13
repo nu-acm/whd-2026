@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, redirect, useNavigate, useRouter } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
 
@@ -53,10 +53,16 @@ const saveProfile = createServerFn({ method: 'POST' })
 export const Route = createFileRoute('/onboarding')({
   validateSearch: validateRedirectSearch,
   loaderDeps: ({ search }) => search,
-  loader: async ({ deps }) => {
-    const result = await loadProfile();
-    if (!result.authed) throw redirect({ to: '/login', search: deps });
-    return result;
+  // Wait for current profile data before mounting a form with local input state.
+  staleTime: 0,
+  preloadStaleTime: 0,
+  loader: {
+    staleReloadMode: 'blocking',
+    handler: async ({ deps }) => {
+      const result = await loadProfile();
+      if (!result.authed) throw redirect({ to: '/login', search: deps });
+      return result;
+    },
   },
   component: OnboardingPage,
 });
@@ -64,6 +70,7 @@ export const Route = createFileRoute('/onboarding')({
 function OnboardingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const router = useRouter();
   const { defaults, registrationOpen } = Route.useLoaderData();
   const { redirect: inviteRedirect } = Route.useSearch();
 
@@ -102,7 +109,8 @@ function OnboardingPage() {
           defaults={defaults}
           onSubmit={async (values) => {
             await saveProfile({ data: values });
-            navigate({ to: safeInviteRedirect(inviteRedirect) ?? '/dashboard' });
+            await router.invalidate({ sync: true });
+            await navigate({ to: safeInviteRedirect(inviteRedirect) ?? '/dashboard' });
           }}
         />
       </AuthCard>
