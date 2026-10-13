@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Menu, X } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import type { Session } from '@/lib/types';
@@ -73,26 +74,26 @@ export default function Navbar({
           aria-label={t('navbar.toggleMenu')}
           onClick={() => setOpen(!open)}
         >
-          <span aria-hidden="true">{open ? '×' : '☰'}</span>
+          <Menu className="menu-icon menu-icon-open" aria-hidden="true" />
+          <X className="menu-icon menu-icon-close" aria-hidden="true" />
         </button>
       </div>
-      <nav
-        id="mobile-navigation"
-        className="mobile-nav"
-        hidden={!open}
-        aria-label={t('navbar.navigation')}
-      >
-        {NAV_LINKS.map((link) => (
-          <a key={link.href} href={link.href} onClick={() => setOpen(false)}>
-            {t(link.labelKey)}
-          </a>
-        ))}
-        <LanguageSwitcher size="md" onLanguageChange={() => setOpen(false)} />
-        <Link to={ctaTo} className="landing-cta" onClick={() => setOpen(false)}>
-          {ctaLabel}
-          <span aria-hidden="true">↗</span>
-        </Link>
-      </nav>
+      <div className="mobile-nav-shell" data-open={open} inert={!open} aria-hidden={!open}>
+        <div className="mobile-nav-clip">
+          <nav id="mobile-navigation" className="mobile-nav" aria-label={t('navbar.navigation')}>
+            {NAV_LINKS.map((link) => (
+              <a key={link.href} href={link.href} onClick={() => setOpen(false)}>
+                {t(link.labelKey)}
+              </a>
+            ))}
+            <LanguageSwitcher size="md" onLanguageChange={() => setOpen(false)} />
+            <Link to={ctaTo} className="landing-cta" onClick={() => setOpen(false)}>
+              {ctaLabel}
+              <span aria-hidden="true">↗</span>
+            </Link>
+          </nav>
+        </div>
+      </div>
     </header>
   );
 }

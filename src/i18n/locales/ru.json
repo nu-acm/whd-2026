@@ -189,7 +189,11 @@
         "a": "Присоединяйтесь к нашему <link href=\"https://t.me/WHD_chat\">Telegram чату</link> и задайте свой вопрос там или свяжитесь с нами по почте: <link href=\"https://mail.google.com/mail/u/0/?fs=1&to=acm_w@nu.edu.kz&su&body&tf=cm\">acm_w@nu.edu.kz.</link>"
       }
     },
-    "chatLink": "Задать вопрос в Telegram"
+    "chatLink": "Задать вопрос в Telegram",
+    "allTitle": "Все вопросы о WHD",
+    "viewAll": "Все вопросы",
+    "contactUs": "Связаться с нами",
+    "backToHome": "На главную"
   },
   "partners": {
     "kicker": "Нас поддерживают",

@@ -189,7 +189,11 @@
         "a": "Сұрағыңызды біздің <link href=\"https://t.me/WHD_chat\">Telegram чатымызға</link> қосылып, немесе бізге электрондық пошта арқылы жазып қоя аласыз: <link href=\"https://mail.google.com/mail/u/0/?fs=1&to=acm_w@nu.edu.kz&su&body&tf=cm\">acm_w@nu.edu.kz.</link>"
       }
     },
-    "chatLink": "Telegram-да сұрақ қою"
+    "chatLink": "Telegram-да сұрақ қою",
+    "allTitle": "WHD туралы барлық сұрақтар",
+    "viewAll": "Барлық сұрақтар",
+    "contactUs": "Бізбен байланысу",
+    "backToHome": "Басты бетке"
   },
   "partners": {
     "kicker": "Бізді қолдайды",

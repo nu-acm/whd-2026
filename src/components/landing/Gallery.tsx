@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
 import {
+  AnimatePresence,
   motion,
   useMotionValue,
   useReducedMotion,
@@ -76,13 +77,13 @@ export default function Gallery() {
   const stage = useRef<HTMLDivElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const [selected, setSelected] = useState<number | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: stage, offset: ['start end', 'end start'] });
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
   const pointerX = useSpring(rawX, { stiffness: 100, damping: 25 });
   const pointerY = useSpring(rawY, { stiffness: 100, damping: 25 });
-  const isOpen = selected !== null;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -102,6 +103,10 @@ export default function Gallery() {
     const bounds = event.currentTarget.getBoundingClientRect();
     rawX.set((event.clientX - bounds.left) / bounds.width - 0.5);
     rawY.set((event.clientY - bounds.top) / bounds.height - 0.5);
+  }
+  function openPhoto(photo: number) {
+    setSelected(photo);
+    setIsOpen(true);
   }
   function step(direction: number) {
     setSelected((current) =>
@@ -124,7 +129,7 @@ export default function Gallery() {
           <h2 id="gallery-title" className="landing-heading">
             {t('gallery.title')}
           </h2>
-          <button type="button" className="gallery-open" onClick={() => setSelected(0)}>
+          <button type="button" className="gallery-open" onClick={() => openPhoto(0)}>
             {t('gallery.viewPhotos')}
             <ArrowUpRight aria-hidden="true" />
           </button>
@@ -138,17 +143,17 @@ export default function Gallery() {
             pointerX={pointerX}
             pointerY={pointerY}
             reduced={!!reduced}
-            onOpen={setSelected}
+            onOpen={openPhoto}
           />
         ))}
       </div>
       <dialog
         ref={dialog}
-        className="gallery-dialog"
+        className="gallery-dialog whd-dialog"
         aria-label={t('gallery.title')}
-        onClose={() => setSelected(null)}
+        onClose={() => setIsOpen(false)}
         onClick={(event) => {
-          if (event.target === event.currentTarget) setSelected(null);
+          if (event.target === event.currentTarget) setIsOpen(false);
         }}
         onKeyDown={(event) => {
           if (event.key === 'ArrowLeft') {
@@ -167,16 +172,25 @@ export default function Gallery() {
               type="button"
               className="gallery-close"
               aria-label={t('gallery.close')}
-              onClick={() => setSelected(null)}
+              onClick={() => setIsOpen(false)}
             >
               <X aria-hidden="true" />
             </button>
-            <img
-              src={PHOTOS[selected]}
-              alt={t('gallery.imageAlt', { index: selected + 1 })}
-              width={900}
-              height={680}
-            />
+            <div className="gallery-image">
+              <AnimatePresence initial={false}>
+                <motion.img
+                  key={selected}
+                  initial={{ opacity: reduced ? 1 : 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: reduced ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }}
+                  src={PHOTOS[selected]}
+                  alt={t('gallery.imageAlt', { index: selected + 1 })}
+                  width={900}
+                  height={680}
+                />
+              </AnimatePresence>
+            </div>
             <div className="gallery-controls">
               <button type="button" aria-label={t('gallery.previous')} onClick={() => step(-1)}>
                 <ArrowLeft aria-hidden="true" />

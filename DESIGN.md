@@ -41,7 +41,7 @@ Design Read: лендинг хакатона для школьниц и студ
 
 По уточнению пользователя hero имеет неоновое свечение и мягко мигающие неоновые глаза маскота. Анимация глаз повторяется раз в 4.8 секунды; prefers-reduced-motion оставляет статичное свечение. Дополнительно пользователь запросил след за курсором из трёх предоставленных цветков: розового, фиолетового и белого. На лендинге при движении мыши появляются цветки размером 20–50 px с разными поворотами, небольшим дрейфом и исчезновением за 0.95–1.4 секунды. Максимум 24 частицы, без перехвата кликов; на touch и при reduced motion след выключен. Парение, scramble-текст и перехват прокрутки не добавлять.
 
-Наведение, нажатие, фокус и раскрытие элементов должны иметь ясную обратную связь. Изменение статуса или таймера по данным сохраняется. Анимационное направление добавлять только по отдельному запросу.
+Наведение, нажатие, фокус и раскрытие элементов должны иметь ясную обратную связь. Изменение статуса или таймера по данным сохраняется. По запросу от 13 октября 2026 раскрытие, закрытие и смена состояния получили плавные переходы 180–280 мс с быстрым откликом и мягким завершением. FAQ и блок формата используют общую анимацию высоты Radix; мобильное меню — обратимый переход grid-rows; нативные диалоги — opacity/transform с сохранением top layer при закрытии; фотографии галереи — crossfade. При reduced motion пространственные переходы отключены.
 
 ## Selected Style Profile
 
@@ -264,3 +264,8 @@ Added the requested cta-4 block between FAQ and footer. Its phone mockup is repl
 User requested the entire landing to match the hero. Added a scoped spy-theme.css after landing.css: Montserrat italic display headings, asymmetric gadget shells, pink gradient actions with dark circular lime arrows, luminous date/time accents, and low-opacity hex grids in selected panels. Facts, challenge cards, date blocks, schedule, bento, photo frames, FAQ, closing CTA and footer now share this language. User-provided flower sprites decorate small section labels and the challenge panel; sponsor logos and photo colors remain intact. No extra continuous animation was added. Existing hover effects respect reduced motion. Shared application/auth styles are unchanged.
 
 Visual checks: desktop 1440 px and mobile 320/390 px, Russian and Kazakh narrow-screen copy, English desktop. Fixed schedule min-content overflow by stacking time above event names below 1024 px. Fixed the decorative challenge flower extending beyond the narrow container. Mobile gallery heading/action remains clear of the rotated photos. Local production build passed. Screenshots: output/spy-theme/desktop.png and output/spy-theme/footer.png.
+
+
+## FAQ showcase and full page — 2026-10-13
+
+The supplied split FAQ reference informs the structure: an illustrated left panel and five separate accordion cards on the right. The landing shows participation, experience, team, registration and online-format questions, with “Все вопросы” linking to /faq and the existing Telegram contact. The public /faq route contains all ten existing localized answers, a home link and language controls. The supplied mascot is stored as a 45 KB WebP. Pink/purple styling, hex grid and soft corners intentionally follow the approved WHD theme rather than the reference’s gold palette. Mobile stacks the illustration/actions above the questions; full-page sidebar stays sticky only on desktop.

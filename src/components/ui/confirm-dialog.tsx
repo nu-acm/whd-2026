@@ -40,7 +40,7 @@ export function ConfirmDialog({
       // A click on the backdrop lands on the <dialog> itself.
       onClick={(e) => e.target === e.currentTarget && onOpenChange(false)}
       data-slot="card"
-      className="bg-whd-surface-raised m-auto w-[calc(100%-2rem)] max-w-sm rounded-2xl border-0 p-6 text-white backdrop:bg-black/80"
+      className="whd-dialog bg-whd-surface-raised m-auto w-[calc(100%-2rem)] max-w-sm rounded-2xl border-0 p-6 text-white backdrop:bg-black/80"
     >
       <h2 className="text-lg font-bold">{title}</h2>
       <p className="text-whd-text-muted mt-2 text-sm leading-relaxed">{description}</p>

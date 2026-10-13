@@ -18,21 +18,33 @@ export interface Faq6Props {
   badge?: string;
   title: ReactNode;
   titleId?: string;
+  headingLevel?: 'h1' | 'h2';
   faqs: FaqItem[];
   contact?: ReactNode;
+  illustration?: ReactNode;
   className?: string;
 }
 
 // Adapted from https://registry.watermelon.sh/r/faq-6.json.
-export function Faq6({ badge, title, titleId, faqs, contact, className }: Faq6Props) {
+export function Faq6({
+  badge,
+  title,
+  titleId,
+  headingLevel: Heading = 'h2',
+  faqs,
+  contact,
+  illustration,
+  className,
+}: Faq6Props) {
   return (
     <div className={cn('faq-six', className)}>
       <div className="faq-six-intro">
         {badge && <p className="landing-eyebrow">{badge}</p>}
-        <h2 id={titleId} className="landing-heading">
+        <Heading id={titleId} className="landing-heading">
           {title}
-        </h2>
+        </Heading>
         {contact}
+        {illustration}
       </div>
       <Accordion type="single" collapsible className="faq-six-list">
         {faqs.map((faq, index) => (

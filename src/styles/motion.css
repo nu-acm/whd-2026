@@ -1,0 +1,192 @@
+/* Shared interaction timing; no entrance effects on readable page content. */
+:root {
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-fast: 180ms;
+  --motion-panel: 280ms;
+}
+
+/* Radix keeps content mounted until its closing animation finishes. */
+.whd-accordion-content[data-state='open'] {
+  animation: whd-expand var(--motion-panel) var(--motion-ease);
+}
+.whd-accordion-content[data-state='closed'] {
+  animation: whd-collapse 220ms var(--motion-ease);
+}
+@keyframes whd-expand {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+}
+@keyframes whd-collapse {
+  from {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+.faq-six-item,
+.feature-two-question,
+.faq-six-toggle {
+  transition:
+    background-color var(--motion-fast) ease-out,
+    color var(--motion-fast) ease-out,
+    box-shadow var(--motion-fast) ease-out;
+}
+.faq-six-toggle {
+  position: relative;
+}
+.faq-six-toggle .faq-six-plus,
+.faq-six-toggle .faq-six-minus {
+  display: block;
+  position: absolute;
+  transition:
+    opacity var(--motion-fast) ease-out,
+    transform var(--motion-panel) var(--motion-ease);
+}
+.faq-six-toggle .faq-six-minus {
+  opacity: 0;
+  transform: rotate(-90deg);
+}
+.faq-six-trigger[data-state='open'] .faq-six-plus {
+  display: block;
+  opacity: 0;
+  transform: rotate(90deg);
+}
+.faq-six-trigger[data-state='open'] .faq-six-minus {
+  opacity: 1;
+  transform: rotate(0);
+}
+
+/* Grid rows allow the menu to reverse smoothly when toggled rapidly. */
+.mobile-nav-shell {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    grid-template-rows var(--motion-panel) var(--motion-ease),
+    opacity 200ms ease-out,
+    visibility 0s var(--motion-panel);
+}
+.mobile-nav-shell[data-open='true'] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+.mobile-nav-clip {
+  min-height: 0;
+  overflow: hidden;
+}
+.menu-toggle {
+  position: relative;
+}
+.menu-icon {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  transition:
+    opacity var(--motion-fast) ease-out,
+    transform var(--motion-panel) var(--motion-ease);
+}
+.menu-icon-close {
+  opacity: 0;
+  transform: rotate(-45deg);
+}
+.menu-toggle[aria-expanded='true'] .menu-icon-open {
+  opacity: 0;
+  transform: rotate(45deg);
+}
+.menu-toggle[aria-expanded='true'] .menu-icon-close {
+  opacity: 1;
+  transform: rotate(0);
+}
+@media (min-width: 1280px) {
+  .mobile-nav-shell {
+    display: none;
+  }
+}
+
+/* Keep the native dialog's top layer during exit, including Escape/backdrop close. */
+.whd-dialog {
+  opacity: 0;
+  transform: translateY(10px) scale(0.985);
+  transition:
+    opacity 220ms ease-out,
+    transform var(--motion-panel) var(--motion-ease),
+    display var(--motion-panel) allow-discrete,
+    overlay var(--motion-panel) allow-discrete;
+}
+.whd-dialog[open] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.whd-dialog::backdrop {
+  opacity: 0;
+  transition:
+    opacity 220ms ease-out,
+    display var(--motion-panel) allow-discrete,
+    overlay var(--motion-panel) allow-discrete;
+}
+.whd-dialog[open]::backdrop {
+  opacity: 1;
+}
+@starting-style {
+  .whd-dialog[open] {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  .whd-dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+.gallery-image {
+  position: relative;
+  height: min(68svh, 680px);
+}
+.gallery-image > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.desktop-nav a,
+.mobile-nav a,
+.footer-two-groups a,
+.faq-contact,
+.faq-page-back a,
+.gallery-close,
+.gallery-controls button,
+.menu-toggle {
+  transition:
+    color var(--motion-fast) ease-out,
+    background-color var(--motion-fast) ease-out,
+    opacity var(--motion-fast) ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .whd-accordion-content {
+    animation: none !important;
+  }
+  .mobile-nav-shell,
+  .menu-icon,
+  .whd-dialog,
+  .whd-dialog::backdrop,
+  .faq-six-item,
+  .feature-two-question,
+  .faq-six-toggle,
+  .faq-six-toggle svg {
+    transition: none !important;
+  }
+}

@@ -189,7 +189,11 @@
         "a": "Join our <link href=\"https://t.me/WHD_chat\">Telegram chat</link> and ask your questions there, or contact us via email: <link href=\"https://mail.google.com/mail/u/0/?fs=1&to=acm_w@nu.edu.kz&su&body&tf=cm\">acm_w@nu.edu.kz.</link>"
       }
     },
-    "chatLink": "Ask us in Telegram"
+    "chatLink": "Ask us in Telegram",
+    "allTitle": "All questions about WHD",
+    "viewAll": "All questions",
+    "contactUs": "Contact us",
+    "backToHome": "Back to home"
   },
   "partners": {
     "kicker": "Supported by",

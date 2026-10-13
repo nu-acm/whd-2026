@@ -129,3 +129,19 @@ Verified the new CTA on desktop 1440 px and phone 390 px; Kazakh text checked at
 ## Whole landing spy styling — 2026-10-13
 
 Reviewed facts/about, dates/schedule, bento, gallery, FAQ open state, CTA/footer on desktop and mobile. Narrow 320 px RU/KK checks found and resolved schedule panel overflow and a 5px decorative flower extension. Gallery inspected at 390 px; photos do not cover heading or action. Global style is scoped to landing components, preserving routes, original content, photos, partners and existing countdown behavior. Production build passed; no new interactive logic was introduced. Proof: output/spy-theme/desktop.png and output/spy-theme/footer.png.
+
+
+## FAQ showcase and full page — 2026-10-13
+
+Compared the supplied reference with the desktop implementation: retained illustrated left panel and five separated cards on the right, with intentional WHD palette, typography, mascot and two requested actions. Checked desktop 1440 px, mobile 390 px and narrow 320 px; no FAQ horizontal overflow at 320 px. Verified five preview questions, navigation to /faq, ten full-page questions, direct refresh, Enter accordion activation, RU/EN/KK switching and return to /#faq. Telegram href preserved. TypeScript, targeted ESLint, local production build and git diff --check passed. Build reports existing inputValidator deprecation warnings in unrelated routes. Screenshot: output/faq-showcase/desktop.png.
+
+final result: passed
+
+
+## Interaction motion — 2026-10-13
+
+Defined the missing shared accordion animations (280 ms open / 220 ms close), crossfaded FAQ plus/minus states, added reversible mobile-menu grid transitions with inert closed content, and native dialog entry/exit transitions. Gallery content remains mounted for exit and photographs crossfade over 220 ms. Reduced-motion CSS and the existing useReducedMotion hook suppress movement. No new library.
+
+Verified accordion computed open/close animation names and durations, mobile menu open/Escape/rapid toggle at 390 px, gallery next-photo controls and Escape dismissal. Native dialog stays displayed during exit, then becomes display:none; its image persists for the fade. The shared confirmation-dialog class uses the same native-dialog CSS; destructive confirmation was not submitted during visual QA. TypeScript, targeted ESLint, local production build and diff whitespace checks passed.
+
+BeUniq raw audit: AI slop 100, copy slop 58, taste 18, design quality 76. The global style/copy audit is not passing; neon/gradient/eyebrow findings belong to the approved custom brand and unchanged content. TASTE-A11Y-001 flags in motion.css/accordion/Gallery are scanner false positives: CSS has an explicit reduced-motion block, accordion chevrons have motion-reduce utilities, and Gallery uses useReducedMotion. Existing unrelated findings remain outside this interaction-only change. Functional motion verification: passed.

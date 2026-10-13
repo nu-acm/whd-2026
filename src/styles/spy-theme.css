@@ -413,3 +413,207 @@
     gap: 8px;
   }
 }
+
+/* FAQ reference: illustrated introduction beside five separate question cards. */
+.faq-showcase .faq-six {
+  grid-template-columns: minmax(0, 1.06fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+.faq-showcase .faq-six-intro {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 480px;
+  padding: 36px;
+  overflow: hidden;
+  border-radius: 28px 10px 28px 10px;
+  background: radial-gradient(ellipse at 95% 85%, #bc2e842b, transparent 64%), #21152d;
+  box-shadow: inset 0 1px 0 #dfacff2b;
+}
+.faq-showcase .faq-six-intro::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: url('/whd/hero-grid.svg') center / 110px 190px repeat;
+  opacity: 0.23;
+  pointer-events: none;
+}
+.faq-showcase .faq-six-intro .landing-heading {
+  position: relative;
+  z-index: 1;
+  max-width: 15ch;
+  font-size: clamp(2rem, 3.2vw, 3rem);
+  margin: 0 0 32px;
+}
+.faq-panel-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: auto;
+}
+.faq-panel-actions .landing-cta {
+  gap: 16px;
+  font-size: 0.9375rem;
+  padding-inline: 18px;
+}
+.faq-panel-actions .faq-contact {
+  margin: 0;
+  font-size: 0.875rem;
+}
+.faq-mascot {
+  position: absolute;
+  right: -4px;
+  bottom: 0;
+  width: 47%;
+  max-width: 300px;
+  height: auto;
+  filter: drop-shadow(0 0 1px #b876ed99) drop-shadow(0 0 18px #da4cc329);
+  pointer-events: none;
+}
+.faq-showcase .faq-six-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.faq-showcase .faq-six-item {
+  flex: 1 0 auto;
+  padding-inline: 24px;
+  border: 0;
+  border-radius: 18px 6px 18px 6px;
+  background: #241a2e;
+  box-shadow: inset 0 1px 0 #e1b4fc1a;
+}
+.faq-showcase .faq-six-item[data-state='open'] {
+  background: #342040;
+}
+.faq-showcase .faq-six-trigger {
+  min-height: 84px;
+  padding-block: 22px;
+  gap: 20px;
+}
+.faq-showcase .faq-six-number {
+  display: none;
+}
+.faq-showcase .faq-six-question {
+  font-weight: 650;
+}
+.faq-showcase .faq-six-answer {
+  padding: 0 0 24px;
+}
+.faq-showcase .faq-six-full {
+  align-items: start;
+}
+.faq-showcase .faq-six-full .faq-six-intro {
+  position: sticky;
+  top: 96px;
+}
+.faq-page {
+  min-height: 100svh;
+}
+.faq-page-back {
+  padding-top: 32px;
+}
+.faq-page-back a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: var(--whd-pink-bright);
+}
+.faq-page .faq-showcase {
+  padding-top: 28px;
+}
+.faq-page-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding-block: 24px 40px;
+  color: var(--whd-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+.faq-page-footer > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.faq-page-footer a:hover {
+  color: var(--whd-pink);
+}
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .faq-showcase .faq-six-intro {
+    min-height: 540px;
+    padding: 28px;
+  }
+  .faq-mascot {
+    width: 45%;
+    bottom: 105px;
+  }
+  .faq-showcase .faq-six-intro .landing-heading {
+    font-size: 2rem;
+  }
+}
+@media (max-width: 1023px) {
+  .faq-showcase .faq-six {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .faq-showcase .faq-six-intro {
+    min-height: 380px;
+  }
+  .faq-showcase .faq-six-full .faq-six-intro {
+    position: relative;
+    top: auto;
+  }
+  .faq-mascot {
+    width: 40%;
+    max-width: 280px;
+  }
+  .faq-page-footer {
+    flex-direction: column;
+  }
+}
+@media (max-width: 599px) {
+  .faq-showcase .faq-six-intro {
+    padding: 24px;
+    min-height: 0;
+  }
+  .faq-showcase .faq-six-intro .landing-heading {
+    max-width: 15ch;
+    margin-bottom: 8px;
+    font-size: 1.875rem;
+  }
+  .faq-mascot {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    order: 2;
+    align-self: center;
+    width: min(82%, 240px);
+    margin: 12px 0;
+  }
+  .faq-panel-actions {
+    order: 3;
+    width: 100%;
+    margin-top: 4px;
+    align-items: center;
+    gap: 8px;
+  }
+  .faq-panel-actions .landing-cta {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .faq-showcase .faq-six-item {
+    padding-inline: 18px;
+  }
+  .faq-showcase .faq-six-trigger {
+    gap: 14px;
+    font-size: 0.9375rem;
+  }
+}
