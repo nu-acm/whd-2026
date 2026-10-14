@@ -5,7 +5,7 @@ interface AppEnv {
 }
 
 /** Emails allowed into /admin and /checkin, from the ADMIN_EMAILS secret. */
-export function getAdminEmails(): string[] {
+function getAdminEmails(): string[] {
   const raw = (env as unknown as AppEnv).ADMIN_EMAILS?.trim();
   if (!raw) return [];
   return raw

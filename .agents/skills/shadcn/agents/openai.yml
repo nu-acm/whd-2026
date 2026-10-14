@@ -1,0 +1,3 @@
+interface:
+  display_name: "WHD shadcn"
+  short_description: "Maintain WHD Base UI components, styling, and registry updates."

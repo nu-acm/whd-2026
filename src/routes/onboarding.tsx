@@ -39,7 +39,7 @@ const loadProfile = createServerFn({ method: 'GET' }).handler(async () => {
 });
 
 const saveProfile = createServerFn({ method: 'POST' })
-  .inputValidator(onboardingSchema)
+  .validator(onboardingSchema)
   .handler(async ({ data }) => {
     const session = await ensureSession(getRequest());
 
@@ -77,7 +77,7 @@ function OnboardingPage() {
   if (!registrationOpen) {
     // With a profile the details are frozen; without one, sign-up is over.
     return (
-      <div className="bg-whd-dark flex min-h-screen flex-col">
+      <div className="flex min-h-screen flex-col bg-whd-dark">
         <AuthHeader showSignOut />
         <AuthCard title={t('onboarding.closedTitle')}>
           <Notice className="mb-5">
@@ -98,7 +98,7 @@ function OnboardingPage() {
   }
 
   return (
-    <div className="bg-whd-dark flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-whd-dark">
       <AuthHeader showSignOut />
       <AuthCard
         title={t('onboarding.title')}

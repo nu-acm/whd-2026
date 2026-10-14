@@ -64,7 +64,7 @@ export default function Countdown({
     const timer = setInterval(tick, SECOND);
     return () => clearInterval(timer);
     // onElapsed is a fire-once notification; re-subscribing on every render is not needed.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react/exhaustive-deps
   }, [target]);
 
   const language = i18n.resolvedLanguage ?? i18n.language;

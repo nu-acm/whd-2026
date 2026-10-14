@@ -19,8 +19,8 @@ function StatTile({
   icon: LucideIcon;
 }) {
   return (
-    <Card className="dashboard-stat">
-      <CardContent className="dashboard-stat-content">
+    <Card variant="dashboard-stat">
+      <CardContent variant="dashboard-stat">
         <Icon className="dashboard-stat-icon" aria-hidden="true" />
         <p className="dashboard-stat-label">{label}</p>
         <p className={cn('dashboard-stat-value', valueClassName)}>{value}</p>
@@ -48,7 +48,7 @@ export function DashboardStats({ team }: { team: TeamData | null }) {
               ? t('dashboard.teamReady')
               : t('dashboard.teamIncomplete', { min: MIN_TEAM_SIZE })
         }
-        valueClassName={ready ? 'text-whd-pink-bright' : 'text-amber-300'}
+        valueClassName={ready ? 'text-whd-pink-bright' : 'text-warning'}
       />
       <StatTile
         icon={Users}

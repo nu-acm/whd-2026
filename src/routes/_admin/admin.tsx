@@ -1,21 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createFileRoute } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 
-import { Button } from '@/components/ui/button';
+import { useAdminTable, type AdminColumnDef } from '@/components/admin/use-admin-table';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Empty, EmptyDescription } from '@/components/ui/empty';
+import { Button, LinkButton } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Segmented } from '@/components/ui/segmented';
-import { ColumnToggleBar, PlainTh, SortableTh, StatCard } from '@/components/admin/table';
-import {
-  applyDir,
-  compareText,
-  useColumnVisibility,
-  useSort,
-  type ColumnDef,
-} from '@/components/admin/table-state';
+import { ColumnToggleBar, AdminDataTable, StatCard } from '@/components/admin/table';
 import { getSession } from '@/lib/auth.server';
 import { sessionIsAdmin } from '@/lib/admin.server';
 import {
@@ -56,33 +52,8 @@ export const Route = createFileRoute('/_admin/admin')({
 type Tab = 'participants' | 'teams';
 type Eligibility = 'all' | 'eligible' | 'not-eligible';
 
-type ParticipantCol = Exclude<keyof ReportParticipant, 'id' | 'teamSlug' | 'teamEligible'>;
-type TeamCol = Exclude<keyof ReportTeam, never>;
-type TeamSortKey = Exclude<TeamCol, 'members'>;
-
-const PARTICIPANT_COLS: readonly ParticipantCol[] = [
-  'fullName',
-  'email',
-  'iin',
-  'phone',
-  'parentPhone',
-  'city',
-  'placeOfStudy',
-  'educationLevel',
-  'cvUrl',
-  'teamName',
-  'attended',
-  'createdAt',
-];
-const TEAM_COLS: readonly TeamCol[] = [
-  'name',
-  'captainName',
-  'memberCount',
-  'eligible',
-  'members',
-  'inviteSlug',
-  'createdAt',
-];
+const participantId = (row: ReportParticipant) => row.id;
+const teamId = (row: ReportTeam) => row.inviteSlug;
 
 const matches = (needle: string, ...fields: (string | null)[]) =>
   fields.some((f) => f?.toLowerCase().includes(needle));
@@ -98,22 +69,20 @@ function AdminPage() {
   const [teamQuery, setTeamQuery] = useState('');
   const [participantFilter, setParticipantFilter] = useState<Eligibility>('all');
   const [teamFilter, setTeamFilter] = useState<Eligibility>('all');
-  const [participantSort, sortParticipants] = useSort<ParticipantCol>('fullName');
-  const [teamSort, sortTeams] = useSort<TeamSortKey>('name');
   const [scrollTarget, setScrollTarget] = useState<string | null>(null);
 
-  const participantCols: ColumnDef<ParticipantCol>[] = PARTICIPANT_COLS.map((key) => ({
-    key,
-    label: t(`admin.col.${key}`),
-  }));
-  const teamCols: ColumnDef<TeamCol>[] = TEAM_COLS.map((key) => ({
-    key,
-    label: t(`admin.col.${key}`),
-  }));
-  const participantVisibility = useColumnVisibility(participantCols);
-  const teamVisibility = useColumnVisibility(teamCols);
-  const pv = participantVisibility.visible;
-  const tv = teamVisibility.visible;
+  const goToTeam = useCallback((slug: string) => {
+    setTeamFilter('all');
+    setTeamQuery('');
+    setTab('teams');
+    setScrollTarget(`team-${slug}`);
+  }, []);
+  const goToParticipant = useCallback((id: string) => {
+    setParticipantFilter('all');
+    setParticipantQuery('');
+    setTab('participants');
+    setScrollTarget(`participant-${id}`);
+  }, []);
 
   const formatDate = useMemo(() => {
     const fmt = new Intl.DateTimeFormat(i18n.language, {
@@ -143,7 +112,7 @@ function AdminPage() {
     [teams, teamFilter],
   );
 
-  const participantRows = useMemo(() => {
+  const participantMatches = useMemo(() => {
     const needle = participantQuery.trim().toLowerCase();
     const filtered = !needle
       ? participantsInFilter
@@ -161,17 +130,10 @@ function AdminPage() {
             p.teamName,
           ),
         );
-    const { key, dir } = participantSort;
-    return [...filtered].sort((a, b) => {
-      const av = a[key];
-      const bv = b[key];
-      const cmp =
-        typeof av === 'boolean' ? Number(av) - Number(bv) : compareText(av, bv as string | null);
-      return applyDir(cmp, dir);
-    });
-  }, [participantsInFilter, participantQuery, participantSort]);
+    return filtered;
+  }, [participantsInFilter, participantQuery]);
 
-  const teamRows = useMemo(() => {
+  const teamMatches = useMemo(() => {
     const needle = teamQuery.trim().toLowerCase();
     const filtered = !needle
       ? teamsInFilter
@@ -184,17 +146,180 @@ function AdminPage() {
             ...team.members.map((m) => m.fullName),
           ),
         );
-    const { key, dir } = teamSort;
-    return [...filtered].sort((a, b) => {
-      const av = a[key];
-      const bv = b[key];
-      const cmp =
-        typeof av === 'number' || typeof av === 'boolean'
-          ? Number(av) - Number(bv)
-          : compareText(av, bv as string);
-      return applyDir(cmp, dir);
-    });
-  }, [teamsInFilter, teamQuery, teamSort]);
+    return filtered;
+  }, [teamsInFilter, teamQuery]);
+
+  const participantCols = useMemo<AdminColumnDef<ReportParticipant>[]>(
+    () => [
+      {
+        id: 'fullName',
+        accessorFn: (p) => p.fullName,
+        meta: { label: t('admin.col.fullName') },
+        cell: ({ row }) => row.original.fullName,
+      },
+      {
+        id: 'email',
+        accessorFn: (p) => p.email,
+        meta: { label: t('admin.col.email') },
+        cell: ({ row }) => row.original.email,
+      },
+      {
+        id: 'iin',
+        accessorFn: (p) => p.iin,
+        meta: { label: t('admin.col.iin'), tone: 'numeric' },
+        cell: ({ row }) => row.original.iin,
+      },
+      {
+        id: 'phone',
+        accessorFn: (p) => p.phone,
+        meta: { label: t('admin.col.phone') },
+        cell: ({ row }) => row.original.phone,
+      },
+      {
+        id: 'parentPhone',
+        accessorFn: (p) => p.parentPhone,
+        meta: { label: t('admin.col.parentPhone') },
+        cell: ({ row }) =>
+          row.original.parentPhone ?? <span className="text-muted-foreground">—</span>,
+      },
+      {
+        id: 'city',
+        accessorFn: (p) => p.city,
+        meta: { label: t('admin.col.city') },
+        cell: ({ row }) => row.original.city,
+      },
+      {
+        id: 'placeOfStudy',
+        accessorFn: (p) => p.placeOfStudy,
+        meta: { label: t('admin.col.placeOfStudy') },
+        cell: ({ row }) => row.original.placeOfStudy,
+      },
+      {
+        id: 'educationLevel',
+        accessorFn: (p) => p.educationLevel,
+        meta: { label: t('admin.col.educationLevel') },
+        cell: ({ row }) => t(`education.${row.original.educationLevel}`),
+      },
+      {
+        id: 'cvUrl',
+        accessorFn: (p) => p.cvUrl,
+        meta: { label: t('admin.col.cvUrl') },
+        cell: ({ row }) =>
+          row.original.cvUrl ? (
+            <LinkButton
+              href={row.original.cvUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="table-link"
+              size="none"
+            >
+              {t('admin.cvOpen')}
+            </LinkButton>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          ),
+      },
+      {
+        id: 'teamName',
+        accessorFn: (p) => p.teamName,
+        meta: { label: t('admin.col.teamName') },
+        cell: ({ row }) => {
+          const { teamName, teamSlug } = row.original;
+          return teamName && teamSlug ? (
+            <Button variant="table-link" size="none" onClick={() => goToTeam(teamSlug)}>
+              {teamName}
+            </Button>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          );
+        },
+      },
+      {
+        id: 'attended',
+        accessorFn: (p) => p.attended,
+        meta: { label: t('admin.col.attended') },
+        sortFn: (a, b) => Number(a.original.attended) - Number(b.original.attended),
+        cell: ({ row }) => (row.original.attended ? '✓' : ''),
+      },
+      {
+        id: 'createdAt',
+        accessorFn: (p) => p.createdAt,
+        meta: { label: t('admin.col.createdAt'), tone: 'muted' },
+        cell: ({ row }) => formatDate(row.original.createdAt),
+      },
+    ],
+    [t, formatDate, goToTeam],
+  );
+  const teamCols = useMemo<AdminColumnDef<ReportTeam>[]>(
+    () => [
+      {
+        id: 'name',
+        accessorFn: (team) => team.name,
+        meta: { label: t('admin.col.name') },
+        cell: ({ row }) => row.original.name,
+      },
+      {
+        id: 'captainName',
+        accessorFn: (team) => team.captainName,
+        meta: { label: t('admin.col.captainName') },
+        cell: ({ row }) => row.original.captainName,
+      },
+      {
+        id: 'memberCount',
+        accessorFn: (team) => team.memberCount,
+        meta: { label: t('admin.col.memberCount') },
+        sortFn: (a, b) => a.original.memberCount - b.original.memberCount,
+        cell: ({ row }) => row.original.memberCount,
+      },
+      {
+        id: 'eligible',
+        accessorFn: (team) => team.eligible,
+        meta: { label: t('admin.col.eligible') },
+        sortFn: (a, b) => Number(a.original.eligible) - Number(b.original.eligible),
+        cell: ({ row }) => (
+          <span
+            className={row.original.eligible ? 'text-whd-pink-bright' : 'text-muted-foreground'}
+          >
+            {row.original.eligible ? '✓' : '—'}
+          </span>
+        ),
+      },
+      {
+        id: 'members',
+        enableSorting: false,
+        meta: { label: t('admin.col.members') },
+        cell: ({ row }) =>
+          row.original.members.map((member, index) => (
+            <span key={member.id}>
+              <Button variant="table-link" size="none" onClick={() => goToParticipant(member.id)}>
+                {member.fullName}
+              </Button>
+              {index < row.original.members.length - 1 && ', '}
+            </span>
+          )),
+      },
+      {
+        id: 'inviteSlug',
+        accessorFn: (team) => team.inviteSlug,
+        meta: { label: t('admin.col.inviteSlug'), tone: 'slug' },
+        cell: ({ row }) => row.original.inviteSlug,
+      },
+      {
+        id: 'createdAt',
+        accessorFn: (team) => team.createdAt,
+        meta: { label: t('admin.col.createdAt'), tone: 'muted' },
+        cell: ({ row }) => formatDate(row.original.createdAt),
+      },
+    ],
+    [t, formatDate, goToParticipant],
+  );
+  const participantTable = useAdminTable(
+    participantMatches,
+    participantCols,
+    'fullName',
+    participantId,
+  );
+  const teamTable = useAdminTable(teamMatches, teamCols, 'name', teamId);
 
   // After switching tabs, wait for the target row to render, then scroll to and flash it.
   useEffect(() => {
@@ -218,20 +343,6 @@ function AdminPage() {
     };
   }, [scrollTarget, tab]);
 
-  const goToTeam = (slug: string) => {
-    setTeamFilter('all');
-    setTeamQuery('');
-    setTab('teams');
-    setScrollTarget(`team-${slug}`);
-  };
-
-  const goToParticipant = (id: string) => {
-    setParticipantFilter('all');
-    setParticipantQuery('');
-    setTab('participants');
-    setScrollTarget(`participant-${id}`);
-  };
-
   const exportCsv = async () => {
     const csv = await downloadCsv();
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
@@ -249,260 +360,110 @@ function AdminPage() {
   ] as const;
 
   const isParticipants = tab === 'participants';
-  const shown = isParticipants ? participantRows.length : teamRows.length;
+  const shown = isParticipants
+    ? participantTable.getRowModel().rows.length
+    : teamTable.getRowModel().rows.length;
   const inFilter = isParticipants ? participantsInFilter.length : teamsInFilter.length;
   const query = isParticipants ? participantQuery : teamQuery;
 
   return (
-    <main className="mx-auto w-full max-w-[100rem] flex-1 px-6 py-10 sm:px-8 lg:px-12">
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold text-white md:text-4xl">{t('admin.title')}</h1>
-        <Button variant="secondary" size="sm" onClick={exportCsv}>
-          {t('admin.exportCsv')}
-        </Button>
-      </div>
-
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label={t('admin.statParticipants')}
-          value={stats.participants}
-          breakdown={t('admin.eligibleBreakdown', {
-            eligible: eligibleParticipants,
-            other: stats.participants - eligibleParticipants,
-          })}
-        />
-        <StatCard
-          label={t('admin.statTeams')}
-          value={stats.teams}
-          breakdown={t('admin.eligibleBreakdown', {
-            eligible: stats.eligibleTeams,
-            other: stats.teams - stats.eligibleTeams,
-          })}
-        />
-        <StatCard label={t('admin.statTeamless')} value={stats.teamless} />
-        <StatCard label={t('admin.statAttended')} value={stats.attended} />
-      </div>
-
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-2">
-          {(['participants', 'teams'] as const).map((key) => (
-            <Button
-              key={key}
-              size="sm"
-              variant={tab === key ? 'primary' : 'ghost'}
-              onClick={() => setTab(key)}
-            >
-              {t(`admin.tab_${key}`)}
-            </Button>
-          ))}
+    <main className="mx-auto w-full max-w-admin flex-1 px-6 py-10 sm:px-8 lg:px-12">
+      <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <h1 className="text-3xl font-bold text-foreground md:text-4xl">{t('admin.title')}</h1>
+          <Button variant="secondary" size="sm" onClick={exportCsv}>
+            {t('admin.exportCsv')}
+          </Button>
         </div>
-        <Input
-          value={query}
-          onChange={(e) =>
-            isParticipants ? setParticipantQuery(e.target.value) : setTeamQuery(e.target.value)
-          }
-          placeholder={
-            isParticipants ? t('admin.searchPlaceholder') : t('admin.teamSearchPlaceholder')
-          }
-          className="max-w-xs"
-        />
-      </div>
 
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        {isParticipants ? (
-          <>
-            <ColumnToggleBar
-              columns={participantCols}
-              visible={pv}
-              onToggle={participantVisibility.toggle}
-              onToggleAll={participantVisibility.toggleAll}
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            label={t('admin.statParticipants')}
+            value={stats.participants}
+            breakdown={t('admin.eligibleBreakdown', {
+              eligible: eligibleParticipants,
+              other: stats.participants - eligibleParticipants,
+            })}
+          />
+          <StatCard
+            label={t('admin.statTeams')}
+            value={stats.teams}
+            breakdown={t('admin.eligibleBreakdown', {
+              eligible: stats.eligibleTeams,
+              other: stats.teams - stats.eligibleTeams,
+            })}
+          />
+          <StatCard label={t('admin.statTeamless')} value={stats.teamless} />
+          <StatCard label={t('admin.statAttended')} value={stats.attended} />
+        </div>
+
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <TabsList>
+            <TabsTrigger value="participants">{t('admin.tab_participants')}</TabsTrigger>
+            <TabsTrigger value="teams">{t('admin.tab_teams')}</TabsTrigger>
+          </TabsList>
+          <Input
+            value={query}
+            onChange={(e) =>
+              isParticipants ? setParticipantQuery(e.target.value) : setTeamQuery(e.target.value)
+            }
+            aria-label={
+              isParticipants ? t('admin.searchPlaceholder') : t('admin.teamSearchPlaceholder')
+            }
+            placeholder={
+              isParticipants ? t('admin.searchPlaceholder') : t('admin.teamSearchPlaceholder')
+            }
+            className="max-w-xs"
+          />
+        </div>
+
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          {isParticipants ? (
+            <>
+              <ColumnToggleBar table={participantTable} />
+              <Segmented
+                label={t('admin.filterLabel')}
+                options={eligibilityOptions}
+                value={participantFilter}
+                onChange={setParticipantFilter}
+              />
+            </>
+          ) : (
+            <>
+              <ColumnToggleBar table={teamTable} />
+              <Segmented
+                label={t('admin.filterLabel')}
+                options={eligibilityOptions}
+                value={teamFilter}
+                onChange={setTeamFilter}
+              />
+            </>
+          )}
+        </div>
+
+        <p className="mb-2 text-xs text-whd-text-muted">
+          {t('admin.showingCount', { shown, total: inFilter })}
+        </p>
+
+        <div className="overflow-x-auto rounded-2xl border border-whd-border">
+          <TabsContent value="participants">
+            <AdminDataTable
+              table={participantTable}
+              variant="participants"
+              rowPrefix="participant"
             />
-            <Segmented
-              label={t('admin.filterLabel')}
-              options={eligibilityOptions}
-              value={participantFilter}
-              onChange={setParticipantFilter}
-            />
-          </>
-        ) : (
-          <>
-            <ColumnToggleBar
-              columns={teamCols}
-              visible={tv}
-              onToggle={teamVisibility.toggle}
-              onToggleAll={teamVisibility.toggleAll}
-            />
-            <Segmented
-              label={t('admin.filterLabel')}
-              options={eligibilityOptions}
-              value={teamFilter}
-              onChange={setTeamFilter}
-            />
-          </>
+          </TabsContent>
+          <TabsContent value="teams">
+            <AdminDataTable table={teamTable} variant="teams" rowPrefix="team" />
+          </TabsContent>
+        </div>
+
+        {shown === 0 && (
+          <Empty>
+            <EmptyDescription>{t('admin.empty')}</EmptyDescription>
+          </Empty>
         )}
-      </div>
-
-      <p className="text-whd-text-muted mb-2 text-xs">
-        {t('admin.showingCount', { shown, total: inFilter })}
-      </p>
-
-      <div className="border-whd-border overflow-x-auto rounded-2xl border">
-        {isParticipants ? (
-          <table className="w-full min-w-[60rem] text-left text-sm">
-            <thead className="bg-whd-surface text-whd-text-muted">
-              <tr>
-                {participantCols.map(
-                  (col) =>
-                    pv[col.key] && (
-                      <SortableTh
-                        key={col.key}
-                        label={col.label}
-                        sortKey={col.key}
-                        sort={participantSort}
-                        onSort={sortParticipants}
-                      />
-                    ),
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {participantRows.map((p) => (
-                <tr
-                  key={p.id}
-                  id={`participant-${p.id}`}
-                  className="border-whd-border scroll-mt-24 border-t text-white/90"
-                >
-                  {pv.fullName && <td className="px-4 py-3 whitespace-nowrap">{p.fullName}</td>}
-                  {pv.email && <td className="px-4 py-3 whitespace-nowrap">{p.email}</td>}
-                  {pv.iin && <td className="px-4 py-3 whitespace-nowrap tabular-nums">{p.iin}</td>}
-                  {pv.phone && <td className="px-4 py-3 whitespace-nowrap">{p.phone}</td>}
-                  {pv.parentPhone && (
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      {p.parentPhone ?? <span className="text-whd-text-dim">—</span>}
-                    </td>
-                  )}
-                  {pv.city && <td className="px-4 py-3 whitespace-nowrap">{p.city}</td>}
-                  {pv.placeOfStudy && <td className="px-4 py-3">{p.placeOfStudy}</td>}
-                  {pv.educationLevel && (
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      {t(`education.${p.educationLevel}`)}
-                    </td>
-                  )}
-                  {pv.cvUrl && (
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      {p.cvUrl ? (
-                        <a
-                          href={p.cvUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-whd-pink-soft hover:text-whd-pink-bright hover:underline"
-                        >
-                          {t('admin.cvOpen')}
-                        </a>
-                      ) : (
-                        <span className="text-whd-text-dim">—</span>
-                      )}
-                    </td>
-                  )}
-                  {pv.teamName && (
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      {p.teamName && p.teamSlug ? (
-                        <button
-                          type="button"
-                          onClick={() => goToTeam(p.teamSlug!)}
-                          className="text-whd-pink-soft hover:text-whd-pink-bright cursor-pointer text-left hover:underline"
-                        >
-                          {p.teamName}
-                        </button>
-                      ) : (
-                        <span className="text-whd-text-dim">—</span>
-                      )}
-                    </td>
-                  )}
-                  {pv.attended && <td className="px-4 py-3">{p.attended ? '✓' : ''}</td>}
-                  {pv.createdAt && (
-                    <td className="text-whd-text-muted px-4 py-3 whitespace-nowrap">
-                      {formatDate(p.createdAt)}
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <table className="w-full min-w-[50rem] text-left text-sm">
-            <thead className="bg-whd-surface text-whd-text-muted">
-              <tr>
-                {teamCols.map((col) =>
-                  !tv[col.key] ? null : col.key === 'members' ? (
-                    <PlainTh key={col.key} label={col.label} />
-                  ) : (
-                    <SortableTh
-                      key={col.key}
-                      label={col.label}
-                      sortKey={col.key}
-                      sort={teamSort}
-                      onSort={sortTeams}
-                    />
-                  ),
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {teamRows.map((team) => (
-                <tr
-                  key={team.inviteSlug}
-                  id={`team-${team.inviteSlug}`}
-                  className="border-whd-border scroll-mt-24 border-t text-white/90"
-                >
-                  {tv.name && <td className="px-4 py-3 whitespace-nowrap">{team.name}</td>}
-                  {tv.captainName && (
-                    <td className="px-4 py-3 whitespace-nowrap">{team.captainName}</td>
-                  )}
-                  {tv.memberCount && <td className="px-4 py-3">{team.memberCount}</td>}
-                  {tv.eligible && (
-                    <td className="px-4 py-3">
-                      <span
-                        className={team.eligible ? 'text-whd-pink-bright' : 'text-whd-text-dim'}
-                      >
-                        {team.eligible ? '✓' : '—'}
-                      </span>
-                    </td>
-                  )}
-                  {tv.members && (
-                    <td className="px-4 py-3">
-                      {team.members.map((m, i) => (
-                        <span key={m.id}>
-                          <button
-                            type="button"
-                            onClick={() => goToParticipant(m.id)}
-                            className="text-whd-pink-soft hover:text-whd-pink-bright cursor-pointer text-left hover:underline"
-                          >
-                            {m.fullName}
-                          </button>
-                          {i < team.members.length - 1 && ', '}
-                        </span>
-                      ))}
-                    </td>
-                  )}
-                  {tv.inviteSlug && (
-                    <td className="text-whd-text-muted px-4 py-3 font-mono text-xs">
-                      {team.inviteSlug}
-                    </td>
-                  )}
-                  {tv.createdAt && (
-                    <td className="text-whd-text-muted px-4 py-3 whitespace-nowrap">
-                      {formatDate(team.createdAt)}
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {shown === 0 && <p className="text-whd-text-muted py-10 text-center">{t('admin.empty')}</p>}
+      </Tabs>
     </main>
   );
 }

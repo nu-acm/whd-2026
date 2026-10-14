@@ -1,43 +1,66 @@
-import { useId } from 'react';
+import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
-type FieldProps = {
-  label: string;
-  hint?: string;
-  /** Already translated; rendered below the control and wired up via aria. */
-  error?: string;
-  required?: boolean;
-  className?: string;
-  children: (props: {
-    id: string;
-    'aria-invalid': boolean;
-    'aria-describedby'?: string;
-  }) => React.ReactNode;
-};
-
-/** Label + control + hint/error, with the aria wiring done once. */
-export function Field({ label, hint, error, required, className, children }: FieldProps) {
-  const id = useId();
-  const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
-
+export function FieldGroup({ className, ...props }: React.ComponentProps<'div'>) {
+  return <div data-slot="field-group" className={cn('whd-field-group', className)} {...props} />;
+}
+export function Field({
+  className,
+  orientation = 'vertical',
+  ...props
+}: React.ComponentProps<'div'> & { orientation?: 'vertical' | 'horizontal' | 'responsive' }) {
   return (
-    <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={id} className="text-sm font-medium text-white">
-        {label}
-        {required && <span className="text-whd-pink-bright ml-1">*</span>}
-      </label>
-
-      {children({ id, 'aria-invalid': !!error, 'aria-describedby': describedBy })}
-
-      {error ? (
-        <p id={`${id}-error`} role="alert" className="text-sm text-red-400">
-          {error}
-        </p>
-      ) : hint ? (
-        <p id={`${id}-hint`} className="text-whd-text-dim text-sm">
-          {hint}
-        </p>
-      ) : null}
+    <div
+      role="group"
+      data-slot="field"
+      data-orientation={orientation}
+      className={cn('whd-field', className)}
+      {...props}
+    />
+  );
+}
+export function FieldLabel({ className, ...props }: React.ComponentProps<'label'>) {
+  return <label data-slot="field-label" className={cn('whd-field-label', className)} {...props} />;
+}
+export function FieldDescription({ className, ...props }: React.ComponentProps<'p'>) {
+  return (
+    <p
+      data-slot="field-description"
+      className={cn('whd-field-description', className)}
+      {...props}
+    />
+  );
+}
+export function FieldError({
+  className,
+  children,
+  errors,
+  ...props
+}: React.ComponentProps<'div'> & { errors?: Array<{ message?: string } | undefined> }) {
+  const content = useMemo(() => {
+    if (children) return children;
+    const messages = [
+      ...new Set(errors?.flatMap((error) => (error?.message ? [error.message] : [])) ?? []),
+    ];
+    if (!messages.length) return null;
+    if (messages.length === 1) return messages[0];
+    return (
+      <ul className="ml-4 flex list-disc flex-col gap-1">
+        {messages.map((message) => (
+          <li key={message}>{message}</li>
+        ))}
+      </ul>
+    );
+  }, [children, errors]);
+  if (!content) return null;
+  return (
+    <div
+      role="alert"
+      data-slot="field-error"
+      className={cn('whd-field-error', className)}
+      {...props}
+    >
+      {content}
     </div>
   );
 }

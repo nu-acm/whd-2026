@@ -2,9 +2,11 @@ import { ArrowUpRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWebHaptics } from 'web-haptics/react';
+import { Spinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
 import InputOtp7 from '@/components/watermelon/input-otp-7';
-import { Field } from '@/components/ui/field';
+import { FieldGroup } from '@/components/ui/field';
+import { FormField } from '@/components/ui/form-field';
 import { authClient, sendSignInCode } from '@/lib/auth-client';
 import { otpSchema } from '@/lib/validation';
 import { webHapticsOptions } from '@/lib/web-haptics';
@@ -40,7 +42,7 @@ export function OtpForm({
 
     const parsed = otpSchema.safeParse({ otp });
     if (!parsed.success) {
-      trigger('error');
+      void trigger('error');
       setError(t(parsed.error.issues[0].message));
       return;
     }
@@ -52,14 +54,14 @@ export function OtpForm({
         otp: parsed.data.otp,
       });
       if (verifyError) {
-        trigger('error');
+        void trigger('error');
         setError(t('login.verifyFailed'));
         return;
       }
-      trigger('success');
+      void trigger('success');
       onVerified();
     } catch {
-      trigger('error');
+      void trigger('error');
       setError(t('login.verifyFailed'));
     } finally {
       setPending(false);
@@ -82,43 +84,53 @@ export function OtpForm({
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-5" noValidate>
-      <Field label={t('login.otpTitle')} error={error ?? undefined} required>
-        {(fieldProps) => (
-          <InputOtp7
-            {...fieldProps}
-            name="otp"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            autoFocus
-            value={otp}
-            onChange={setOtp}
-            disabled={pending}
-          />
-        )}
-      </Field>
-
-      <Button type="submit" disabled={pending || otp.length !== 6} className="w-full">
-        <span>{pending ? t('common.loading') : t('login.verify')}</span>
-        <ArrowUpRight className="account-button-arrow" aria-hidden="true" />
-      </Button>
-
-      <div className="account-otp-actions flex items-center justify-between text-sm">
-        <button
-          type="button"
-          onClick={onChangeEmail}
-          className="text-whd-text-muted hover:text-whd-pink-bright cursor-pointer transition-colors"
+      <FieldGroup>
+        <FormField
+          disabled={pending}
+          label={t('login.otpTitle')}
+          error={error ?? undefined}
+          required
         >
-          {t('login.changeEmail')}
-        </button>
-        <button
-          type="button"
-          onClick={resend}
-          disabled={cooldown > 0 || resending || pending}
-          className="text-whd-pink-soft hover:text-whd-pink-bright disabled:text-whd-text-dim cursor-pointer transition-colors disabled:cursor-not-allowed"
-        >
-          {cooldown > 0 ? t('login.resendIn', { seconds: cooldown }) : t('login.resend')}
-        </button>
-      </div>
+          {(fieldProps) => (
+            <InputOtp7
+              {...fieldProps}
+              name="otp"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              autoFocus
+              value={otp}
+              onChange={setOtp}
+              disabled={pending}
+            />
+          )}
+        </FormField>
+
+        <Button type="submit" disabled={pending || otp.length !== 6} className="w-full">
+          <>
+            {pending && <Spinner data-icon="inline-start" />}
+            <span>{pending ? t('common.loading') : t('login.verify')}</span>
+          </>
+          <ArrowUpRight className="account-button-arrow" aria-hidden="true" />
+        </Button>
+
+        <div className="account-otp-actions flex items-center justify-between text-sm">
+          <button
+            type="button"
+            onClick={onChangeEmail}
+            className="cursor-pointer text-whd-text-muted transition-colors hover:text-whd-pink-bright"
+          >
+            {t('login.changeEmail')}
+          </button>
+          <button
+            type="button"
+            onClick={resend}
+            disabled={cooldown > 0 || resending || pending}
+            className="cursor-pointer text-whd-pink-soft transition-colors hover:text-whd-pink-bright disabled:cursor-not-allowed disabled:text-whd-text-dim"
+          >
+            {cooldown > 0 ? t('login.resendIn', { seconds: cooldown }) : t('login.resend')}
+          </button>
+        </div>
+      </FieldGroup>
     </form>
   );
 }

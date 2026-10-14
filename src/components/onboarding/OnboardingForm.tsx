@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useWebHaptics } from 'web-haptics/react';
 import { Button } from '@/components/ui/button';
 import { Input, Select } from '@/components/ui/input';
-import { Field } from '@/components/ui/field';
+import { FieldGroup } from '@/components/ui/field';
+import { FormField } from '@/components/ui/form-field';
 import {
   EDUCATION_LEVELS,
   MINOR_EDUCATION_LEVELS,
@@ -57,7 +58,7 @@ export function OnboardingForm({
         // Zod messages are i18n keys; resolve them for display.
         if (key && !next[key]) next[key] = t(issue.message);
       }
-      trigger('error');
+      void trigger('error');
       setErrors(next);
       return;
     }
@@ -65,9 +66,9 @@ export function OnboardingForm({
     setPending(true);
     try {
       await onSubmit(parsed.data);
-      trigger('success');
+      void trigger('success');
     } catch (err) {
-      trigger('error');
+      void trigger('error');
       // Server validation errors serialize their issues into Error.message.
       const next: Errors = {};
       if (err instanceof Error) {
@@ -106,117 +107,141 @@ export function OnboardingForm({
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-5" noValidate>
-      <Field label={t('onboarding.fullName')} error={errors.fullName} required>
-        {(p) => (
-          <Input
-            {...p}
-            autoComplete="name"
-            value={values.fullName}
-            onChange={(e) => set('fullName')(e.target.value)}
-            disabled={pending}
-          />
-        )}
-      </Field>
-
-      <Field label={t('onboarding.iin')} hint={t('onboarding.iinHint')} error={errors.iin} required>
-        {(p) => (
-          <Input
-            {...p}
-            inputMode="numeric"
-            maxLength={12}
-            value={values.iin}
-            onChange={(e) => set('iin')(e.target.value.replace(/\D/g, '').slice(0, 12))}
-            disabled={pending}
-          />
-        )}
-      </Field>
-
-      <Field label={t('onboarding.phone')} error={errors.phone} required>
-        {(p) => (
-          <Input
-            {...p}
-            type="tel"
-            autoComplete="tel"
-            placeholder="+7 700 000 00 00"
-            value={values.phone}
-            onChange={(e) => set('phone')(e.target.value)}
-            disabled={pending}
-          />
-        )}
-      </Field>
-
-      <Field label={t('onboarding.educationLevel')} error={errors.educationLevel} required>
-        {(p) => (
-          <Select
-            {...p}
-            value={values.educationLevel}
-            onChange={(e) => set('educationLevel')(e.target.value)}
-            disabled={pending}
-          >
-            <option value="" disabled>
-              —
-            </option>
-            {EDUCATION_LEVELS.map((level) => (
-              <option key={level} value={level}>
-                {t(`education.${level}`)}
-              </option>
-            ))}
-          </Select>
-        )}
-      </Field>
-
-      {needsParentPhone && (
-        <Field
-          label={t('onboarding.parentPhone')}
-          hint={t('onboarding.parentPhoneHint')}
-          error={errors.parentPhone}
+      <FieldGroup>
+        <FormField
+          disabled={pending}
+          label={t('onboarding.fullName')}
+          error={errors.fullName}
           required
         >
           {(p) => (
             <Input
               {...p}
-              type="tel"
-              placeholder="+7 700 000 00 00"
-              value={values.parentPhone}
-              onChange={(e) => set('parentPhone')(e.target.value)}
+              autoComplete="name"
+              value={values.fullName}
+              onChange={(e) => set('fullName')(e.target.value)}
               disabled={pending}
             />
           )}
-        </Field>
-      )}
+        </FormField>
 
-      <Field label={t('onboarding.placeOfStudy')} error={errors.placeOfStudy} required>
-        {(p) => (
-          <Input
-            {...p}
-            value={values.placeOfStudy}
-            onChange={(e) => set('placeOfStudy')(e.target.value)}
+        <FormField
+          disabled={pending}
+          label={t('onboarding.iin')}
+          hint={t('onboarding.iinHint')}
+          error={errors.iin}
+          required
+        >
+          {(p) => (
+            <Input
+              {...p}
+              inputMode="numeric"
+              maxLength={12}
+              value={values.iin}
+              onChange={(e) => set('iin')(e.target.value.replace(/\D/g, '').slice(0, 12))}
+              disabled={pending}
+            />
+          )}
+        </FormField>
+
+        <FormField disabled={pending} label={t('onboarding.phone')} error={errors.phone} required>
+          {(p) => (
+            <Input
+              {...p}
+              type="tel"
+              autoComplete="tel"
+              placeholder="+7 700 000 00 00"
+              value={values.phone}
+              onChange={(e) => set('phone')(e.target.value)}
+              disabled={pending}
+            />
+          )}
+        </FormField>
+
+        <FormField
+          disabled={pending}
+          label={t('onboarding.educationLevel')}
+          error={errors.educationLevel}
+          required
+        >
+          {(p) => (
+            <Select
+              {...p}
+              value={values.educationLevel}
+              onChange={(e) => set('educationLevel')(e.target.value)}
+              disabled={pending}
+            >
+              <option value="" disabled>
+                —
+              </option>
+              {EDUCATION_LEVELS.map((level) => (
+                <option key={level} value={level}>
+                  {t(`education.${level}`)}
+                </option>
+              ))}
+            </Select>
+          )}
+        </FormField>
+
+        {needsParentPhone && (
+          <FormField
             disabled={pending}
-          />
+            label={t('onboarding.parentPhone')}
+            hint={t('onboarding.parentPhoneHint')}
+            error={errors.parentPhone}
+            required
+          >
+            {(p) => (
+              <Input
+                {...p}
+                type="tel"
+                placeholder="+7 700 000 00 00"
+                value={values.parentPhone}
+                onChange={(e) => set('parentPhone')(e.target.value)}
+                disabled={pending}
+              />
+            )}
+          </FormField>
         )}
-      </Field>
 
-      <Field label={t('onboarding.city')} error={errors.city} required>
-        {(p) => (
-          <Input
-            {...p}
-            autoComplete="address-level2"
-            value={values.city}
-            onChange={(e) => set('city')(e.target.value)}
-            disabled={pending}
-          />
+        <FormField
+          disabled={pending}
+          label={t('onboarding.placeOfStudy')}
+          error={errors.placeOfStudy}
+          required
+        >
+          {(p) => (
+            <Input
+              {...p}
+              value={values.placeOfStudy}
+              onChange={(e) => set('placeOfStudy')(e.target.value)}
+              disabled={pending}
+            />
+          )}
+        </FormField>
+
+        <FormField disabled={pending} label={t('onboarding.city')} error={errors.city} required>
+          {(p) => (
+            <Input
+              {...p}
+              autoComplete="address-level2"
+              value={values.city}
+              onChange={(e) => set('city')(e.target.value)}
+              disabled={pending}
+            />
+          )}
+        </FormField>
+
+        {errors.form && (
+          <p role="alert" className="text-sm text-destructive">
+            {errors.form}
+          </p>
         )}
-      </Field>
 
-      {errors.form && (
-        <p role="alert" className="text-sm text-red-400">
-          {errors.form}
-        </p>
-      )}
-
-      <Button type="submit" disabled={pending} className="mt-1 w-full">
-        {pending ? t('common.loading') : t('onboarding.submit')}
-      </Button>
+        <Button type="submit" disabled={pending} className="mt-1 w-full">
+          {pending ? t('common.loading') : t('onboarding.submit')}
+        </Button>
+      </FieldGroup>
     </form>
   );
 }

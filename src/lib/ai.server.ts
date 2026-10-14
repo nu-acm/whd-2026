@@ -35,7 +35,7 @@ const THEMES = [
 ];
 
 /** Models like to wrap the answer in quotes or add a trailing full stop. */
-export function cleanName(raw: string): string {
+function cleanName(raw: string): string {
   const firstLine = raw.trim().split('\n')[0] ?? '';
   return firstLine
     .replace(/^["'«“]+|["'»”.!]+$/g, '')
@@ -59,7 +59,7 @@ export async function generateTeamNameForParticipant(userId: string): Promise<st
   }
 }
 
-export async function generateTeamName(): Promise<string> {
+async function generateTeamName(): Promise<string> {
   const examples = sampleExamples(20).join(', ');
   const theme = THEMES[Math.floor(Math.random() * THEMES.length)];
   const prompt = [

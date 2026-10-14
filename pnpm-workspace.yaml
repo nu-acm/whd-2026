@@ -1,0 +1,17 @@
+allowBuilds:
+  esbuild: true
+  workerd: true
+  '@prisma/client': false
+  better-sqlite3: true
+catalog:
+  vite: npm:@voidzero-dev/vite-plus-core@1.1.0
+  vite-plus: 1.1.0
+overrides:
+  # Workers tests do not use Vitest's optional jsdom environment.
+  vitest@5.0.3>jsdom: '-'
+  vite@*: 'catalog:'
+  # Only the Vite/Rolldown integration is used, so exclude this optional provider.
+  unplugin@3.4.0>rollup: '-'
+peerDependencyRules:
+  allowAny:
+    - vite

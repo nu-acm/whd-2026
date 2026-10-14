@@ -146,7 +146,7 @@ export function participantsToCsv(rows: ReportParticipant[]): string {
   const escape = (v: string | null | boolean) => {
     const s = v === null ? '' : String(v);
     // Keep formulas inert and leading-zero identifiers as text in spreadsheet imports.
-    // eslint-disable-next-line no-control-regex -- Spreadsheet importers can ignore leading controls.
+    // oxlint-disable-next-line no-control-regex -- Spreadsheet importers can ignore leading controls.
     const formulaPrefix = /^[\s\u0000-\u001f]*[=+@-]/;
     const asText = formulaPrefix.test(s) || /^[\t\r\n]/.test(s) || /^0\d+$/.test(s);
     const safe = asText ? `'${s}` : s;

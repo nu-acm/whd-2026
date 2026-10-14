@@ -21,10 +21,10 @@ export default function Stats2({ stats }: { stats: EventStat[] }) {
   return (
     <div className="event-stats-grid">
       {stats.map((stat) => (
-        <Card key={stat.id} className={`event-stat-card event-stat-${stat.accent}`}>
+        <Card key={stat.id} variant="event" accent={stat.accent}>
           <div className="event-stat-glow" aria-hidden="true" />
           <div className="event-stat-accent" aria-hidden="true" />
-          <CardContent className="event-stat-content">
+          <CardContent variant="event">
             <dl>
               <dt className="event-stat-badge">
                 <stat.icon aria-hidden="true" />

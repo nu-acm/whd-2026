@@ -51,12 +51,14 @@ export default function Hero({
         <p className="sr-only">{t('hero.tagline')}</p>
         <div className="hero-action">
           {cta && (
-            <Link to={cta.to} className="landing-cta hero-spy-cta">
-              <span className="hero-cta-text-slot">
-                <span className="hero-cta-label">{cta.label}</span>
-              </span>
-              <span className="hero-cta-icon-slot" aria-hidden="true">
-                <span className="hero-cta-arrow">↗</span>
+            <Link to={cta.to} preload={false} className="landing-cta hero-spy-cta">
+              <span className="hero-cta-surface">
+                <span className="hero-cta-text-slot">
+                  <span className="hero-cta-label">{cta.label}</span>
+                </span>
+                <span className="hero-cta-icon-slot" aria-hidden="true">
+                  <span className="hero-cta-arrow">↗</span>
+                </span>
               </span>
             </Link>
           )}

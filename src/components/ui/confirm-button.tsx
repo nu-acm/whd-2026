@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Spinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
 import type { ButtonVariantProps } from '@/components/ui/button-variants';
 import { cn } from '@/lib/utils';
@@ -14,8 +15,8 @@ type ConfirmButtonProps = ButtonVariantProps & {
   loading?: boolean;
   loadingLabel?: string;
   className?: string;
-  /** Styles for the armed state; defaults to red, which vanishes on pink backgrounds. */
-  armedClassName?: string;
+  /** Named armed-state appearance for destructive actions or sign-out. */
+  confirmationTone?: 'danger' | 'accent';
 };
 
 /**
@@ -32,7 +33,7 @@ export function ConfirmButton({
   variant = 'secondary',
   size = 'sm',
   className,
-  armedClassName = 'border-red-500/70 text-red-300 hover:border-red-500 hover:bg-red-500/10',
+  confirmationTone = 'danger',
 }: ConfirmButtonProps) {
   const [armed, setArmed] = useState(false);
   const timeoutRef = useRef<number | null>(null);
@@ -62,12 +63,19 @@ export function ConfirmButton({
 
   return (
     <Button
-      variant={variant}
+      variant={
+        showConfirm
+          ? confirmationTone === 'accent'
+            ? 'confirm-accent'
+            : 'confirm-danger'
+          : variant
+      }
       size={size}
       disabled={disabled || loading}
       onClick={handleClick}
-      className={cn(className, showConfirm && armedClassName)}
+      className={cn(className)}
     >
+      {loading && <Spinner data-icon="inline-start" />}
       {loading ? (loadingLabel ?? '…') : showConfirm ? confirmLabel : label}
     </Button>
   );

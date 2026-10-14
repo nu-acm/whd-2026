@@ -1,9 +1,9 @@
 {
   "include": [
     "src",
+    "tests",
+    "playwright.config.ts",
     "vite.config.ts",
-    "vitest.config.ts",
-    "eslint.config.js",
     "drizzle.config.ts",
     "drizzle.config.local.ts"
   ],
@@ -11,12 +11,16 @@
     "target": "ES2022",
     "jsx": "react-jsx",
     "module": "ESNext",
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["node", "vite/client", "@cloudflare/workers-types"],
+    "types": [
+      "node",
+      "vite/client",
+      "@cloudflare/workers-types",
+      "@cloudflare/vitest-plugin/types"
+    ],
 
     /* Bundler mode */
     "moduleResolution": "bundler",

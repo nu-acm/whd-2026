@@ -17,17 +17,16 @@ export default function InputOtp7(
       maxLength={6}
       pattern={REGEXP_ONLY_DIGITS}
       pasteTransformer={(text) => text.replace(/\D/g, '')}
-      containerClassName="account-otp-input"
     >
-      <InputOTPGroup className="account-otp-group" aria-hidden="true">
+      <InputOTPGroup aria-hidden="true">
         {[0, 1, 2].map((index) => (
-          <InputOTPSlot key={index} index={index} className="account-otp-slot" />
+          <InputOTPSlot key={index} index={index} />
         ))}
       </InputOTPGroup>
-      <InputOTPSeparator className="account-otp-separator" aria-hidden="true" />
-      <InputOTPGroup className="account-otp-group" aria-hidden="true">
+      <InputOTPSeparator aria-hidden="true" />
+      <InputOTPGroup aria-hidden="true">
         {[3, 4, 5].map((index) => (
-          <InputOTPSlot key={index} index={index} className="account-otp-slot" />
+          <InputOTPSlot key={index} index={index} />
         ))}
       </InputOTPGroup>
     </InputOTP>

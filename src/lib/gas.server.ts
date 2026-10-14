@@ -32,7 +32,8 @@ export async function callGas<T extends object = object>(
 
   // Apps Script answers 200 even on failure; the verdict is in the body.
   const reply = (await res.json().catch(() => null)) as
-    ({ ok?: boolean; error?: string } & T) | null;
+    | ({ ok?: boolean; error?: string } & T)
+    | null;
   if (!reply?.ok)
     throw new Error(`Apps Script ${action} failed: ${reply?.error ?? 'non-JSON response'}`);
   return reply;

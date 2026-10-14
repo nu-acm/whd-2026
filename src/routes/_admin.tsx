@@ -39,12 +39,12 @@ function AdminLayout() {
 
   const handleSignOut = async () => {
     await authClient.signOut();
-    navigate({ to: '/', reloadDocument: true });
+    await navigate({ to: '/', reloadDocument: true });
   };
 
   return (
     <AdminHeaderContext.Provider value={contextValue}>
-      <div className="bg-whd-dark flex min-h-screen flex-col">
+      <div className="flex min-h-screen flex-col bg-whd-dark">
         <AdminHeader onSignOut={handleSignOut} {...controls} />
         <Outlet />
       </div>

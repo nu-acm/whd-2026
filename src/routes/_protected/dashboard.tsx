@@ -47,7 +47,7 @@ const loadDashboard = createServerFn({ method: 'GET' }).handler(async () => {
 });
 
 const createTeamFn = createServerFn({ method: 'POST' })
-  .inputValidator(createTeamSchema)
+  .validator(createTeamSchema)
   .handler(async ({ data }) => {
     const session = await ensureSession(getRequest());
     assertRegistrationOpen();
@@ -55,7 +55,7 @@ const createTeamFn = createServerFn({ method: 'POST' })
   });
 
 const joinTeamFn = createServerFn({ method: 'POST' })
-  .inputValidator(inviteSlugSchema)
+  .validator(inviteSlugSchema)
   .handler(async ({ data }) => {
     const session = await ensureSession(getRequest());
     assertRegistrationOpen();
@@ -63,7 +63,7 @@ const joinTeamFn = createServerFn({ method: 'POST' })
   });
 
 const kickMemberFn = createServerFn({ method: 'POST' })
-  .inputValidator(z.object({ userId: z.string().min(1) }))
+  .validator(z.object({ userId: z.string().min(1) }))
   .handler(async ({ data }) => {
     const session = await ensureSession(getRequest());
     assertRegistrationOpen();
@@ -115,7 +115,7 @@ function DashboardPage() {
 
   const succeed = async (message: string) => {
     await refresh();
-    trigger('success');
+    void trigger('success');
     setFeedback({ type: 'success', message });
   };
 
@@ -131,7 +131,7 @@ function DashboardPage() {
       await action();
       await succeed(successMessage);
     } catch (err) {
-      trigger('error');
+      void trigger('error');
       // Server errors may be i18n keys (registration closed); t() passes plain text through.
       setFeedback({
         type: 'error',
@@ -167,7 +167,7 @@ function DashboardPage() {
             registrationOpen={registrationOpen}
             onDone={succeed}
             onError={(message) => {
-              trigger('error');
+              void trigger('error');
               setFeedback({ type: 'error', message });
             }}
           />
@@ -181,7 +181,7 @@ function DashboardPage() {
             pendingAction={pendingAction}
             onKick={(id) => {
               const name = team.members.find((m) => m.id === id)?.fullName ?? '';
-              runTeamAction(
+              void runTeamAction(
                 id,
                 () => kickMemberFn({ data: { userId: id } }),
                 t('dashboard.feedbackKicked', { name }),
@@ -189,7 +189,11 @@ function DashboardPage() {
             }}
             onLeave={() => runTeamAction('leave', () => leaveTeamFn(), t('dashboard.feedbackLeft'))}
             onDissolve={() =>
-              runTeamAction('dissolve', () => dissolveTeamFn(), t('dashboard.feedbackDissolved'))
+              void runTeamAction(
+                'dissolve',
+                () => dissolveTeamFn(),
+                t('dashboard.feedbackDissolved'),
+              )
             }
           />
         ) : (

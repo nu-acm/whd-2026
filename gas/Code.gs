@@ -7,7 +7,7 @@
  *   delete-cv  { fileId }            moves that CV to the Drive trash
  * Mail is sent and files are owned by the account that deployed the script.
  *
- * Setup (see gas/README.md):
+ * Setup (see README.md):
  *   1. Project Settings → Script Properties → add GAS_SECRET (same value as the site's).
  *   2. Deploy → New deployment → Web app; Execute as: Me; Who has access: Anyone.
  *   3. Put the /exec URL in the site's GAS_URL.

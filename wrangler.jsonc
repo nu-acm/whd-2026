@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "whd-landing",
-  "compatibility_date": "2025-09-02",
+  "name": "whd-2026",
+  "compatibility_date": "2026-10-13",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
   "observability": {
@@ -10,7 +10,7 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "whd-test-d",
+      "database_name": "whd-2026",
       "database_id": "7a96f83f-95c6-4306-80b9-7f399c3bd74b",
       "migrations_dir": "drizzle",
     },

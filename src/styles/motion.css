@@ -5,11 +5,11 @@
   --motion-panel: 280ms;
 }
 
-/* Radix keeps content mounted until its closing animation finishes. */
-.whd-accordion-content[data-state='open'] {
+/* Base UI keeps panels mounted through their closing animation. */
+.whd-accordion-content[data-open] {
   animation: whd-expand var(--motion-panel) var(--motion-ease);
 }
-.whd-accordion-content[data-state='closed'] {
+.whd-accordion-content[data-closed] {
   animation: whd-collapse 220ms var(--motion-ease);
 }
 @keyframes whd-expand {
@@ -18,13 +18,13 @@
     opacity: 0;
   }
   to {
-    height: var(--radix-accordion-content-height);
+    height: var(--accordion-panel-height);
     opacity: 1;
   }
 }
 @keyframes whd-collapse {
   from {
-    height: var(--radix-accordion-content-height);
+    height: var(--accordion-panel-height);
     opacity: 1;
   }
   to {
@@ -33,8 +33,8 @@
   }
 }
 
-.faq-six-item,
-.feature-two-question,
+[data-variant='faq'] .whd-accordion-item,
+[data-variant='feature'] .whd-accordion-item,
 .faq-six-toggle {
   transition:
     background-color var(--motion-fast) ease-out,
@@ -56,12 +56,12 @@
   opacity: 0;
   transform: rotate(-90deg);
 }
-.faq-six-trigger[data-state='open'] .faq-six-plus {
+[data-variant='faq'] .whd-accordion-trigger[data-open] .faq-six-plus {
   display: block;
   opacity: 0;
   transform: rotate(90deg);
 }
-.faq-six-trigger[data-state='open'] .faq-six-minus {
+[data-variant='faq'] .whd-accordion-trigger[data-open] .faq-six-minus {
   opacity: 1;
   transform: rotate(0);
 }
@@ -116,39 +116,7 @@
   }
 }
 
-/* Keep the native dialog's top layer during exit, including Escape/backdrop close. */
-.whd-dialog {
-  opacity: 0;
-  transform: translateY(10px) scale(0.985);
-  transition:
-    opacity 220ms ease-out,
-    transform var(--motion-panel) var(--motion-ease),
-    display var(--motion-panel) allow-discrete,
-    overlay var(--motion-panel) allow-discrete;
-}
-.whd-dialog[open] {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-.whd-dialog::backdrop {
-  opacity: 0;
-  transition:
-    opacity 220ms ease-out,
-    display var(--motion-panel) allow-discrete,
-    overlay var(--motion-panel) allow-discrete;
-}
-.whd-dialog[open]::backdrop {
-  opacity: 1;
-}
-@starting-style {
-  .whd-dialog[open] {
-    opacity: 0;
-    transform: translateY(10px) scale(0.985);
-  }
-  .whd-dialog[open]::backdrop {
-    opacity: 0;
-  }
-}
+/* Gallery photos overlap during their crossfade. */
 .gallery-image {
   position: relative;
   height: min(68svh, 680px);
@@ -181,10 +149,8 @@
   }
   .mobile-nav-shell,
   .menu-icon,
-  .whd-dialog,
-  .whd-dialog::backdrop,
-  .faq-six-item,
-  .feature-two-question,
+  [data-variant='faq'] .whd-accordion-item,
+  [data-variant='feature'] .whd-accordion-item,
   .faq-six-toggle,
   .faq-six-toggle svg {
     transition: none !important;

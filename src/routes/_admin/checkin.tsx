@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createFileRoute } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
@@ -6,18 +6,14 @@ import { getRequest } from '@tanstack/react-start/server';
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 
-import { Button } from '@/components/ui/button';
+import { useAdminTable, type AdminColumnDef } from '@/components/admin/use-admin-table';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Empty, EmptyDescription } from '@/components/ui/empty';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Segmented } from '@/components/ui/segmented';
-import { ColumnToggleBar, PlainTh, SortableTh, StatCard } from '@/components/admin/table';
-import {
-  applyDir,
-  compareText,
-  useColumnVisibility,
-  useSort,
-  type ColumnDef,
-} from '@/components/admin/table-state';
+import { ColumnToggleBar, AdminDataTable, StatCard } from '@/components/admin/table';
 import { MIN_TEAM_SIZE } from '@/db/schema';
 import { getSession } from '@/lib/auth.server';
 import { sessionIsAdmin } from '@/lib/admin.server';
@@ -40,7 +36,7 @@ const loadCheckin = createServerFn({ method: 'GET' }).handler(async () => {
 });
 
 const setAttendanceFn = createServerFn({ method: 'POST' })
-  .inputValidator(z.object({ participantId: z.string().min(1), attended: z.boolean() }))
+  .validator(z.object({ participantId: z.string().min(1), attended: z.boolean() }))
   .handler(async ({ data }) => {
     await assertAdmin();
     return setAttendance(data.participantId, data.attended);
@@ -66,9 +62,8 @@ type AttendanceFilter = 'all' | 'attended' | 'not-attended';
 /** ready: enough members present to compete; partial: some; no-show: none. */
 type TeamStatus = 'ready' | 'partial' | 'no-show';
 
-type ParticipantCol = 'fullName' | 'teamName' | 'placeOfStudy' | 'educationLevel';
-type TeamCol = 'name' | 'captainName' | 'members' | 'attended';
-type TeamSortKey = Exclude<TeamCol, 'members'>;
+const participantId = (row: CheckinData['participants'][number]) => row.id;
+const teamId = (row: CheckinTeam) => row.id;
 
 const attendedCount = (team: CheckinTeam) => team.members.filter((m) => m.attended).length;
 
@@ -107,15 +102,13 @@ function AttendanceCheckbox({
 
   return (
     <>
-      <input
-        type="checkbox"
+      <Checkbox
         checked={checked}
         disabled={disabled}
-        onChange={(e) => (e.target.checked ? onChange(true) : setConfirmOpen(true))}
+        onCheckedChange={(next) => (next ? onChange(true) : setConfirmOpen(true))}
         aria-label={
           checked ? t('admin.markAbsentLabel', { name }) : t('admin.markPresentLabel', { name })
         }
-        className="accent-whd-pink h-5 w-5 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
       />
       <ConfirmDialog
         open={confirmOpen}
@@ -127,6 +120,28 @@ function AttendanceCheckbox({
         onConfirm={() => onChange(false)}
       />
     </>
+  );
+}
+
+const AttendanceActionsContext = createContext<{
+  pendingIds: ReadonlySet<string>;
+  setAttended: (id: string, attended: boolean) => void;
+} | null>(null);
+
+function AttendanceCell({
+  row,
+}: {
+  row: { id: string; original: CheckinData['participants'][number] };
+}) {
+  const actions = useContext(AttendanceActionsContext);
+  if (!actions) throw new Error('Attendance cells require their action provider.');
+  return (
+    <AttendanceCheckbox
+      checked={row.original.attended}
+      disabled={actions.pendingIds.has(row.id)}
+      name={row.original.fullName}
+      onChange={(attended) => actions.setAttended(row.id, attended)}
+    />
   );
 }
 
@@ -142,21 +157,8 @@ function CheckinPage() {
   const [teamQuery, setTeamQuery] = useState('');
   const [participantFilter, setParticipantFilter] = useState<AttendanceFilter>('all');
   const [teamFilter, setTeamFilter] = useState<'all' | TeamStatus>('all');
-  const [participantSort, sortParticipants] = useSort<ParticipantCol>('fullName');
-  const [teamSort, sortTeams] = useSort<TeamSortKey>('name');
   const [pendingIds, setPendingIds] = useState<ReadonlySet<string>>(() => new Set());
   const [error, setError] = useState<string | null>(null);
-
-  const participantCols: ColumnDef<ParticipantCol>[] = (
-    ['fullName', 'teamName', 'placeOfStudy', 'educationLevel'] as const
-  ).map((key) => ({ key, label: t(`admin.col.${key}`) }));
-  const teamCols: ColumnDef<TeamCol>[] = (
-    ['name', 'captainName', 'members', 'attended'] as const
-  ).map((key) => ({ key, label: t(`admin.col.${key}`) }));
-  const participantVisibility = useColumnVisibility(participantCols);
-  const teamVisibility = useColumnVisibility(teamCols);
-  const pv = participantVisibility.visible;
-  const tv = teamVisibility.visible;
 
   const presentCount = participants.filter((p) => p.attended).length;
   const statusCounts = useMemo(() => {
@@ -177,7 +179,7 @@ function CheckinPage() {
     [teams, teamFilter],
   );
 
-  const participantRows = useMemo(() => {
+  const participantMatches = useMemo(() => {
     const needle = participantQuery.trim().toLowerCase();
     const filtered = !needle
       ? participantsInFilter
@@ -187,11 +189,10 @@ function CheckinPage() {
             f.toLowerCase().includes(needle),
           ),
         );
-    const { key, dir } = participantSort;
-    return [...filtered].sort((a, b) => applyDir(compareText(a[key], b[key]), dir));
-  }, [participantsInFilter, participantQuery, participantSort]);
+    return filtered;
+  }, [participantsInFilter, participantQuery]);
 
-  const teamRows = useMemo(() => {
+  const teamMatches = useMemo(() => {
     const needle = teamQuery.trim().toLowerCase();
     const filtered = !needle
       ? teamsInFilter
@@ -200,15 +201,8 @@ function CheckinPage() {
             f.toLowerCase().includes(needle),
           ),
         );
-    const { key, dir } = teamSort;
-    return [...filtered].sort((a, b) => {
-      const cmp =
-        key === 'attended'
-          ? attendedCount(a) - attendedCount(b) || a.members.length - b.members.length
-          : compareText(a[key], b[key]);
-      return applyDir(cmp, dir);
-    });
-  }, [teamsInFilter, teamQuery, teamSort]);
+    return filtered;
+  }, [teamsInFilter, teamQuery]);
 
   const setPending = (id: string, pending: boolean) =>
     setPendingIds((prev) => {
@@ -219,7 +213,7 @@ function CheckinPage() {
     });
 
   // Optimistic: tick the box immediately, roll back if the server refuses.
-  const attendance = useMutation({
+  const { mutate } = useMutation({
     mutationFn: (vars: { participantId: string; attended: boolean }) =>
       setAttendanceFn({ data: vars }),
     onMutate: async ({ participantId, attended }) => {
@@ -251,218 +245,219 @@ function CheckinPage() {
     onSettled: (_row, _err, vars) => setPending(vars.participantId, false),
   });
 
-  const setAttended = (participantId: string, attended: boolean) =>
-    attendance.mutate({ participantId, attended });
+  const setAttended = useCallback(
+    (participantId: string, attended: boolean) => mutate({ participantId, attended }),
+    [mutate],
+  );
+  const attendanceActions = useMemo(() => ({ pendingIds, setAttended }), [pendingIds, setAttended]);
+
+  const participantCols = useMemo<AdminColumnDef<CheckinData['participants'][number]>[]>(
+    () => [
+      {
+        id: 'attendance',
+        accessorFn: (p) => p.attended,
+        enableSorting: false,
+        enableHiding: false,
+        meta: { label: t('admin.col.attended') },
+        cell: AttendanceCell,
+      },
+      {
+        id: 'fullName',
+        accessorFn: (p) => p.fullName,
+        meta: { label: t('admin.col.fullName') },
+        cell: ({ row }) => row.original.fullName,
+      },
+      {
+        id: 'teamName',
+        accessorFn: (p) => p.teamName,
+        meta: { label: t('admin.col.teamName'), tone: 'muted' },
+        cell: ({ row }) => row.original.teamName,
+      },
+      {
+        id: 'placeOfStudy',
+        accessorFn: (p) => p.placeOfStudy,
+        meta: { label: t('admin.col.placeOfStudy'), tone: 'muted' },
+        cell: ({ row }) => row.original.placeOfStudy,
+      },
+      {
+        id: 'educationLevel',
+        accessorFn: (p) => p.educationLevel,
+        meta: { label: t('admin.col.educationLevel'), tone: 'muted' },
+        cell: ({ row }) => t(`education.${row.original.educationLevel}`),
+      },
+    ],
+    [t],
+  );
+  const teamCols = useMemo<AdminColumnDef<CheckinTeam>[]>(
+    () => [
+      {
+        id: 'name',
+        accessorFn: (team) => team.name,
+        meta: { label: t('admin.col.name') },
+        cell: ({ row }) => row.original.name,
+      },
+      {
+        id: 'captainName',
+        accessorFn: (team) => team.captainName,
+        meta: { label: t('admin.col.captainName'), tone: 'muted' },
+        cell: ({ row }) => row.original.captainName,
+      },
+      {
+        id: 'members',
+        enableSorting: false,
+        meta: { label: t('admin.col.members') },
+        cell: ({ row }) =>
+          row.original.members.map((member, index) => (
+            <span
+              key={member.id}
+              className={member.attended ? 'text-whd-pink-bright' : 'text-muted-foreground'}
+            >
+              {member.fullName}
+              {index < row.original.members.length - 1 && ', '}
+            </span>
+          )),
+      },
+      {
+        id: 'attended',
+        accessorFn: attendedCount,
+        meta: { label: t('admin.col.attended'), tone: 'numeric' },
+        sortFn: (a, b) =>
+          attendedCount(a.original) - attendedCount(b.original) ||
+          a.original.members.length - b.original.members.length,
+        cell: ({ row }) => `${attendedCount(row.original)}/${row.original.members.length}`,
+      },
+    ],
+    [t],
+  );
+  const participantTable = useAdminTable(
+    participantMatches,
+    participantCols,
+    'fullName',
+    participantId,
+  );
+  const teamTable = useAdminTable(teamMatches, teamCols, 'name', teamId);
 
   const isParticipants = tab === 'participants';
-  const shown = isParticipants ? participantRows.length : teamRows.length;
+  const shown = isParticipants
+    ? participantTable.getRowModel().rows.length
+    : teamTable.getRowModel().rows.length;
   const inFilter = isParticipants ? participantsInFilter.length : teamsInFilter.length;
 
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-10 sm:px-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white md:text-4xl">{t('admin.checkinTitle')}</h1>
-        <p className="text-whd-text-muted mt-2 text-sm">
-          {t('admin.checkinScope', { min: MIN_TEAM_SIZE })}
-        </p>
-      </div>
-
-      <div className="mb-8 grid gap-4 sm:grid-cols-2">
-        <StatCard
-          label={t('admin.statEligibleParticipants')}
-          value={participants.length}
-          breakdown={t('admin.attendanceBreakdown', {
-            present: presentCount,
-            absent: participants.length - presentCount,
-          })}
-        />
-        <StatCard
-          label={t('admin.statEligibleTeams')}
-          value={teams.length}
-          breakdown={t('admin.teamStatusBreakdown', {
-            ready: statusCounts.ready,
-            partial: statusCounts.partial,
-            noShow: statusCounts['no-show'],
-          })}
-        />
-      </div>
-
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-2">
-          {(['participants', 'teams'] as const).map((key) => (
-            <Button
-              key={key}
-              size="sm"
-              variant={tab === key ? 'primary' : 'ghost'}
-              onClick={() => setTab(key)}
-            >
-              {t(`admin.tab_${key}`)}
-            </Button>
-          ))}
+      <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground md:text-4xl">
+            {t('admin.checkinTitle')}
+          </h1>
+          <p className="mt-2 text-sm text-whd-text-muted">
+            {t('admin.checkinScope', { min: MIN_TEAM_SIZE })}
+          </p>
         </div>
-        <Input
-          value={isParticipants ? participantQuery : teamQuery}
-          onChange={(e) =>
-            isParticipants ? setParticipantQuery(e.target.value) : setTeamQuery(e.target.value)
-          }
-          placeholder={
-            isParticipants ? t('admin.checkinSearchPlaceholder') : t('admin.teamSearchPlaceholder')
-          }
-          className="max-w-xs"
-          autoFocus
-        />
-      </div>
 
-      {error && (
-        <p role="alert" className="mb-3 text-sm text-red-400">
-          {error}
+        <div className="mb-8 grid gap-4 sm:grid-cols-2">
+          <StatCard
+            label={t('admin.statEligibleParticipants')}
+            value={participants.length}
+            breakdown={t('admin.attendanceBreakdown', {
+              present: presentCount,
+              absent: participants.length - presentCount,
+            })}
+          />
+          <StatCard
+            label={t('admin.statEligibleTeams')}
+            value={teams.length}
+            breakdown={t('admin.teamStatusBreakdown', {
+              ready: statusCounts.ready,
+              partial: statusCounts.partial,
+              noShow: statusCounts['no-show'],
+            })}
+          />
+        </div>
+
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <TabsList>
+            <TabsTrigger value="participants">{t('admin.tab_participants')}</TabsTrigger>
+            <TabsTrigger value="teams">{t('admin.tab_teams')}</TabsTrigger>
+          </TabsList>
+          <Input
+            value={isParticipants ? participantQuery : teamQuery}
+            onChange={(e) =>
+              isParticipants ? setParticipantQuery(e.target.value) : setTeamQuery(e.target.value)
+            }
+            aria-label={
+              isParticipants ? t('admin.searchPlaceholder') : t('admin.teamSearchPlaceholder')
+            }
+            placeholder={
+              isParticipants
+                ? t('admin.checkinSearchPlaceholder')
+                : t('admin.teamSearchPlaceholder')
+            }
+            className="max-w-xs"
+            autoFocus
+          />
+        </div>
+
+        {error && (
+          <p role="alert" className="mb-3 text-sm text-destructive">
+            {error}
+          </p>
+        )}
+
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          {isParticipants ? (
+            <>
+              <ColumnToggleBar table={participantTable} />
+              <Segmented
+                label={t('admin.filterLabel')}
+                value={participantFilter}
+                onChange={setParticipantFilter}
+                options={[
+                  { value: 'all', label: t('admin.filterAll') },
+                  { value: 'attended', label: t('admin.filterAttended') },
+                  { value: 'not-attended', label: t('admin.filterNotAttended') },
+                ]}
+              />
+            </>
+          ) : (
+            <>
+              <ColumnToggleBar table={teamTable} />
+              <Segmented
+                label={t('admin.filterLabel')}
+                value={teamFilter}
+                onChange={setTeamFilter}
+                options={[
+                  { value: 'all', label: t('admin.filterAll') },
+                  { value: 'ready', label: t('admin.statusReady') },
+                  { value: 'partial', label: t('admin.statusPartial') },
+                  { value: 'no-show', label: t('admin.statusNoShow') },
+                ]}
+              />
+            </>
+          )}
+        </div>
+
+        <p className="mb-2 text-xs text-whd-text-muted">
+          {t('admin.showingCount', { shown, total: inFilter })}
         </p>
-      )}
 
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        {isParticipants ? (
-          <>
-            <ColumnToggleBar
-              columns={participantCols}
-              visible={pv}
-              onToggle={participantVisibility.toggle}
-              onToggleAll={participantVisibility.toggleAll}
-            />
-            <Segmented
-              label={t('admin.filterLabel')}
-              value={participantFilter}
-              onChange={setParticipantFilter}
-              options={[
-                { value: 'all', label: t('admin.filterAll') },
-                { value: 'attended', label: t('admin.filterAttended') },
-                { value: 'not-attended', label: t('admin.filterNotAttended') },
-              ]}
-            />
-          </>
-        ) : (
-          <>
-            <ColumnToggleBar
-              columns={teamCols}
-              visible={tv}
-              onToggle={teamVisibility.toggle}
-              onToggleAll={teamVisibility.toggleAll}
-            />
-            <Segmented
-              label={t('admin.filterLabel')}
-              value={teamFilter}
-              onChange={setTeamFilter}
-              options={[
-                { value: 'all', label: t('admin.filterAll') },
-                { value: 'ready', label: t('admin.statusReady') },
-                { value: 'partial', label: t('admin.statusPartial') },
-                { value: 'no-show', label: t('admin.statusNoShow') },
-              ]}
-            />
-          </>
+        <div className="overflow-x-auto rounded-2xl border border-whd-border">
+          <TabsContent value="participants">
+            <AttendanceActionsContext value={attendanceActions}>
+              <AdminDataTable table={participantTable} variant="checkin" />
+            </AttendanceActionsContext>
+          </TabsContent>
+          <TabsContent value="teams">
+            <AdminDataTable table={teamTable} variant="checkin" />
+          </TabsContent>
+        </div>
+
+        {shown === 0 && (
+          <Empty>
+            <EmptyDescription>{t('admin.empty')}</EmptyDescription>
+          </Empty>
         )}
-      </div>
-
-      <p className="text-whd-text-muted mb-2 text-xs">
-        {t('admin.showingCount', { shown, total: inFilter })}
-      </p>
-
-      <div className="border-whd-border overflow-x-auto rounded-2xl border">
-        {isParticipants ? (
-          <table className="w-full min-w-[40rem] text-left text-sm">
-            <thead className="bg-whd-surface text-whd-text-muted">
-              <tr>
-                <PlainTh label={t('admin.col.attended')} />
-                {participantCols.map(
-                  (col) =>
-                    pv[col.key] && (
-                      <SortableTh
-                        key={col.key}
-                        label={col.label}
-                        sortKey={col.key}
-                        sort={participantSort}
-                        onSort={sortParticipants}
-                      />
-                    ),
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {participantRows.map((p) => (
-                <tr key={p.id} className="border-whd-border border-t text-white/90">
-                  <td className="px-4 py-3">
-                    <AttendanceCheckbox
-                      checked={p.attended}
-                      disabled={pendingIds.has(p.id)}
-                      name={p.fullName}
-                      onChange={(attended) => setAttended(p.id, attended)}
-                    />
-                  </td>
-                  {pv.fullName && <td className="px-4 py-3">{p.fullName}</td>}
-                  {pv.teamName && <td className="text-whd-text-muted px-4 py-3">{p.teamName}</td>}
-                  {pv.placeOfStudy && (
-                    <td className="text-whd-text-muted px-4 py-3">{p.placeOfStudy}</td>
-                  )}
-                  {pv.educationLevel && (
-                    <td className="text-whd-text-muted px-4 py-3 whitespace-nowrap">
-                      {t(`education.${p.educationLevel}`)}
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <table className="w-full min-w-[40rem] text-left text-sm">
-            <thead className="bg-whd-surface text-whd-text-muted">
-              <tr>
-                {teamCols.map((col) =>
-                  !tv[col.key] ? null : col.key === 'members' ? (
-                    <PlainTh key={col.key} label={col.label} />
-                  ) : (
-                    <SortableTh
-                      key={col.key}
-                      label={col.label}
-                      sortKey={col.key}
-                      sort={teamSort}
-                      onSort={sortTeams}
-                    />
-                  ),
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {teamRows.map((team) => (
-                <tr key={team.id} className="border-whd-border border-t text-white/90">
-                  {tv.name && <td className="px-4 py-3">{team.name}</td>}
-                  {tv.captainName && (
-                    <td className="text-whd-text-muted px-4 py-3">{team.captainName}</td>
-                  )}
-                  {tv.members && (
-                    <td className="px-4 py-3">
-                      {team.members.map((m, i) => (
-                        <span
-                          key={m.id}
-                          className={m.attended ? 'text-whd-pink-bright' : 'text-whd-text-dim'}
-                        >
-                          {m.fullName}
-                          {i < team.members.length - 1 && ', '}
-                        </span>
-                      ))}
-                    </td>
-                  )}
-                  {tv.attended && (
-                    <td className="px-4 py-3 font-medium tabular-nums">
-                      {attendedCount(team)}/{team.members.length}
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {shown === 0 && <p className="text-whd-text-muted py-10 text-center">{t('admin.empty')}</p>}
+      </Tabs>
     </main>
   );
 }

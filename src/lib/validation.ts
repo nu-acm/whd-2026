@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
 /**
- * Women's Hack Day is open to school, college and university students, so the
- * list starts at School — unlike HackNU, which is university-only.
+ * Women's Hack Day is open to school, college and university students.
  */
 export const EDUCATION_LEVELS = [
   'School',
@@ -62,7 +61,7 @@ export type OtpInput = z.infer<typeof otpSchema>;
 const phoneRegex = /^\+?[\d][\d\s\-().]{5,24}$/;
 
 /** Reduce a phone number to digits so stored values are comparable. */
-export function stripPhoneDigits(phone: string): string {
+function stripPhoneDigits(phone: string): string {
   return phone.replace(/\D/g, '');
 }
 

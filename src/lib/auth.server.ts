@@ -1,7 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { emailOTP } from 'better-auth/plugins';
-import { APIError } from 'better-auth/api';
+import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { env } from 'cloudflare:workers';
 import { getDb } from '@/db';
 import { user, session, account, verification } from '@/db/auth-schema';
@@ -13,26 +13,6 @@ interface AuthEnv {
   BETTER_AUTH_URL: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
-  DEMO_LOGIN_EMAIL?: string;
-  DEMO_LOGIN_CODE?: string;
-}
-
-const DEMO_CODE_PATTERN = /^\d{6}$/;
-
-/**
- * TEMPORARY, for showing the admin panel to others. When both DEMO_LOGIN_*
- * vars are set, that one email always gets the fixed code (no email is sent),
- * and the login page displays it. Remove the vars to turn this off.
- */
-export function getDemoLogin() {
-  const { DEMO_LOGIN_EMAIL, DEMO_LOGIN_CODE } = env as unknown as AuthEnv;
-  const email = DEMO_LOGIN_EMAIL?.trim().toLowerCase();
-  if (!email || !DEMO_LOGIN_CODE || !DEMO_CODE_PATTERN.test(DEMO_LOGIN_CODE)) return null;
-  return { email, code: DEMO_LOGIN_CODE };
-}
-
-function isDemoEmail(email: string) {
-  return getDemoLogin()?.email === email.trim().toLowerCase();
 }
 
 /** True when both Google OAuth secrets are set, so the login page can offer it. */
@@ -72,14 +52,19 @@ export function getAuth() {
     appName: "Women's Hack Day",
     baseURL: url,
     ...(socialProviders && { socialProviders }),
+    hooks: {
+      before: createAuthMiddleware(async (ctx) => {
+        if (ctx.path === '/email-otp/send-verification-otp') {
+          // Delivery is part of this response; Better Auth's default runner swallows failures.
+          ctx.context.runInBackgroundOrAwait = async (task) => await task;
+        }
+      }),
+    },
     plugins: [
       emailOTP({
         otpLength: 6,
         expiresIn: 300,
-        // Undefined falls back to Better Auth's random code.
-        generateOTP: ({ email }) => (isDemoEmail(email) ? getDemoLogin()?.code : undefined),
         async sendVerificationOTP({ email, otp, type }) {
-          if (isDemoEmail(email)) return;
           // Without a mail webhook configured, print the code so local
           // development works with no external service.
           if (!isGasConfigured()) {

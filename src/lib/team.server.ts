@@ -68,7 +68,7 @@ function transliterate(s: string): string {
  * Turn a team name into a URL-safe ASCII slug.
  * "Команда Альфа" → "komanda-alyfa"; "Cool Hackers!!" → "cool-hackers"
  */
-export function slugify(name: string): string {
+function slugify(name: string): string {
   return transliterate(name.trim().toLowerCase())
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
@@ -78,12 +78,12 @@ export function slugify(name: string): string {
  * Normalize a name for uniqueness checks, so "Binary  Blossoms" and
  * "binary blossoms" collide while the display name is preserved as typed.
  */
-export function canonicalizeTeamName(name: string): string {
+function canonicalizeTeamName(name: string): string {
   return name.trim().normalize('NFKC').toLowerCase().replace(/\s+/g, ' ');
 }
 
 /** Unique invite slug, appending -2, -3 … on collision. */
-export async function generateUniqueSlug(name: string): Promise<string> {
+async function generateUniqueSlug(name: string): Promise<string> {
   const db = getAppDb();
   const base = slugify(name);
 
