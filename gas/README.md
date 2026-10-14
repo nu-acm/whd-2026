@@ -28,7 +28,7 @@ opening the `/exec` URL.
 
 ## Connect the site
 
-Local (`.dev.vars`), then restart `npm run dev`:
+Local (`.dev.vars`), then restart `vp dev`:
 
 ```
 GAS_URL=https://script.google.com/macros/s/.../exec
@@ -38,8 +38,8 @@ GAS_SECRET=<the same value as the script property>
 Production:
 
 ```
-npx wrangler secret put GAS_URL
-npx wrangler secret put GAS_SECRET
+pnpm exec wrangler secret put GAS_URL
+pnpm exec wrangler secret put GAS_SECRET
 ```
 
 After editing `Code.gs`, use **Deploy → Manage deployments → Edit → New

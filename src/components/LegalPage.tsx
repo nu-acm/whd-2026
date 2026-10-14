@@ -12,15 +12,15 @@ export function LegalPage({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-whd-dark flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-whd-dark">
       <AuthHeader />
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12 sm:px-8">
-        <h1 className="text-3xl font-bold text-white md:text-4xl">{title}</h1>
-        <p className="text-whd-text-muted mt-2 mb-10 text-sm">Last updated: {updated}</p>
-        <div className="text-whd-text-muted space-y-8 text-base leading-relaxed">{children}</div>
+        <h1 className="text-3xl font-bold text-foreground md:text-4xl">{title}</h1>
+        <p className="mt-2 mb-10 text-sm text-whd-text-muted">Last updated: {updated}</p>
+        <div className="space-y-8 text-base leading-relaxed text-whd-text-muted">{children}</div>
         <Link
           to="/"
-          className="text-whd-pink-soft hover:text-whd-pink-bright mt-12 inline-block text-sm transition-colors"
+          className="mt-12 inline-block text-sm text-whd-pink-soft transition-colors hover:text-whd-pink-bright"
         >
           ← Back to home
         </Link>
@@ -32,7 +32,7 @@ export function LegalPage({
 export function LegalSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="mb-2 text-lg font-semibold text-white">{title}</h2>
+      <h2 className="mb-2 text-lg font-semibold text-foreground">{title}</h2>
       {children}
     </section>
   );
@@ -40,7 +40,7 @@ export function LegalSection({ title, children }: { title: string; children: Rea
 
 export function ContactLink({ email }: { email: string }) {
   return (
-    <a href={`mailto:${email}`} className="text-whd-pink-soft hover:text-whd-pink-bright underline">
+    <a href={`mailto:${email}`} className="text-whd-pink-soft underline hover:text-whd-pink-bright">
       {email}
     </a>
   );

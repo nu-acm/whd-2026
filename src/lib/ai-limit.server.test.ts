@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import { env } from 'cloudflare:workers';
 import { TestD1 } from '@/test/d1';
 import { AI_COOLDOWN_MS, AI_RATE_LIMIT_ERROR, AI_REQUESTS_PER_WINDOW, AI_WINDOW_MS } from './ai';

@@ -20,7 +20,7 @@ import { webHapticsOptions } from '@/lib/web-haptics';
  * login/onboarding first; the slug is preserved so they land back here.
  */
 const resolveInvite = createServerFn({ method: 'GET' })
-  .inputValidator(inviteSlugSchema)
+  .validator(inviteSlugSchema)
   .handler(async ({ data }) => {
     const team = await getTeamBySlug(data.slug);
     if (!team) return { status: 'not-found' as const };
@@ -38,7 +38,7 @@ const resolveInvite = createServerFn({ method: 'GET' })
   });
 
 const acceptInvite = createServerFn({ method: 'POST' })
-  .inputValidator(inviteSlugSchema)
+  .validator(inviteSlugSchema)
   .handler(async ({ data }) => {
     const session = await getSession(getRequest());
     if (!session?.user) throw new Error('Unauthorized');
@@ -72,10 +72,10 @@ function InvitePage() {
     setPending(true);
     try {
       await acceptInvite({ data: { slug } });
-      trigger('success');
-      navigate({ to: '/dashboard' });
+      void trigger('success');
+      await navigate({ to: '/dashboard' });
     } catch (err) {
-      trigger('error');
+      void trigger('error');
       // Server errors may be i18n keys (registration closed); t() passes plain text through.
       setError(err instanceof Error ? err.message : 'dashboard.actionFailed');
       setPending(false);
@@ -90,7 +90,7 @@ function InvitePage() {
   };
 
   return (
-    <div className="bg-whd-dark flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-whd-dark">
       <AuthHeader showSignOut />
       <AuthCard
         title={result.status === 'can-join' ? t('invite.title') : t('invite.cannotJoin')}
@@ -106,7 +106,7 @@ function InvitePage() {
               {pending ? t('common.loading') : t('invite.join')}
             </Button>
             {error && (
-              <p role="alert" className="text-sm text-red-400">
+              <p role="alert" className="text-sm text-destructive">
                 {t(error)}
               </p>
             )}

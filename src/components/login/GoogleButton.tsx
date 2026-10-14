@@ -48,7 +48,7 @@ export function GoogleButton({ redirect }: { redirect?: string }) {
         {pending ? t('common.loading') : t('login.google')}
       </Button>
       {error && (
-        <p role="alert" className="text-sm text-red-400">
+        <p role="alert" className="text-sm text-destructive">
           {error}
         </p>
       )}

@@ -1,5 +1,5 @@
 # Cloudflare Workers secrets for local development.
-# Loaded by wrangler during `npm run dev`. Copy to .dev.vars and fill in.
+# Loaded by Wrangler during `vp dev`. Copy to .dev.vars and fill in.
 
 # Where the app is served from.
 # local: http://localhost:3000   remote: https://whd.nuacmw.kz

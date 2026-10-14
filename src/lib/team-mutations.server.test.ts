@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 import { env } from 'cloudflare:workers';
 import { TestD1 } from '@/test/d1';
 import { TEAM_ERRORS } from '@/lib/team-errors';

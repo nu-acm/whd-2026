@@ -1,5 +1,6 @@
 import { useId, useRef, useState } from 'react';
-import { CloudUpload, FileText, LoaderCircle } from 'lucide-react';
+import { CloudUpload, FileText } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -86,7 +87,7 @@ export function FileUpload({
         }}
       />
       <div className="file-upload-icon" aria-hidden="true">
-        {uploading ? <LoaderCircle className="file-upload-spinner" /> : <CloudUpload />}
+        {uploading ? <Spinner /> : <CloudUpload />}
       </div>
       <h3 id={`${id}-title`} className="file-upload-title">
         {title}

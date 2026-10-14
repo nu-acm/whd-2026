@@ -31,19 +31,20 @@ function PrivacyPage() {
         <p className="mb-2">When you register, we collect and process:</p>
         <ul className="list-inside list-disc space-y-1">
           <li>
-            <strong className="text-white">Account data:</strong> your email address, and your name
-            and profile picture if you sign in with Google.
+            <strong className="text-foreground">Account data:</strong> your email address, and your
+            name and profile picture if you sign in with Google.
           </li>
           <li>
-            <strong className="text-white">Registration data:</strong> full name, IIN (individual
-            identification number), phone number, city, place of study, level of study, and a parent
-            or guardian’s phone number for school students.
+            <strong className="text-foreground">Registration data:</strong> full name, IIN
+            (individual identification number), phone number, city, place of study, level of study,
+            and a parent or guardian’s phone number for school students.
           </li>
           <li>
-            <strong className="text-white">Team data:</strong> your team’s name and members.
+            <strong className="text-foreground">Team data:</strong> your team’s name and members.
           </li>
           <li>
-            <strong className="text-white">Attendance:</strong> whether you checked in at the event.
+            <strong className="text-foreground">Attendance:</strong> whether you checked in at the
+            event.
           </li>
         </ul>
       </LegalSection>

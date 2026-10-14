@@ -17,10 +17,36 @@
 }
 .flower-trail img {
   position: absolute;
+  width: var(--flower-size, 20px);
+  left: var(--flower-x, 0px);
+  top: var(--flower-y, 0px);
   height: auto;
   opacity: 0;
   pointer-events: none;
   user-select: none;
+}
+.flower-trail img[data-active] {
+  animation: flower-trail-burst var(--flower-duration, 1s) ease-out forwards;
+}
+@keyframes flower-trail-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--flower-rotation)) scale(0.45);
+  }
+  12% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) rotate(var(--flower-rotation)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--flower-drift-x)), calc(-50% + var(--flower-drift-y)))
+      rotate(var(--flower-end-rotation)) scale(0.15);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flower-trail img[data-active] {
+    animation: none;
+  }
 }
 .landing-section {
   padding-block: 72px;
@@ -458,31 +484,31 @@
   gap: 12px;
   margin-block: 28px;
 }
-.feature-two-question {
+[data-variant='feature'] .whd-accordion-item {
   border: 0;
   border-radius: 12px;
   padding-inline: 16px;
   background: var(--whd-surface-raised);
 }
-.feature-two-trigger {
+[data-variant='feature'] .whd-accordion-trigger {
   min-height: 72px;
   align-items: center;
   font-size: 0.875rem;
   line-height: 1.5;
   color: var(--whd-text);
 }
-.feature-two-trigger:hover {
+[data-variant='feature'] .whd-accordion-trigger:hover {
   color: var(--whd-pink);
   text-decoration: none;
 }
-.feature-two-trigger > svg {
+[data-variant='feature'] .whd-accordion-trigger > svg {
   color: var(--whd-pink);
 }
-.feature-two-answer {
+[data-variant='feature'] .whd-accordion-inner {
   color: var(--whd-text-muted);
   line-height: 1.65;
 }
-.feature-two-answer a {
+[data-variant='feature'] .whd-accordion-inner a {
   color: var(--whd-pink);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -1061,14 +1087,14 @@
 .faq-six-list {
   min-width: 0;
 }
-.faq-six-item {
+[data-variant='faq'] .whd-accordion-item {
   border: 0;
   border-bottom: 1px dashed #b9b1cc30;
 }
-.faq-six-item:last-child {
+[data-variant='faq'] .whd-accordion-item:last-child {
   border-bottom: 0;
 }
-.faq-six-trigger {
+[data-variant='faq'] .whd-accordion-trigger {
   display: flex;
   align-items: center;
   gap: 20px;
@@ -1079,14 +1105,14 @@
   line-height: 1.5;
   color: var(--whd-text);
 }
-.faq-six-trigger:hover {
+[data-variant='faq'] .whd-accordion-trigger:hover {
   text-decoration: none;
   color: var(--whd-pink-bright);
 }
-.faq-six-trigger > svg {
+[data-variant='faq'] .whd-accordion-trigger > svg {
   display: none;
 }
-.faq-six-trigger:focus-visible {
+[data-variant='faq'] .whd-accordion-trigger:focus-visible {
   box-shadow: none;
 }
 .faq-six-number {
@@ -1118,24 +1144,24 @@
 .faq-six-minus {
   display: none;
 }
-.faq-six-trigger[data-state='open'] .faq-six-plus {
+[data-variant='faq'] .whd-accordion-trigger[data-open] .faq-six-plus {
   display: none;
 }
-.faq-six-trigger[data-state='open'] .faq-six-minus {
+[data-variant='faq'] .whd-accordion-trigger[data-open] .faq-six-minus {
   display: block;
 }
-.faq-six-trigger[data-state='open'] .faq-six-toggle {
+[data-variant='faq'] .whd-accordion-trigger[data-open] .faq-six-toggle {
   background: var(--whd-pink);
   color: var(--whd-dark);
 }
-.faq-six-answer {
+[data-variant='faq'] .whd-accordion-inner {
   padding: 0 52px 28px 50px;
   color: var(--whd-text-muted);
   font-size: 1rem;
   line-height: 1.75;
   overflow-wrap: anywhere;
 }
-.faq-six-answer a {
+[data-variant='faq'] .whd-accordion-inner a {
   color: var(--whd-pink-bright);
 }
 .faq-contact {
@@ -1493,7 +1519,7 @@
     gap: 10px;
     margin-block: 24px;
   }
-  .feature-two-trigger {
+  [data-variant='feature'] .whd-accordion-trigger {
     min-height: 56px;
   }
   .feature-two-visual {
@@ -1649,7 +1675,7 @@
   .faq-six-intro .landing-heading {
     max-width: 16ch;
   }
-  .faq-six-trigger {
+  [data-variant='faq'] .whd-accordion-trigger {
     gap: 12px;
     padding-block: 22px;
     font-size: 1rem;
@@ -1657,7 +1683,7 @@
   .faq-six-number {
     flex-basis: 26px;
   }
-  .faq-six-answer {
+  [data-variant='faq'] .whd-accordion-inner {
     padding: 0 0 24px 38px;
   }
   .footer-two {

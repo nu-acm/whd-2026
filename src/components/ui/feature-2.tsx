@@ -53,19 +53,15 @@ export default function Features2({
             {title}
           </h2>
           <p className="landing-copy">{description}</p>
-          <Accordion type="single" collapsible className="feature-two-questions">
+          <Accordion variant="feature">
             {questions.map((question) => (
-              <AccordionItem key={question.id} value={question.id} className="feature-two-question">
-                <AccordionTrigger className="feature-two-trigger">
-                  {question.title}
-                </AccordionTrigger>
-                <AccordionContent className="feature-two-answer">
-                  {question.answer}
-                </AccordionContent>
+              <AccordionItem key={question.id} value={question.id}>
+                <AccordionTrigger>{question.title}</AccordionTrigger>
+                <AccordionContent>{question.answer}</AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
-          <LinkButton href="#schedule" className="feature-two-action">
+          <LinkButton href="#schedule" variant="feature">
             {actionLabel}
             <span aria-hidden="true">↗</span>
           </LinkButton>
@@ -73,9 +69,18 @@ export default function Features2({
         <div className="feature-two-visual">
           <ol className="feature-two-rounds" aria-label={roundsLabel}>
             {rounds.map((round, index) => (
-              <li key={round.id} className={`feature-two-round feature-two-round-${index + 1}`}>
-                <Card className="feature-two-card">
-                  <CardContent className="feature-two-card-content">
+              <li
+                key={round.id}
+                className={
+                  [
+                    'feature-two-round feature-two-round-1',
+                    'feature-two-round feature-two-round-2',
+                    'feature-two-round feature-two-round-3',
+                  ][index]
+                }
+              >
+                <Card variant="feature">
+                  <CardContent variant="feature">
                     <div className="feature-two-card-top">
                       <round.icon aria-hidden="true" />
                       <span className="feature-two-number" aria-hidden="true">

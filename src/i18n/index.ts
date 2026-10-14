@@ -31,7 +31,7 @@ export function createI18n() {
     // Hydrate in the language already rendered by the server. A first-visit
     // navigator preference must not replace that markup before hydration.
     lng: isBrowser ? document.documentElement.lang || 'en' : 'en',
-    initImmediate: false,
+    initAsync: false,
     resources,
     fallbackLng: 'en',
     supportedLngs: [...supportedLngs],

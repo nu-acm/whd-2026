@@ -1,96 +1,100 @@
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import type { ColumnDef, SortState } from '@/components/admin/table-state';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableHead,
+} from '@/components/ui/table';
+import { flexRender } from '@tanstack/react-table';
+import type { AdminTable } from '@/components/admin/use-admin-table';
+import { Button } from '@/components/ui/button';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 /*
  * Pieces shared by the admin report and check-in tables: sortable headers,
  * show/hide column pills, and the stat tiles above them.
  */
 
-export function ColumnToggleBar<K extends string>({
-  columns,
-  visible,
-  onToggle,
-  onToggleAll,
-}: {
-  columns: readonly ColumnDef<K>[];
-  visible: Record<K, boolean>;
-  onToggle: (key: K) => void;
-  onToggleAll: () => void;
-}) {
+export function ColumnToggleBar<T extends object>({ table }: { table: AdminTable<T> }) {
   const { t } = useTranslation();
-  const allVisible = columns.every((c) => visible[c.key]);
-
+  const columns = table.getAllLeafColumns().filter((column) => column.getCanHide());
+  const allVisible = columns.every((column) => column.getIsVisible());
   return (
-    <div
-      className="flex flex-wrap items-center gap-1.5"
-      role="group"
-      aria-label={t('admin.columns')}
-    >
-      <button
-        type="button"
-        onClick={onToggleAll}
-        className="text-whd-text-muted cursor-pointer px-1 text-xs underline-offset-2 hover:text-white hover:underline"
-      >
+    <div className="flex flex-wrap items-center gap-1.5">
+      <Button size="sm" variant="link" onClick={() => table.toggleAllColumnsVisible(!allVisible)}>
         {allVisible ? t('admin.hideAll') : t('admin.showAll')}
-      </button>
-      {columns.map((col) => (
-        <button
-          key={col.key}
-          type="button"
-          aria-pressed={visible[col.key]}
-          onClick={() => onToggle(col.key)}
-          className={cn(
-            'cursor-pointer rounded-full border px-2.5 py-0.5 text-xs transition-colors select-none',
-            visible[col.key]
-              ? 'border-whd-pink/50 bg-whd-pink/15 text-whd-pink-bright hover:bg-whd-pink/25'
-              : 'border-whd-border text-whd-text-dim hover:text-whd-text-muted',
-          )}
-        >
-          {col.label}
-        </button>
-      ))}
+      </Button>
+      <ToggleGroup
+        multiple
+        variant="columns"
+        value={columns.filter((column) => column.getIsVisible()).map((column) => column.id)}
+        onValueChange={(values) => {
+          for (const column of columns)
+            if (column.getIsVisible() !== values.includes(column.id)) column.toggleVisibility();
+        }}
+        aria-label={t('admin.columns')}
+      >
+        {columns.map((column) => (
+          <ToggleGroupItem key={column.id} value={column.id} variant="columns">
+            {column.columnDef.meta?.label ?? column.id}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
     </div>
   );
 }
 
-export function SortableTh<K extends string>({
-  label,
-  sortKey,
-  sort,
-  onSort,
+export function AdminDataTable<T extends object>({
+  table,
+  variant,
+  rowPrefix,
 }: {
-  label: string;
-  sortKey: K;
-  sort: SortState<K>;
-  onSort: (key: K) => void;
+  table: AdminTable<T>;
+  variant: 'participants' | 'teams' | 'checkin';
+  rowPrefix?: string;
 }) {
-  const active = sort.key === sortKey;
   return (
-    <th
-      className="px-4 py-3 font-medium whitespace-nowrap"
-      aria-sort={active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : undefined}
-    >
-      <button
-        type="button"
-        onClick={() => onSort(sortKey)}
-        className={cn(
-          'inline-flex cursor-pointer items-center gap-1 transition-colors hover:text-white',
-          active && 'text-whd-pink-bright',
-        )}
-      >
-        {label}
-        <span aria-hidden="true" className={active ? '' : 'opacity-0'}>
-          {sort.dir === 'asc' || !active ? '↑' : '↓'}
-        </span>
-      </button>
-    </th>
+    <Table variant={variant}>
+      <TableHeader>
+        {table.getHeaderGroups().map((group) => (
+          <TableRow key={group.id}>
+            {group.headers.map((header) => {
+              const sorted = header.column.getIsSorted();
+              return (
+                <TableHead
+                  key={header.id}
+                  colSpan={header.colSpan}
+                  aria-sort={sorted ? (sorted === 'asc' ? 'ascending' : 'descending') : undefined}
+                >
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              );
+            })}
+          </TableRow>
+        ))}
+      </TableHeader>
+      <TableBody>
+        {table.getRowModel().rows.map((row) => (
+          <TableRow
+            key={row.id}
+            id={rowPrefix ? `${rowPrefix}-${row.id}` : undefined}
+            className={rowPrefix ? 'scroll-mt-24' : undefined}
+          >
+            {row.getVisibleCells().map((cell) => (
+              <TableCell key={cell.id} tone={cell.column.columnDef.meta?.tone}>
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
-}
-
-export function PlainTh({ label }: { label: string }) {
-  return <th className="px-4 py-3 font-medium whitespace-nowrap">{label}</th>;
 }
 
 export function StatCard({
@@ -104,13 +108,13 @@ export function StatCard({
 }) {
   return (
     <Card>
-      <CardContent className="flex items-end justify-between gap-3 p-5">
+      <CardContent variant="stat">
         <div>
-          <div className="text-whd-pink-bright text-3xl font-black md:text-4xl">{value}</div>
-          <div className="text-whd-text-muted mt-1 text-sm">{label}</div>
+          <div className="text-3xl font-black text-whd-pink-bright md:text-4xl">{value}</div>
+          <div className="mt-1 text-sm text-whd-text-muted">{label}</div>
         </div>
         {breakdown && (
-          <div className="text-whd-text-muted text-right text-sm tabular-nums">{breakdown}</div>
+          <div className="text-right text-sm text-whd-text-muted tabular-nums">{breakdown}</div>
         )}
       </CardContent>
     </Card>

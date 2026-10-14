@@ -20,7 +20,7 @@ export default function FAQ({ full = false }: { full?: boolean }) {
         title={full ? t('faq.allTitle') : t('faq.title')}
         titleId="faq-title"
         headingLevel={full ? 'h1' : 'h2'}
-        className={full ? 'faq-six-full' : 'faq-six-preview'}
+        variant={full ? 'full' : 'preview'}
         faqs={questions.map((key) => ({
           id: key,
           question: t(`faq.questions.${key}.q`),

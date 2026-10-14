@@ -58,8 +58,8 @@ function LoginPage() {
 
   const handleVerified = async () => {
     const destination = (await getPostLoginDestination()) ?? '/onboarding';
-    if (destination === '/onboarding') navigate({ to: '/onboarding', search });
-    else navigate({ to: safeInviteRedirect(search.redirect) ?? destination });
+    if (destination === '/onboarding') await navigate({ to: '/onboarding', search });
+    else await navigate({ to: safeInviteRedirect(search.redirect) ?? destination });
   };
 
   return (
@@ -76,9 +76,9 @@ function LoginPage() {
             <>
               <GoogleButton redirect={search.redirect} />
               <div className="account-form-divider">
-                <span className="bg-whd-border h-px flex-1" />
-                <span className="text-whd-text-muted text-sm">{t('login.or')}</span>
-                <span className="bg-whd-border h-px flex-1" />
+                <span className="h-px flex-1 bg-whd-border" />
+                <span className="text-sm text-whd-text-muted">{t('login.or')}</span>
+                <span className="h-px flex-1 bg-whd-border" />
               </div>
             </>
           )}
@@ -103,10 +103,12 @@ function LoginPage() {
 /** TEMPORARY: shows the demo admin login (see getDemoLogin). */
 function DemoHint({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="border-whd-pink/60 bg-whd-pink/10 mb-5 rounded-xl border border-dashed px-4 py-3 text-sm last:mt-5 last:mb-0">
+    <div className="mb-5 rounded-xl border border-dashed border-whd-pink/60 bg-whd-pink/10 px-4 py-3 text-sm last:mt-5 last:mb-0">
       <span className="text-whd-text-muted">{label} </span>
       <span
-        className={mono ? 'font-mono text-lg tracking-[0.3em] text-white' : 'text-white select-all'}
+        className={
+          mono ? 'font-mono text-lg tracking-eyebrow text-foreground' : 'text-foreground select-all'
+        }
       >
         {value}
       </span>

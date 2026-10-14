@@ -3,9 +3,15 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWebHaptics } from 'web-haptics/react';
 import { Button } from '@/components/ui/button';
+import {
+  InputGroup,
+  InputGroupInput,
+  InputGroupAddon,
+  InputGroupButton,
+} from '@/components/ui/input-group';
 import { Input } from '@/components/ui/input';
-import { Field } from '@/components/ui/field';
-import { Card, CardContent } from '@/components/ui/card';
+import { FormField } from '@/components/ui/form-field';
+import { Card, CardContent, CardTitle, CardHeader, CardDescription } from '@/components/ui/card';
 import { createTeamSchema, inviteSlugSchema } from '@/lib/validation';
 import { webHapticsOptions } from '@/lib/web-haptics';
 import { AI_COOLDOWN_MS } from '@/lib/ai';
@@ -55,7 +61,7 @@ export function NoTeamCard({
   const generationRef = useRef(0);
 
   const fail = (setError: (m: string) => void, message: string) => {
-    trigger('error');
+    void trigger('error');
     setError(message);
   };
 
@@ -101,7 +107,7 @@ export function NoTeamCard({
       const suggestion = await onGenerate();
       if (id !== generationRef.current) return;
       setName(suggestion);
-      trigger('success');
+      void trigger('success');
     } catch (err) {
       if (id !== generationRef.current) return;
       fail(setNameError, err instanceof Error ? err.message : 'dashboard.generateFailed');
@@ -124,63 +130,63 @@ export function NoTeamCard({
 
   if (!registrationOpen) {
     return (
-      <Card className="account-team-card">
-        <CardContent className="account-no-team-content">
+      <Card variant="team">
+        <CardHeader variant="no-team">
           <Users className="account-section-icon" aria-hidden="true" />
-          <h2>{t('dashboard.noTeam')}</h2>
-          <p className="mt-3 text-sm text-amber-200">{t('dashboard.registrationClosedNoTeam')}</p>
-        </CardContent>
+          <CardTitle variant="account">{t('dashboard.noTeam')}</CardTitle>
+          <CardDescription variant="warning">
+            {t('dashboard.registrationClosedNoTeam')}
+          </CardDescription>
+        </CardHeader>
       </Card>
     );
   }
 
   return (
-    <Card className="account-team-card">
-      <CardContent className="account-no-team-content">
-        <div>
-          <Users className="account-section-icon" aria-hidden="true" />
-          <h2>{t('dashboard.noTeam')}</h2>
-          <p className="text-whd-text-muted mt-2 text-sm leading-relaxed">
-            {t('dashboard.noTeamHint')}
-          </p>
-        </div>
-
+    <Card variant="team">
+      <CardHeader variant="no-team">
+        <Users className="account-section-icon" aria-hidden="true" />
+        <CardTitle variant="account">{t('dashboard.noTeam')}</CardTitle>
+        <CardDescription variant="account">{t('dashboard.noTeamHint')}</CardDescription>
+      </CardHeader>
+      <CardContent variant="no-team">
         <div className="account-team-forms">
           <form onSubmit={submitCreate} className="account-team-form" noValidate>
             <h3>{t('dashboard.newTeamTitle')}</h3>
-            <Field
+            <FormField
               label={t('dashboard.teamNameLabel')}
               error={nameError ? t(nameError) : undefined}
+              disabled={pending || generating}
             >
               {(p) => (
-                <div className="relative">
-                  <Input
+                <InputGroup>
+                  <InputGroupInput
                     {...p}
                     value={name}
                     placeholder={t('dashboard.teamNamePlaceholder')}
                     onChange={(e) => setName(e.target.value)}
                     disabled={pending || generating}
-                    className="pr-12"
                   />
-                  <button
-                    type="button"
-                    onClick={generating ? cancelGenerate : generate}
-                    disabled={pending || (!generating && cooldownSeconds > 0)}
-                    aria-label={generateLabel}
-                    title={generateLabel}
-                    className="text-whd-pink-soft hover:text-whd-pink-bright absolute inset-y-0 right-0 flex w-11 cursor-pointer items-center justify-center rounded-r-lg transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    {generating ? (
-                      <Square size={16} aria-hidden="true" />
-                    ) : (
-                      <Sparkles size={18} aria-hidden="true" />
-                    )}
-                  </button>
-                </div>
+                  <InputGroupAddon align="inline-end">
+                    <InputGroupButton
+                      type="button"
+                      onClick={generating ? cancelGenerate : generate}
+                      disabled={pending || (!generating && cooldownSeconds > 0)}
+                      aria-label={generateLabel}
+                      title={generateLabel}
+                    >
+                      {generating ? (
+                        <Square size={16} aria-hidden="true" />
+                      ) : (
+                        <Sparkles size={18} aria-hidden="true" />
+                      )}
+                    </InputGroupButton>
+                  </InputGroupAddon>
+                </InputGroup>
               )}
-            </Field>
+            </FormField>
             {generating && (
-              <p className="text-whd-text-muted -mt-1 text-sm" aria-live="polite">
+              <p className="-mt-1 text-sm text-whd-text-muted" aria-live="polite">
                 {t('dashboard.generating')}
               </p>
             )}
@@ -192,9 +198,10 @@ export function NoTeamCard({
 
           <form onSubmit={submitJoin} className="account-team-form account-join-form" noValidate>
             <h3>{t('dashboard.invitedTitle')}</h3>
-            <Field
+            <FormField
               label={t('dashboard.inviteCodeLabel')}
               error={slugError ? t(slugError) : undefined}
+              disabled={pending}
             >
               {(p) => (
                 <Input
@@ -205,7 +212,7 @@ export function NoTeamCard({
                   disabled={pending}
                 />
               )}
-            </Field>
+            </FormField>
             <Button type="submit" variant="secondary" disabled={pending}>
               <LinkIcon size={18} aria-hidden="true" />
               {t('dashboard.joinTeam')}

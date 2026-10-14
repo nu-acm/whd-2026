@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import { env } from 'cloudflare:workers';
 
 type OtpData = { email: string; otp: string; type: string };

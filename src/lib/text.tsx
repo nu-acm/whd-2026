@@ -30,14 +30,14 @@ export function parseTextWithLinks(text: string): ReactNode[] {
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-whd-pink-bright decoration-whd-pink-bright/40 hover:text-whd-pink-soft underline underline-offset-4 transition-colors duration-200"
+          className="text-whd-pink-bright underline decoration-whd-pink-bright/40 underline-offset-4 transition-colors duration-200 hover:text-whd-pink-soft"
         >
           {linkLabel}
         </a>,
       );
     } else {
       parts.push(
-        <span key={match.index} className="text-whd-pink-soft font-bold">
+        <span key={match.index} className="font-bold text-whd-pink-soft">
           {pinkText}
         </span>,
       );

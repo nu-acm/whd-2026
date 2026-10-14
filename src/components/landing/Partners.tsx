@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 /** Freedom Broker wordmark: the shield + FREEDOM lockup with BROKER set beneath. */
 function FreedomBrokerLogo({ alt }: { alt: string }) {
   return (
-    <div role="img" aria-label={alt} className="relative aspect-[572.663/172.142] w-full">
+    <div role="img" aria-label={alt} className="freedom-broker-logo">
       <img
         src="/whd/sponsor-freedom.svg"
         alt=""
@@ -16,7 +16,7 @@ function FreedomBrokerLogo({ alt }: { alt: string }) {
         alt=""
         width={227.821}
         height={42.597}
-        className="absolute top-[58.45%] left-[33.33%] h-[24.74%] w-[39.79%]"
+        className="freedom-broker-wordmark"
       />
     </div>
   );

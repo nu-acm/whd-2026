@@ -41,7 +41,7 @@ Design Read: лендинг хакатона для школьниц и студ
 
 По уточнению пользователя hero имеет неоновое свечение и мягко мигающие неоновые глаза маскота. Анимация глаз повторяется раз в 4.8 секунды; prefers-reduced-motion оставляет статичное свечение. Дополнительно пользователь запросил след за курсором из трёх предоставленных цветков: розового, фиолетового и белого. На лендинге при движении мыши появляются цветки размером 20–50 px с разными поворотами, небольшим дрейфом и исчезновением за 0.95–1.4 секунды. Максимум 24 частицы, без перехвата кликов; на touch и при reduced motion след выключен. Парение, scramble-текст и перехват прокрутки не добавлять.
 
-Наведение, нажатие, фокус и раскрытие элементов должны иметь ясную обратную связь. Изменение статуса или таймера по данным сохраняется. По запросу от 13 октября 2026 раскрытие, закрытие и смена состояния получили плавные переходы 180–280 мс с быстрым откликом и мягким завершением. FAQ и блок формата используют общую анимацию высоты Radix; мобильное меню — обратимый переход grid-rows; нативные диалоги — opacity/transform с сохранением top layer при закрытии; фотографии галереи — crossfade. При reduced motion пространственные переходы отключены.
+Наведение, нажатие, фокус и раскрытие элементов должны иметь ясную обратную связь. Изменение статуса или таймера по данным сохраняется. По запросу от 13 октября 2026 раскрытие, закрытие и смена состояния получили плавные переходы 180–280 мс с быстрым откликом и мягким завершением. FAQ и блок формата используют анимацию высоты Base UI с --accordion-panel-height и data-open; мобильное меню использует обратимый переход grid-rows; диалоги Base UI используют opacity/transform и порталы; фотографии галереи — crossfade. При reduced motion пространственные переходы отключены.
 
 ## Selected Style Profile
 
@@ -62,7 +62,7 @@ custom/reference: прямое указание пользователя на н
 
 ## Design System Source
 
-src/components/ui, src/components/landing, src/styles.css. Локальные React-компоненты с Tailwind, class-variance-authority и tailwind-merge. ConfirmDialog построен на native dialog.
+src/components/ui, src/components/landing, src/styles.css и src/styles/components.css. Локальные компоненты shadcn Base UI/Nova с Tailwind, class-variance-authority и cn. ConfirmDialog использует Alert Dialog, галерея использует Dialog.
 
 Текущие NeonFrame, NeonPanel, Card и Button содержат тяжёлые рамки/свечение: это исходное состояние для переработки, а не обязательный визуальный образец. Общие изменения не должны неожиданно ухудшить формы и кабинет.
 
@@ -96,7 +96,7 @@ card-playful-tile в пользовательской интерпретации
 
 ## Modal Style
 
-modal-task-dialog; для разрушительных действий modal-danger-confirm. Сохранить native dialog и его управление фокусом, Escape, понятные действия и спокойный фон. Без толстых неоновых рамок.
+Для разрушительных действий использовать Base UI Alert Dialog: начальный фокус на Cancel, Escape и Cancel закрывают окно, клик по фону оставляет его открытым. Галерея использует Base UI Dialog: клик по фону и Escape закрывают окно, стрелки переключают фотографии. Оба окна блокируют прокрутку и возвращают фокус. Сохранить понятные действия и спокойный фон без толстых неоновых рамок.
 
 ## Header Style
 
@@ -265,11 +265,9 @@ User requested the entire landing to match the hero. Added a scoped spy-theme.cs
 
 Visual checks: desktop 1440 px and mobile 320/390 px, Russian and Kazakh narrow-screen copy, English desktop. Fixed schedule min-content overflow by stacking time above event names below 1024 px. Fixed the decorative challenge flower extending beyond the narrow container. Mobile gallery heading/action remains clear of the rotated photos. Local production build passed. Screenshots: output/spy-theme/desktop.png and output/spy-theme/footer.png.
 
-
 ## FAQ showcase and full page — 2026-10-13
 
 The supplied split FAQ reference informs the structure: an illustrated left panel and five separate accordion cards on the right. The landing shows participation, experience, team, registration and online-format questions, with “Все вопросы” linking to /faq and the existing Telegram contact. The public /faq route contains all ten existing localized answers, a home link and language controls. The supplied mascot is stored as a 45 KB WebP. Pink/purple styling, hex grid and soft corners intentionally follow the approved WHD theme rather than the reference’s gold palette. Mobile stacks the illustration/actions above the questions; full-page sidebar stays sticky only on desktop.
-
 
 ## Account pages — 2026-10-13
 
@@ -278,3 +276,44 @@ Login and dashboard now use the approved WHD language: Montserrat italic display
 DashboardLayout places the greeting, profile action and three real status facts above the team area. Team management is the main column; optional CV and FAQ/contact form the secondary column. NoTeamCard retains both create/join forms and name generation. TeamCard now shows readable member names, roles, initials, available slots and a labeled invite field. On narrow phones member actions move below names. Existing login redirects, Google/OTP operations, registration checks, team callbacks and CV requests remain intact. RU/EN/KK additions cover only new introductory labels.
 
 Responsive checks: 320/390/768/1440 px. No persistent decorative animation; form/feedback transitions respect reduced motion. No new UI dependency. Proof: output/account-redesign/login.png and dashboard.png (local component fixtures).
+
+## Base UI and lint migration, 2026-10-14
+
+The app now uses shadcn Base UI with the Nova registry configuration. The b0
+TanStack Start reference was generated outside this repository. Its Inter font
+was not adopted; WHD fonts, Kazakh glyph coverage, assets, content, section order,
+and custom grids remain. Earlier notes about Radix and native dialogs describe
+the implementation before this migration.
+
+Shared controls use semantic tokens mapped to the existing WHD palette. Appearance
+belongs in component variants or owned CSS. All six shadcnlint rules are errors,
+including UI internals; call sites may use layout classes. Runtime gallery and
+flower offsets use CSS custom properties. Reduced motion removes movement.
+
+Both accordion compositions use Base UI value arrays and single-open behavior.
+Admin tables use TanStack Table v9 for sorting and visibility while retaining
+all rows, search, CSV, counts, and attendance behavior. No pagination or selection
+was added. The confirmation and gallery dialog behavior is specified above.
+
+The official `.agents/skills/shadcn` skill is pinned in `SOURCE.md`. Use its
+`--dry-run`/`--diff` workflow for updates. Run `pnpm exec vp check`, the behavior
+tests, and the production build. See `docs/shadcn-migration.md` and the latest
+entry in `design-qa.md` for validation evidence. No permanent preview route exists.
+
+## Component composition after review, 2026-10-14
+
+Use the canonical Field compound family for new recipes. Existing forms use the
+FormField adapter for translated labels, required markers, hint/error IDs, and
+control ARIA attributes. Button retains WHD aliases alongside upstream defaults
+and icon sizes. Card supports size and CardAction; its header, content, and
+footer are siblings, with descriptions inside headers. Owned variants retain
+account spacing.
+
+Admin column definitions own translated labels, accessors, sorting, and cells.
+The shared renderer uses TanStack header groups and visible cells with stable
+row IDs. Pending attendance state must not recreate cell component identities,
+so confirmation focus can return to the same checkbox after an update.
+
+Confirmation content scrolls inside its capped height. Enabled hidden-column
+controls and field hints use muted-foreground rather than the dim decorative
+token. The review-fix evidence is recorded in design-qa.md.

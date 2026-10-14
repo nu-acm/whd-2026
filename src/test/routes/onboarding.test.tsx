@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import { act, cleanup, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -33,7 +33,7 @@ vi.mock('@tanstack/react-start/server', () => ({ getRequest: vi.fn() }));
 vi.mock('@tanstack/react-start', () => ({
   createServerFn: () => ({
     handler: (fn: unknown) => fn,
-    inputValidator: () => ({ handler: (fn: unknown) => fn }),
+    validator: () => ({ handler: (fn: unknown) => fn }),
   }),
 }));
 

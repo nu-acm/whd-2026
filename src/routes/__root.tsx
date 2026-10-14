@@ -29,10 +29,10 @@ const getServerLocale = createServerFn({ method: 'GET' }).handler(async () => {
 function NotFoundPage() {
   const { t } = useTranslation();
   return (
-    <div className="bg-whd-dark flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-whd-dark">
       <AuthHeader />
       <AuthCard title={t('notFound.title')} subtitle={t('notFound.message')}>
-        <p className="text-whd-pink-bright mb-6 text-7xl font-black md:text-8xl">404</p>
+        <p className="mb-6 text-7xl font-black text-whd-pink-bright md:text-8xl">404</p>
         <Link to="/" className={buttonVariants({ className: 'w-full' })}>
           {t('notFound.goHome')}
         </Link>
@@ -44,12 +44,12 @@ function NotFoundPage() {
 function RootErrorPage({ error, reset }: ErrorComponentProps) {
   const { t } = useTranslation();
   return (
-    <div className="bg-whd-dark flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-whd-dark">
       <AuthHeader />
       <AuthCard title={t('errorPage.title')} subtitle={t('errorPage.message')}>
         {/* The raw message helps while developing; users never see internals. */}
         {import.meta.env.DEV && (
-          <p className="mb-6 font-mono text-sm break-words text-red-400">
+          <p className="mb-6 font-mono text-sm break-words text-destructive">
             {error instanceof Error ? error.message : String(error)}
           </p>
         )}
@@ -110,7 +110,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; i18n
 function RootDocument({ children }: { children: React.ReactNode }) {
   const { i18n } = useTranslation();
   return (
-    <html lang={i18n.language || 'en'}>
+    <html lang={i18n.language || 'en'} className="dark">
       <head>
         <HeadContent />
       </head>

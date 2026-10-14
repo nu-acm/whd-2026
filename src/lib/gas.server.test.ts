@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import { env } from 'cloudflare:workers';
 import { callGas, isGasConfigured } from './gas.server';
 

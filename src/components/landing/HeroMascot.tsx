@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import Countdown from '@/components/landing/Countdown';
 import type { RegistrationStatus } from '@/lib/registration';
+import { cn } from '@/lib/utils';
 
 export default function HeroMascot({
   registration,
@@ -17,7 +18,7 @@ export default function HeroMascot({
 }) {
   const { t } = useTranslation();
   return (
-    <div className={`hero-visual ${className}`}>
+    <div className={cn('hero-visual', className)}>
       <img
         src="/whd/mascot-hero.svg"
         alt={t('hero.imageAlt')}

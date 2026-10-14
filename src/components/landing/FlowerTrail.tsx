@@ -38,6 +38,7 @@ export default function FlowerTrail() {
     const release = (flower: HTMLImageElement) => {
       particles.get(flower)?.cancel();
       particles.delete(flower);
+      flower.removeAttribute('data-active');
     };
 
     const clear = () => {
@@ -60,32 +61,25 @@ export default function FlowerTrail() {
 
       const flower = flowers[flowerIndex++ % flowers.length];
       release(flower);
+      // Commit the removed animation before recycling an active pool slot.
+      flower.getAnimations();
       if (!flower.complete || flower.naturalWidth === 0) return;
       const size = 20 + Math.random() * 30;
       const rotation = Math.random() * 240 - 120;
       const driftX = Math.random() * 44 - 22;
       const driftY = 18 + Math.random() * 30;
       const spin = Math.random() * 100 - 50;
-      Object.assign(flower.style, {
-        width: `${size}px`,
-        left: `${event.clientX}px`,
-        top: `${event.clientY}px`,
-      });
-      const animation = flower.animate(
-        [
-          { opacity: 0, transform: `translate(-50%, -50%) rotate(${rotation}deg) scale(.45)` },
-          {
-            opacity: 0.95,
-            transform: `translate(-50%, -50%) rotate(${rotation}deg) scale(1)`,
-            offset: 0.12,
-          },
-          {
-            opacity: 0,
-            transform: `translate(calc(-50% + ${driftX}px), calc(-50% + ${driftY}px)) rotate(${rotation + spin}deg) scale(.15)`,
-          },
-        ],
-        { duration: 800 + Math.random() * 300, easing: 'ease-out', fill: 'forwards' },
-      );
+      flower.style.setProperty('--flower-size', `${size}px`);
+      flower.style.setProperty('--flower-x', `${event.clientX}px`);
+      flower.style.setProperty('--flower-y', `${event.clientY}px`);
+      flower.style.setProperty('--flower-rotation', `${rotation}deg`);
+      flower.style.setProperty('--flower-drift-x', `${driftX}px`);
+      flower.style.setProperty('--flower-drift-y', `${driftY}px`);
+      flower.style.setProperty('--flower-end-rotation', `${rotation + spin}deg`);
+      flower.style.setProperty('--flower-duration', `${800 + Math.random() * 300}ms`);
+      flower.setAttribute('data-active', '');
+      const animation = flower.getAnimations()[0];
+      if (!animation) return;
       particles.set(flower, animation);
       animation.onfinish = () => release(flower);
     };

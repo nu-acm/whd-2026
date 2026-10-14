@@ -1,7 +1,15 @@
 import { FileText, CircleCheck } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardAction,
+} from '@/components/ui/card';
 import { FileUpload } from '@/components/ui/file-upload-2';
 import { ConfirmButton } from '@/components/ui/confirm-button';
 import { CV_ERRORS, CV_MAX_BYTES, CV_MAX_MB } from '@/lib/cv';
@@ -85,22 +93,26 @@ export function CvCard({
   };
 
   return (
-    <Card className="account-cv-card">
-      <CardContent className="flex flex-col gap-4">
+    <Card variant="cv">
+      <CardHeader variant="cv">
         <FileText className="account-section-icon" aria-hidden="true" />
         <div className="account-card-heading">
-          <h2 className="account-card-title">{t('cv.title')}</h2>
-          <span className={hasCv ? 'account-status-tag is-complete' : 'account-status-tag'}>
-            {hasCv && <CircleCheck size={14} aria-hidden="true" />}
-            {hasCv ? t('cv.uploaded') : t('cv.none')}
-          </span>
+          <CardTitle variant="account">{t('cv.title')}</CardTitle>
+          <CardAction>
+            <Badge variant="status" complete={hasCv}>
+              {hasCv && <CircleCheck size={14} aria-hidden="true" />}
+              {hasCv ? t('cv.uploaded') : t('cv.none')}
+            </Badge>
+          </CardAction>
         </div>
 
-        <p className="text-whd-text-muted text-sm leading-relaxed">
+        <CardDescription variant="account">
           {registrationOpen ? t('cv.hint', { mb: CV_MAX_MB }) : t('cv.locked')}
-        </p>
+        </CardDescription>
+      </CardHeader>
 
-        {registrationOpen && (
+      {registrationOpen && (
+        <CardContent variant="cv">
           <div className="account-cv-upload">
             <FileUpload
               accept="application/pdf,.pdf"
@@ -127,8 +139,8 @@ export function CvCard({
               />
             )}
           </div>
-        )}
-      </CardContent>
+        </CardContent>
+      )}
     </Card>
   );
 }

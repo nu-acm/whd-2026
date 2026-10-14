@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 import { env } from 'cloudflare:workers';
 import { getAdminEmails, sessionIsAdmin } from './admin.server';
 

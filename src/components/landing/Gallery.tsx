@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
 import {
   AnimatePresence,
@@ -9,8 +9,9 @@ import {
   useSpring,
   useTransform,
 } from 'motion/react';
-import type { MotionValue } from 'motion/react';
+import type { MotionValue, MotionStyle } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { ArrowLeft, ArrowRight, ArrowUpRight, X } from 'lucide-react';
 
 const PHOTOS = [
@@ -20,6 +21,14 @@ const PHOTOS = [
   '/whd/gallery-teamwork.webp',
   '/whd/gallery-participants.webp',
   '/whd/gallery-awards.webp',
+] as const;
+const FRAME_CLASSES = [
+  'gallery-frame gallery-frame-1',
+  'gallery-frame gallery-frame-2',
+  'gallery-frame gallery-frame-3',
+  'gallery-frame gallery-frame-4',
+  'gallery-frame gallery-frame-5',
+  'gallery-frame gallery-frame-6',
 ] as const;
 const FRAMES = [
   { photo: 3, depth: 24 },
@@ -55,8 +64,8 @@ function FloatingPhoto({
   return (
     <motion.button
       type="button"
-      className={`gallery-frame gallery-frame-${index + 1}`}
-      style={reduced ? undefined : { x, y }}
+      className={FRAME_CLASSES[index]}
+      style={{ '--gallery-x': reduced ? 0 : x, '--gallery-y': reduced ? 0 : y } as MotionStyle}
       onClick={() => onOpen(frame.photo)}
       aria-label={t('gallery.openPhoto', { index: frame.photo + 1 })}
     >
@@ -75,7 +84,7 @@ function FloatingPhoto({
 export default function Gallery() {
   const { t } = useTranslation();
   const stage = useRef<HTMLDivElement>(null);
-  const dialog = useRef<HTMLDialogElement>(null);
+
   const [selected, setSelected] = useState<number | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const reduced = useReducedMotion();
@@ -84,19 +93,6 @@ export default function Gallery() {
   const rawY = useMotionValue(0);
   const pointerX = useSpring(rawX, { stiffness: 100, damping: 25 });
   const pointerY = useSpring(rawY, { stiffness: 100, damping: 25 });
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const element = dialog.current;
-    if (!element) return;
-    element.showModal();
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      element.close();
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isOpen]);
 
   function move(event: PointerEvent<HTMLDivElement>) {
     if (reduced || event.pointerType !== 'mouse') return;
@@ -147,64 +143,61 @@ export default function Gallery() {
           />
         ))}
       </div>
-      <dialog
-        ref={dialog}
-        className="gallery-dialog whd-dialog"
-        aria-label={t('gallery.title')}
-        onClose={() => setIsOpen(false)}
-        onClick={(event) => {
-          if (event.target === event.currentTarget) setIsOpen(false);
-        }}
-        onKeyDown={(event) => {
-          if (event.key === 'ArrowLeft') {
-            event.preventDefault();
-            step(-1);
-          }
-          if (event.key === 'ArrowRight') {
-            event.preventDefault();
-            step(1);
-          }
-        }}
-      >
-        {selected !== null && (
-          <div className="gallery-viewer">
-            <button
-              type="button"
-              className="gallery-close"
-              aria-label={t('gallery.close')}
-              onClick={() => setIsOpen(false)}
-            >
-              <X aria-hidden="true" />
-            </button>
-            <div className="gallery-image">
-              <AnimatePresence initial={false}>
-                <motion.img
-                  key={selected}
-                  initial={{ opacity: reduced ? 1 : 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: reduced ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }}
-                  src={PHOTOS[selected]}
-                  alt={t('gallery.imageAlt', { index: selected + 1 })}
-                  width={900}
-                  height={680}
-                />
-              </AnimatePresence>
-            </div>
-            <div className="gallery-controls">
-              <button type="button" aria-label={t('gallery.previous')} onClick={() => step(-1)}>
-                <ArrowLeft aria-hidden="true" />
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent
+          variant="gallery"
+          onKeyDown={(event) => {
+            if (event.key === 'ArrowLeft') {
+              event.preventDefault();
+              step(-1);
+            }
+            if (event.key === 'ArrowRight') {
+              event.preventDefault();
+              step(1);
+            }
+          }}
+        >
+          <DialogTitle className="sr-only">{t('gallery.title')}</DialogTitle>
+          {selected !== null && (
+            <div className="gallery-viewer">
+              <button
+                type="button"
+                className="gallery-close"
+                aria-label={t('gallery.close')}
+                onClick={() => setIsOpen(false)}
+              >
+                <X aria-hidden="true" />
               </button>
-              <p aria-live="polite">
-                {selected + 1} / {PHOTOS.length}
-              </p>
-              <button type="button" aria-label={t('gallery.next')} onClick={() => step(1)}>
-                <ArrowRight aria-hidden="true" />
-              </button>
+              <div className="gallery-image">
+                <AnimatePresence initial={false}>
+                  <motion.img
+                    key={selected}
+                    initial={{ opacity: reduced ? 1 : 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: reduced ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    src={PHOTOS[selected]}
+                    alt={t('gallery.imageAlt', { index: selected + 1 })}
+                    width={900}
+                    height={680}
+                  />
+                </AnimatePresence>
+              </div>
+              <div className="gallery-controls">
+                <button type="button" aria-label={t('gallery.previous')} onClick={() => step(-1)}>
+                  <ArrowLeft aria-hidden="true" />
+                </button>
+                <p aria-live="polite">
+                  {selected + 1} / {PHOTOS.length}
+                </p>
+                <button type="button" aria-label={t('gallery.next')} onClick={() => step(1)}>
+                  <ArrowRight aria-hidden="true" />
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </dialog>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

@@ -15,6 +15,7 @@ export interface FaqItem {
 }
 
 export interface Faq6Props {
+  variant?: 'preview' | 'full';
   badge?: string;
   title: ReactNode;
   titleId?: string;
@@ -27,6 +28,7 @@ export interface Faq6Props {
 
 // Adapted from https://registry.watermelon.sh/r/faq-6.json.
 export function Faq6({
+  variant = 'preview',
   badge,
   title,
   titleId,
@@ -37,7 +39,7 @@ export function Faq6({
   className,
 }: Faq6Props) {
   return (
-    <div className={cn('faq-six', className)}>
+    <div className={cn('faq-six', variant === 'full' && 'faq-six-full', className)}>
       <div className="faq-six-intro">
         {badge && <p className="landing-eyebrow">{badge}</p>}
         <Heading id={titleId} className="landing-heading">
@@ -46,10 +48,10 @@ export function Faq6({
         {contact}
         {illustration}
       </div>
-      <Accordion type="single" collapsible className="faq-six-list">
+      <Accordion variant="faq">
         {faqs.map((faq, index) => (
-          <AccordionItem key={faq.id} value={faq.id} className="faq-six-item">
-            <AccordionTrigger className="faq-six-trigger">
+          <AccordionItem key={faq.id} value={faq.id}>
+            <AccordionTrigger>
               <span className="faq-six-number" aria-hidden="true">
                 Q{index + 1}
               </span>
@@ -59,7 +61,7 @@ export function Faq6({
                 <FaMinus className="faq-six-minus" />
               </span>
             </AccordionTrigger>
-            <AccordionContent className="faq-six-answer">
+            <AccordionContent>
               <p>{faq.answer}</p>
             </AccordionContent>
           </AccordionItem>

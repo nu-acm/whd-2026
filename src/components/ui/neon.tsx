@@ -14,21 +14,15 @@ type NeonFrameProps = React.ComponentProps<'div'> & {
  */
 export function NeonFrame({
   size = 'md',
-  interactive = false,
-  flat = false,
+  interactive: _interactive,
+  flat: _flat,
   className,
   ...props
 }: NeonFrameProps) {
   return (
     <div
       data-slot="neon-frame"
-      className={cn(
-        'neon-frame',
-        size === 'sm' && 'neon-frame-sm',
-        interactive && 'neon-frame-interactive',
-        flat && 'neon-frame-flat',
-        className,
-      )}
+      className={cn('neon-frame', size === 'sm' && 'neon-frame-sm', className)}
       {...props}
     />
   );
@@ -37,15 +31,22 @@ export function NeonFrame({
 type NeonPanelProps = React.ComponentProps<'div'> & {
   /** Which edge touches a sibling panel; that edge is squared off. */
   position?: 'full' | 'top' | 'bottom';
+  density?: 'default' | 'auth';
 };
 
 /** Content group inside a NeonFrame surface. */
-export function NeonPanel({ position = 'full', className, ...props }: NeonPanelProps) {
+export function NeonPanel({
+  position = 'full',
+  density = 'default',
+  className,
+  ...props
+}: NeonPanelProps) {
   return (
     <div
       data-slot="neon-panel"
       className={cn(
         'neon-panel',
+        density === 'auth' && (position === 'top' ? 'whd-auth-top' : 'whd-auth-bottom'),
         position === 'top' && 'neon-panel-top',
         position === 'bottom' && 'neon-panel-bottom',
         className,

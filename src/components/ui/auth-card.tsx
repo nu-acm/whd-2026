@@ -1,6 +1,5 @@
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { NeonFrame, NeonPanel } from '@/components/ui/neon';
 
 /** Centred card used by the login and onboarding screens. */
 export function AuthCard({
@@ -22,10 +21,14 @@ export function AuthCard({
     return (
       <main className="account-login-grid">
         {illustration}
-        <Card className={cn('account-login-card', className)}>
-          <CardContent key={contentKey} className="account-login-content">
-            <h1>{title}</h1>
-            {subtitle && <p className="account-form-subtitle">{subtitle}</p>}
+        <Card variant="login" className={className}>
+          <CardHeader variant="login">
+            <CardTitle as="h1" variant="login">
+              {title}
+            </CardTitle>
+            {subtitle && <CardDescription variant="login">{subtitle}</CardDescription>}
+          </CardHeader>
+          <CardContent key={contentKey} variant="login">
             {children}
           </CardContent>
         </Card>
@@ -37,18 +40,18 @@ export function AuthCard({
       {/* Star glow, echoing the landing hero */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 left-1/2 aspect-square w-[min(900px,140vw)] -translate-x-1/2 -translate-y-1/2 bg-[url('/whd/star-glow.webp')] bg-contain bg-center bg-no-repeat opacity-70"
+        className="whd-auth-glow pointer-events-none absolute top-1/2 left-1/2 aspect-square -translate-x-1/2 -translate-y-1/2 bg-contain bg-center bg-no-repeat opacity-70"
       />
 
-      <NeonFrame className={cn('relative w-full max-w-md', className)}>
-        <NeonPanel position="top" className="px-6 py-5 sm:px-8">
-          <h1 className="neon-text text-2xl font-bold text-white sm:text-3xl">{title}</h1>
-        </NeonPanel>
-        <NeonPanel position="bottom" className="px-6 pt-5 pb-7 sm:px-8">
-          {subtitle && <p className="text-whd-text-muted text-sm leading-relaxed">{subtitle}</p>}
-          <div className={cn(subtitle && 'mt-6')}>{children}</div>
-        </NeonPanel>
-      </NeonFrame>
+      <Card variant="auth" className={cn('relative w-full max-w-md', className)}>
+        <CardHeader variant="auth">
+          <CardTitle as="h1" variant="auth">
+            {title}
+          </CardTitle>
+          {subtitle && <CardDescription variant="auth">{subtitle}</CardDescription>}
+        </CardHeader>
+        <CardContent variant="auth">{children}</CardContent>
+      </Card>
     </div>
   );
 }

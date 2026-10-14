@@ -40,9 +40,6 @@
   border-radius: 26px 8px 26px 8px;
   min-width: 0;
 }
-.account-page [data-slot='card-content'] {
-  padding: 28px;
-}
 .account-page :is(input:not([type='file']):not([data-input-otp]), select) {
   min-height: 52px;
   border-radius: 12px 5px 12px 5px;
@@ -126,7 +123,9 @@
   gap: 12px 24px;
 }
 .account-footer a {
-  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 .account-page a:focus-visible {
   outline: 2px solid var(--whd-pink-bright);
@@ -237,10 +236,7 @@
 .account-page .account-login-card {
   background: transparent;
 }
-.account-page .account-login-content {
-  padding: 16px 0;
-}
-.account-login-content h1 {
+.account-login-card h1 {
   font-size: clamp(2.5rem, 4vw, 3.5rem);
   margin-bottom: 16px;
 }
@@ -300,7 +296,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 32px;
+  min-height: 44px;
   font-size: 0.875rem;
   color: var(--whd-pink-bright);
 }
@@ -483,9 +479,6 @@
   color: #fda4af;
   padding-inline: 0;
   white-space: normal;
-}
-.account-no-team-content > div > .account-section-icon {
-  margin-bottom: 16px;
 }
 .account-team-forms {
   display: grid;
@@ -748,10 +741,7 @@
     bottom: -14px;
     right: 6px;
   }
-  .account-page .account-login-content {
-    padding: 0;
-  }
-  .account-login-content h1 {
+  .account-login-card h1 {
     font-size: 2.25rem;
   }
   .account-form-subtitle {
@@ -794,9 +784,6 @@
   .dashboard-stat:first-child {
     grid-column: 1 / -1;
   }
-  .account-page .dashboard-stat-content {
-    padding: 18px;
-  }
   .dashboard-stat-value {
     font-size: 1.125rem;
   }
@@ -808,9 +795,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
-  }
-  .account-page [data-slot='card-content'] {
-    padding: 24px;
   }
   .account-team-forms {
     grid-template-columns: 1fr 1fr;
@@ -859,15 +843,6 @@
     border-left: 0;
     border-top: 1px solid #d6b8ed1a;
   }
-  .account-page [data-slot='card-content'] {
-    padding: 22px;
-  }
-  .account-page .account-login-content {
-    padding: 0;
-  }
-  .account-page .dashboard-stat-content {
-    padding: 16px;
-  }
   .dashboard-stat-icon {
     right: 14px;
     top: 16px;
@@ -887,7 +862,7 @@
   .account-member > button {
     grid-column: 2;
     justify-self: start;
-    min-height: 36px;
+    min-height: 44px;
     font-size: 0.75rem;
     padding-inline: 6px;
   }
@@ -1028,4 +1003,68 @@
   .account-otp-slot .animate-caret-blink {
     animation: none;
   }
+}
+
+/* Card parts are siblings; spacing still follows the established account layout. */
+.account-page [data-slot='card'] {
+  --card-spacing: 28px;
+}
+.account-page [data-slot='card'][data-size='sm'] {
+  --card-spacing: 16px;
+}
+.account-page [data-slot='card-content'] {
+  padding: var(--card-spacing);
+}
+.account-page [data-slot='card'] > :is(.whd-team-header, .whd-cv-header, .whd-no-team-header) {
+  padding: var(--card-spacing) var(--card-spacing) 0;
+}
+.account-page
+  [data-slot='card']
+  > :is(.whd-team-header, .whd-cv-header, .whd-no-team-header):only-child {
+  padding-bottom: var(--card-spacing);
+}
+.account-page .account-team-card > .account-team-content {
+  padding-top: 24px;
+}
+.account-page .account-team-card:has(> [data-slot='card-footer']) > .account-team-content {
+  padding-bottom: 0;
+}
+.account-page .account-cv-card > .account-cv-content {
+  display: flex;
+  padding-top: 16px;
+}
+.account-page .account-team-card > .account-no-team-content {
+  padding-top: 0;
+}
+.account-page .whd-team-footer {
+  padding: 24px var(--card-spacing) var(--card-spacing);
+}
+.account-page .account-login-card > .account-login-header {
+  padding: 16px 0 0;
+}
+.account-page .account-login-card > .account-login-content {
+  padding: 0 0 16px;
+}
+@media (max-width: 1023px) and (min-width: 768px) {
+  .account-page [data-slot='card'] {
+    --card-spacing: 24px;
+  }
+}
+@media (max-width: 479px) {
+  .account-page [data-slot='card'] {
+    --card-spacing: 22px;
+  }
+}
+@media (max-width: 767px) {
+  .account-page .account-login-card > .account-login-header,
+  .account-page .account-login-card > .account-login-content {
+    padding: 0;
+  }
+}
+@media (max-width: 1023px) and (min-width: 768px) {
+  .account-page .dashboard-stat-content {
+    padding: var(--card-spacing);
+  }
+}
+@media (max-width: 479px) {
 }

@@ -1,20 +1,12 @@
 import { betterAuth } from 'better-auth';
-import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { emailOTP } from 'better-auth/plugins';
 
 /**
- * CLI-only auth configuration, kept Node-safe so `@better-auth/cli` can read it
- * to generate src/db/auth-schema.ts. This is NEVER used at runtime — the
- * request-time instance lives in auth.server.ts.
- *
- * Nothing here may import `cloudflare:workers`.
+ * Node-only configuration for generating the Drizzle auth schema with `auth`.
+ * The CLI selects Drizzle and SQLite explicitly; no database connection is needed.
+ * Request-time authentication lives in auth.server.ts.
  */
 export const auth = betterAuth({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  database: drizzleAdapter(null as any, {
-    provider: 'sqlite',
-    schema: {},
-  }),
   secret: process.env.BETTER_AUTH_SECRET,
   appName: "Women's Hack Day",
   ...(process.env.GOOGLE_CLIENT_ID &&

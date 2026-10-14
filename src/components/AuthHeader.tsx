@@ -5,6 +5,7 @@ import { ConfirmButton } from '@/components/ui/confirm-button';
 import { CircleHelp, MessageCircle } from 'lucide-react';
 import { TELEGRAM_CHAT_URL } from '@/lib/event';
 import { authClient } from '@/lib/auth-client';
+import { cn } from '@/lib/utils';
 
 /** Slim header for the signed-in pages: logo, language, who is signed in, sign out. */
 export function AuthHeader({
@@ -21,15 +22,18 @@ export function AuthHeader({
 
   const handleSignOut = async () => {
     await authClient.signOut();
-    navigate({ to: '/', reloadDocument: true });
+    await navigate({ to: '/', reloadDocument: true });
   };
 
   return (
-    <header className="auth-header border-whd-pink/40 bg-whd-dark/90 sticky top-0 z-50 w-full border-b">
+    <header className="auth-header sticky top-0 z-50 w-full border-b border-whd-pink/40 bg-whd-dark/90">
       <div
-        className={`auth-header-inner mx-auto flex h-16 max-w-[90rem] items-center justify-between px-4 sm:px-8 lg:px-12 ${showHelp ? 'auth-header-with-help' : ''}`}
+        className={cn(
+          'auth-header-inner mx-auto flex h-16 max-w-account items-center justify-between px-4 sm:px-8 lg:px-12',
+          showHelp && 'auth-header-with-help',
+        )}
       >
-        <Link to="/" className="flex items-center" aria-label="Women’s Hack Day">
+        <Link to="/" className="flex min-h-11 items-center" aria-label="Women’s Hack Day">
           <img
             src="/whd/logo.webp"
             alt=""
@@ -55,7 +59,7 @@ export function AuthHeader({
         <div className="auth-header-actions flex items-center gap-3">
           <LanguageSwitcher />
           {email && (
-            <span className="auth-header-email hidden text-sm text-white/80 sm:inline">
+            <span className="auth-header-email hidden text-sm text-foreground/80 sm:inline">
               {email}
             </span>
           )}
@@ -65,7 +69,7 @@ export function AuthHeader({
               label={t('common.signOut')}
               confirmLabel={t('common.confirm')}
               onConfirm={handleSignOut}
-              armedClassName="bg-whd-pink text-whd-purple-deep hover:bg-whd-pink-bright hover:text-whd-purple-deep"
+              confirmationTone="accent"
             />
           )}
         </div>

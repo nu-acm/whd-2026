@@ -6,7 +6,7 @@ import { ConfirmButton } from '@/components/ui/confirm-button';
 import type { AdminHeaderControls } from '@/lib/admin-header-context';
 
 const navLinkClass =
-  'rounded-lg px-3 py-1.5 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white';
+  'inline-flex min-h-11 items-center rounded-lg px-3 py-1.5 text-sm text-foreground/80 transition-colors hover:bg-foreground/10 hover:text-foreground';
 
 /** Header shared by /admin and /checkin: navigation, refresh, sign out. */
 export function AdminHeader({
@@ -18,10 +18,14 @@ export function AdminHeader({
   const { t } = useTranslation();
 
   return (
-    <header className="border-whd-pink/40 bg-whd-dark/90 sticky top-0 z-50 w-full border-b">
-      <div className="mx-auto flex h-16 max-w-[100rem] items-center justify-between gap-3 px-4 sm:px-8 lg:px-12">
+    <header className="sticky top-0 z-50 w-full border-b border-whd-pink/40 bg-whd-dark/90">
+      <div className="mx-auto flex h-16 max-w-admin items-center justify-between gap-3 px-4 sm:px-8 lg:px-12">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">
-          <Link to="/" className="flex shrink-0 items-center" aria-label="Women’s Hack Day">
+          <Link
+            to="/"
+            className="flex min-h-11 shrink-0 items-center"
+            aria-label="Women’s Hack Day"
+          >
             <img
               src="/whd/logo.webp"
               alt=""
@@ -39,7 +43,7 @@ export function AdminHeader({
               to="/admin"
               className={navLinkClass}
               activeProps={{
-                className: 'bg-whd-purple text-white shadow-[inset_0_0_0_2px_var(--whd-pink)]',
+                className: 'admin-nav-active',
               }}
             >
               {t('admin.navReport')}
@@ -48,7 +52,7 @@ export function AdminHeader({
               to="/checkin"
               className={navLinkClass}
               activeProps={{
-                className: 'bg-whd-purple text-white shadow-[inset_0_0_0_2px_var(--whd-pink)]',
+                className: 'admin-nav-active',
               }}
             >
               {t('admin.checkin')}
@@ -77,7 +81,7 @@ export function AdminHeader({
             label={t('common.signOut')}
             confirmLabel={t('common.confirm')}
             onConfirm={onSignOut}
-            armedClassName="bg-whd-pink text-whd-purple-deep hover:bg-whd-pink-bright hover:text-whd-purple-deep"
+            confirmationTone="accent"
           />
         </div>
       </div>

@@ -164,11 +164,11 @@
 .feature-two-time {
   color: var(--round-accent);
 }
-.feature-two-question {
+[data-variant='feature'] .whd-accordion-item {
   border-radius: 18px 6px 18px 6px;
   background: #24172f;
 }
-.feature-two-question[data-state='open'] {
+[data-variant='feature'] .whd-accordion-item[data-open] {
   background: #321d41;
 }
 /* Dates and schedule share the watch's luminous digits. */
@@ -298,12 +298,12 @@
 .faq-six-number {
   color: var(--spy-lime);
 }
-.faq-six-item {
+[data-variant='faq'] .whd-accordion-item {
   padding-inline: 16px;
   border-bottom-color: #b371ce30;
   border-radius: 18px 6px 18px 6px;
 }
-.faq-six-item[data-state='open'] {
+[data-variant='faq'] .whd-accordion-item[data-open] {
   background: linear-gradient(110deg, #50245b5c, #28193266);
   border-bottom-color: transparent;
 }
@@ -312,7 +312,7 @@
   background: #3c1d4a;
   box-shadow: inset 0 1px 0 #dd89f22b;
 }
-.faq-six-trigger[data-state='open'] .faq-six-toggle {
+[data-variant='faq'] .whd-accordion-trigger[data-open] .faq-six-toggle {
   box-shadow: 0 0 16px #fd5cc333;
 }
 .faq-contact {
@@ -365,13 +365,13 @@
     padding-inline: 12px;
     gap: 12px;
   }
-  .faq-six-item {
+  [data-variant='faq'] .whd-accordion-item {
     padding-inline: 8px;
   }
-  .faq-six-trigger {
+  [data-variant='faq'] .whd-accordion-trigger {
     gap: 10px;
   }
-  .faq-six-answer {
+  [data-variant='faq'] .whd-accordion-inner {
     padding-left: 36px;
   }
   .gallery-frame-1,
@@ -482,7 +482,7 @@
   flex-direction: column;
   gap: 12px;
 }
-.faq-showcase .faq-six-item {
+.faq-showcase [data-variant='faq'] .whd-accordion-item {
   flex: 1 0 auto;
   padding-inline: 24px;
   border: 0;
@@ -490,10 +490,10 @@
   background: #241a2e;
   box-shadow: inset 0 1px 0 #e1b4fc1a;
 }
-.faq-showcase .faq-six-item[data-state='open'] {
+.faq-showcase [data-variant='faq'] .whd-accordion-item[data-open] {
   background: #342040;
 }
-.faq-showcase .faq-six-trigger {
+.faq-showcase [data-variant='faq'] .whd-accordion-trigger {
   min-height: 84px;
   padding-block: 22px;
   gap: 20px;
@@ -504,7 +504,7 @@
 .faq-showcase .faq-six-question {
   font-weight: 650;
 }
-.faq-showcase .faq-six-answer {
+.faq-showcase [data-variant='faq'] .whd-accordion-inner {
   padding: 0 0 24px;
 }
 .faq-showcase .faq-six-full {
@@ -609,10 +609,10 @@
     width: 100%;
     justify-content: space-between;
   }
-  .faq-showcase .faq-six-item {
+  .faq-showcase [data-variant='faq'] .whd-accordion-item {
     padding-inline: 18px;
   }
-  .faq-showcase .faq-six-trigger {
+  .faq-showcase [data-variant='faq'] .whd-accordion-trigger {
     gap: 14px;
     font-size: 0.9375rem;
   }

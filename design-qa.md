@@ -130,13 +130,11 @@ Verified the new CTA on desktop 1440 px and phone 390 px; Kazakh text checked at
 
 Reviewed facts/about, dates/schedule, bento, gallery, FAQ open state, CTA/footer on desktop and mobile. Narrow 320 px RU/KK checks found and resolved schedule panel overflow and a 5px decorative flower extension. Gallery inspected at 390 px; photos do not cover heading or action. Global style is scoped to landing components, preserving routes, original content, photos, partners and existing countdown behavior. Production build passed; no new interactive logic was introduced. Proof: output/spy-theme/desktop.png and output/spy-theme/footer.png.
 
-
 ## FAQ showcase and full page — 2026-10-13
 
 Compared the supplied reference with the desktop implementation: retained illustrated left panel and five separated cards on the right, with intentional WHD palette, typography, mascot and two requested actions. Checked desktop 1440 px, mobile 390 px and narrow 320 px; no FAQ horizontal overflow at 320 px. Verified five preview questions, navigation to /faq, ten full-page questions, direct refresh, Enter accordion activation, RU/EN/KK switching and return to /#faq. Telegram href preserved. TypeScript, targeted ESLint, local production build and git diff --check passed. Build reports existing inputValidator deprecation warnings in unrelated routes. Screenshot: output/faq-showcase/desktop.png.
 
 final result: passed
-
 
 ## Interaction motion — 2026-10-13
 
@@ -145,7 +143,6 @@ Defined the missing shared accordion animations (280 ms open / 220 ms close), cr
 Verified accordion computed open/close animation names and durations, mobile menu open/Escape/rapid toggle at 390 px, gallery next-photo controls and Escape dismissal. Native dialog stays displayed during exit, then becomes display:none; its image persists for the fade. The shared confirmation-dialog class uses the same native-dialog CSS; destructive confirmation was not submitted during visual QA. TypeScript, targeted ESLint, local production build and diff whitespace checks passed.
 
 BeUniq raw audit: AI slop 100, copy slop 58, taste 18, design quality 76. The global style/copy audit is not passing; neon/gradient/eyebrow findings belong to the approved custom brand and unchanged content. TASTE-A11Y-001 flags in motion.css/accordion/Gallery are scanner false positives: CSS has an explicit reduced-motion block, accordion chevrons have motion-reduce utilities, and Gallery uses useReducedMotion. Existing unrelated findings remain outside this interaction-only change. Functional motion verification: passed.
-
 
 ## Login and dashboard — 2026-10-13
 
@@ -175,3 +172,75 @@ Account form animation is keyed by the stable email/OTP step, not translated tit
 - Installed Watermelon `input-otp-7` with the requested pnpm/shadcn command, corrected its registry import paths and wired it to the existing OtpForm state and shared Field label/error.
 - Two groups of three digits, WHD filled surfaces, thin pink active ring, error borders, reduced-motion caret. Paste strips spaces/separators; native one-time-code autocomplete and numeric keyboard retained. No auto-submit or authentication changes.
 - Four OTP tests passed: digit entry, formatted paste/correction/pending state, failed verification, resend cooldown/retry. TypeScript, targeted ESLint and production build passed. Browser review of the local fixture at desktop and narrow viewport; no real code requested or submitted. Proof: `output/account-redesign/otp-input.png`.
+
+## shadcn Base UI migration, 2026-10-14
+
+Migrated shared controls, account compositions, landing accordions, dialogs, and
+admin tables to the Base UI/Nova foundation while preserving WHD content,
+branding, assets, and behavior. The earlier entries about Radix and native dialogs
+record the implementation before this migration.
+
+- Live TanStack Start landing, login, and full FAQ: EN/RU/KK at 320, 390, 768,
+  and 1440px, 36 combinations. No horizontal overflow or fresh hydration errors.
+- Real dashboard, no-team, locked registration, onboarding, OTP, report, and
+  check-in components in a disposable fixture: the same matrix, 84 combinations.
+  Final measurements found no document overflow or visible standalone controls
+  below 44px. Fixed narrow member actions, table row links, profile links,
+  account footer links, and logo link targets.
+- Reviewed narrow translated error messages, disabled onboarding fields,
+  conditional guardian fields, team-name generation/cancellation, and pending
+  team actions. Automated tests cover OTP paste/resend and CV pending/error/drop
+  validation. Fixture callbacks use synthetic data and perform no real mutations.
+- Confirmation starts on Cancel, ignores backdrop clicks, and restores checkbox
+  focus after Escape. Gallery locks scrolling, supports arrows and crossfades,
+  dismisses on backdrop/Escape, and restores its opener. Verified in the browser
+  and regression tests.
+- Admin search, attendance filters, sorting, column visibility, and retained rows
+  verified in the browser and tests. CSV, refresh, row links, and server behavior
+  retain their existing code paths.
+- Reduced motion exercised in the disposable fixture using the real stylesheet
+  rules and the JavaScript media-query branch. Gallery offsets remain zero and
+  CSS animations stop. The flower trail uses CSS variables and a bounded pool;
+  tests cover scroll cleanup, reduced motion, and touch exclusion.
+- Formatting, all six strict lint rules, TypeScript, 172 tests across 31 files,
+  and the production client/Worker build pass. Lint loads the actual WHD theme
+  with no discovery/fallback warnings. New SSR tests cover React 19.3 hydration,
+  controlled state, stable field IDs, an open accordion, and a client portal.
+
+Evidence: `output/shadcn/fixture-matrix.json`, `public-matrix.json`, command logs,
+and screenshots including `dashboard-1440-kk.jpg`, `onboarding-320-kk.jpg`,
+`report-320-kk.jpg`, `confirmation-1440-en.jpg`, `gallery-dialog-1440-kk.jpg`,
+and `reduced-landing-390-kk.jpg`. Protected screens were tested with synthetic
+fixtures; live email, OAuth, Drive uploads, and account mutations were not run.
+Disposable fixture sources and server were removed after QA. No preview route,
+database migration, or deployment was added. Details: `docs/shadcn-migration.md`.
+
+Implementation and scoped visual QA: passed.
+
+## shadcn review fixes, 2026-10-14
+
+Fixed all six review findings: short-screen confirmation scrolling, enabled
+column-toggle/helper contrast, standard Button/Field/Card APIs, sibling account
+card composition, typed TanStack rendering, and real-screen regression coverage.
+
+- The enabled unpressed column toggle measures 9.37:1 on the WHD background.
+- A 320x220 Russian confirmation with a 96-character synthetic name keeps Cancel
+  and Confirm inside its scrollable surface. Both actions are 44px tall. Backdrop
+  retention, Escape dismissal, and opener focus were verified.
+- The account/admin matrix covers EN/RU/KK at 320/390/768/1440px for dashboard,
+  no-team, locked, pending, uploaded CV, OTP, guardian onboarding, report, and
+  check-in. All 108 combinations have no document overflow, no nested card
+  headers, and no visible standalone form controls below 44px. Title, subtitle,
+  and field positions remain identical after the onboarding composition change.
+- Live TanStack Start login passes the 12 language/width combinations. Fresh
+  navigation and locale reloads produced no application or hydration warnings.
+- Tests render the actual Gallery and admin routes, including CSV and row links.
+  They also caught and protect against checkbox remounting during attendance
+  updates, which had prevented confirmation focus restoration.
+- Final formatting, strict lint, TypeScript, 182 tests in 34 files, and the
+  production client/Worker build pass. All six shadcn rules remain errors.
+
+Evidence: output/shadcn/fix-responsive.json, fix-short-evidence.json,
+fix-contrast-evidence.json, fix-confirm-short.jpg, and fix-* screenshots/logs.
+Protected screens use disposable synthetic fixtures. No account, attendance,
+database, or deployment operation is part of this review fix.

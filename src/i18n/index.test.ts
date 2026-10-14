@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { I18nextProvider, useTranslation } from 'react-i18next';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { createI18n, supportedLngs } from '@/i18n';
 import { TEAM_ERRORS } from '@/lib/team-errors';
 import { AI_RATE_LIMIT_ERROR } from '@/lib/ai';
