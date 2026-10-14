@@ -18,20 +18,8 @@ export default function FlowerTrail() {
     const finePointer = window.matchMedia('(any-hover: hover) and (any-pointer: fine)');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const particles = new Map<HTMLImageElement, Animation>();
-    // Reuse a fixed pool instead of allocating and removing nodes during movement.
-    const flowers = Array.from({ length: MAX_FLOWERS }, (_, index) => {
-      const flower = new Image();
-      flower.src = FLOWERS[index % FLOWERS.length];
-      flower.alt = '';
-      flower.draggable = false;
-      layer.appendChild(flower);
-      return flower;
-    });
-    let disposed = false;
+    let flowers: HTMLImageElement[] = [];
     let ready = false;
-    void Promise.allSettled(flowers.map((flower) => flower.decode())).then(() => {
-      ready = !disposed;
-    });
     let previous: { x: number; y: number; time: number } | null = null;
     let flowerIndex = 0;
 
@@ -60,6 +48,8 @@ export default function FlowerTrail() {
       previous = { x: event.clientX, y: event.clientY, time: now };
 
       const flower = flowers[flowerIndex++ % flowers.length];
+      const position = flower.parentElement;
+      if (!position) return;
       release(flower);
       // Commit the removed animation before recycling an active pool slot.
       flower.getAnimations();
@@ -69,9 +59,9 @@ export default function FlowerTrail() {
       const driftX = Math.random() * 44 - 22;
       const driftY = 18 + Math.random() * 30;
       const spin = Math.random() * 100 - 50;
-      flower.style.setProperty('--flower-size', `${size}px`);
-      flower.style.setProperty('--flower-x', `${event.clientX}px`);
-      flower.style.setProperty('--flower-y', `${event.clientY}px`);
+      position.style.setProperty('--flower-x', `${event.clientX}px`);
+      position.style.setProperty('--flower-y', `${event.clientY}px`);
+      flower.style.setProperty('--flower-scale', `${size / 50}`);
       flower.style.setProperty('--flower-rotation', `${rotation}deg`);
       flower.style.setProperty('--flower-drift-x', `${driftX}px`);
       flower.style.setProperty('--flower-drift-y', `${driftY}px`);
@@ -84,23 +74,53 @@ export default function FlowerTrail() {
       animation.onfinish = () => release(flower);
     };
 
-    window.addEventListener('pointermove', move, { passive: true });
+    const disposePool = () => {
+      window.removeEventListener('pointermove', move);
+      clear();
+      ready = false;
+      flowers.forEach((flower) => flower.parentElement?.remove());
+      flowers = [];
+      flowerIndex = 0;
+    };
+
+    const updateEligibility = () => {
+      disposePool();
+      if (!finePointer.matches || reducedMotion.matches) return;
+
+      // Allocate and decode only while a mouse trail is allowed.
+      const pool = Array.from({ length: MAX_FLOWERS }, (_, index) => {
+        const position = document.createElement('span');
+        position.className = 'flower-trail-position';
+        const flower = new Image();
+        flower.src = FLOWERS[index % FLOWERS.length];
+        flower.alt = '';
+        flower.draggable = false;
+        position.appendChild(flower);
+        layer.appendChild(position);
+        return flower;
+      });
+      flowers = pool;
+      void Promise.allSettled(pool.map((flower) => flower.decode())).then(() => {
+        // A preference change or unmount may have replaced this pool while decoding.
+        if (flowers === pool) ready = true;
+      });
+      window.addEventListener('pointermove', move, { passive: true });
+    };
+
+    updateEligibility();
     window.addEventListener('blur', clear);
     window.addEventListener('scroll', clear, { passive: true });
     document.addEventListener('visibilitychange', clear);
-    finePointer.addEventListener('change', clear);
-    reducedMotion.addEventListener('change', clear);
+    finePointer.addEventListener('change', updateEligibility);
+    reducedMotion.addEventListener('change', updateEligibility);
 
     return () => {
-      disposed = true;
-      window.removeEventListener('pointermove', move);
       window.removeEventListener('blur', clear);
       window.removeEventListener('scroll', clear);
       document.removeEventListener('visibilitychange', clear);
-      finePointer.removeEventListener('change', clear);
-      reducedMotion.removeEventListener('change', clear);
-      clear();
-      flowers.forEach((flower) => flower.remove());
+      finePointer.removeEventListener('change', updateEligibility);
+      reducedMotion.removeEventListener('change', updateEligibility);
+      disposePool();
     };
   }, []);
 

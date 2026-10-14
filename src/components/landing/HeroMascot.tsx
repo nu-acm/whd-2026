@@ -27,6 +27,7 @@ export default function HeroMascot({
         fetchPriority={priority ? 'high' : undefined}
         loading={priority ? 'eager' : 'lazy'}
       />
+      <span className="hero-eyes" aria-hidden="true" />
       <div className="hero-gadget">
         {!isClosed && registration.deadline ? (
           <Countdown deadline={registration.deadline} onElapsed={onElapsed} />

@@ -1,11 +1,8 @@
 <svg width="5221" height="6327" viewBox="0 0 5221 6327" fill="none" xmlns="http://www.w3.org/2000/svg">
 <style>
-.neon-eye {fill:#ff7bdd;filter:drop-shadow(0 0 24px #ff4dcc) drop-shadow(0 0 65px #ff25bc);animation:eye-neon 4.8s ease-in-out infinite;}
-.neon-eye-core {fill:#f82daf;animation:eye-core 4.8s ease-in-out infinite;}
+.neon-eye {fill:#ff7bdd;filter:drop-shadow(0 0 24px #ff4dcc) drop-shadow(0 0 65px #ff25bc);}
+.neon-eye-core {fill:#f82daf;}
 .neon-screen {filter:drop-shadow(0 0 18px #ff6eda) drop-shadow(0 0 48px #d92dff);}
-@keyframes eye-neon {0%,60%,100%{fill:#ff7bdd;filter:drop-shadow(0 0 24px #ff4dcc) drop-shadow(0 0 65px #ff25bc)}70%,82%{fill:#fff3ff;filter:drop-shadow(0 0 38px #fff0fb) drop-shadow(0 0 105px #ff25bc)}76%{fill:#bd1665;filter:drop-shadow(0 0 8px #ff4dcc)}}
-@keyframes eye-core {0%,60%,100%{fill:#f82daf}70%,82%{fill:#ffb8ed}76%{fill:#bd1665}}
-@media(prefers-reduced-motion:reduce){.neon-eye,.neon-eye-core{animation:none}}
 </style>
 
 <g filter="url(#filter0_d_996_2)">

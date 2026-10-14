@@ -295,6 +295,20 @@ Admin tables use TanStack Table v9 for sorting and visibility while retaining
 all rows, search, CSV, counts, and attendance behavior. No pagination or selection
 was added. The confirmation and gallery dialog behavior is specified above.
 
+## Hero performance, 2026-10-14
+
+The mascot illustration now has static eye colors and glow. Two cropped SVG images
+reuse the supplied artwork for bright and dim eye states; the small overlays
+crossfade with CSS opacity on the existing 4.8-second cycle. Reduced motion keeps
+the base glow and loads no eye overlays. HeroMascot shares this behavior with the
+closing CTA. The mobile title and action own their stacking order so the hex grid
+stays behind them.
+
+The flower pool is created only when a fine pointer with hover is available and
+reduced motion is off. Preference changes release or recreate the pool; decoding
+from a discarded pool cannot activate a replacement. The 16-particle cap, cursor
+spacing, duration and cleanup behavior are retained.
+
 The official `.agents/skills/shadcn` skill is pinned in `SOURCE.md`. Use its
 `--dry-run`/`--diff` workflow for updates. Run `pnpm exec vp check`, the behavior
 tests, and the production build. See `docs/shadcn-migration.md` and the latest
@@ -317,3 +331,25 @@ so confirmation focus can return to the same checkbox after an update.
 Confirmation content scrolls inside its capped height. Enabled hidden-column
 controls and field hints use muted-foreground rather than the dim decorative
 token. The review-fix evidence is recorded in design-qa.md.
+
+## Hero button hover, 2026-10-14
+
+The hero CTA loads its account route on activation. Repeated pointer entry and
+keyboard focus do not preload account access checks. The gradient, skewed casing,
+hover lift and brighter glow remain; two static shadow layers crossfade through
+opacity over 180ms. Reduced motion keeps the glow feedback without the lift.
+
+Flowers use fixed boxes with transforms for position and scale. Their 100:91
+aspect ratio, displayed widths of 20 to 50px, drift, duration and 16-particle cap
+are preserved. Position wrappers keep cursor offsets outside the burst animation;
+the decorative layer is contained and never intercepts clicks.
+
+The CTA's interactive area stays fixed on hover and press. Only the nested
+hero-cta-surface moves; its decorative descendants ignore pointer events. Apply
+hover and active states from the link so lifting the surface cannot repeatedly
+remove the cursor from the hit area. The skew, glow and lift remain visible.
+
+The hero surface uses a transform transition. Only fine pointers with hover and
+motion enabled reserve compositor layers for the surface and its two glow layers.
+Touch devices have no hover lift; keyboard focus shows the brighter glow and focus
+outline. Reduced motion disables movement and transitions without reserving layers.

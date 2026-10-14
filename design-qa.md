@@ -244,3 +244,103 @@ Evidence: output/shadcn/fix-responsive.json, fix-short-evidence.json,
 fix-contrast-evidence.json, fix-confirm-short.jpg, and fix-* screenshots/logs.
 Protected screens use disposable synthetic fixtures. No account, attendance,
 database, or deployment operation is part of this review fix.
+
+## Hero performance, 2026-10-14
+
+The eye blink now crossfades two static SVG crops with opacity. The source mascot
+keeps its normal static glow; both hero placements retain the 4.8-second cycle.
+Mobile title/action stacking keeps the grid behind the content. FlowerTrail
+allocates no pool on touch-only devices or with reduced motion enabled, releases
+the pool on preference changes, and ignores decoding from discarded pools.
+
+- Production Chrome traces over 10.5 seconds: desktop Paint events fell from 274
+  to 33 and RasterTask events from 502 to 11. The original animated mascot was
+  served in the baseline; the optimized trace used the final built assets.
+- EN/RU/KK passed at 360, 390, 768 and 1440px. CTA visibility, horizontal overflow,
+  image loading and application errors were checked. Bright/dim states and the
+  closing mascot were inspected in the production build.
+- Initial reduced motion loads no eye overlays and creates no flower nodes.
+  Live preference changes stop and restore the trail; scrolling clears particles.
+- Formatting, all strict lint rules, TypeScript, 185 tests across 34 files, and
+  the production client/Worker build pass. Flower regression tests cover pointer
+  eligibility, preference changes, cleanup and stale decoding.
+
+Evidence: output/hero-performance/production/checks.json, live-trail.json,
+profile.json, traces and screenshots. Measurements used headless local Chrome at
+2x pixel density; they measure painting work rather than real-device FPS. The two
+eye crops total 68,730 bytes in the build, about 27,811 bytes with gzip, and are
+shared by both mascot placements. Reduced motion loads neither crop. No deployment
+was performed.
+
+## Hero button hover, 2026-10-14
+
+An elliptical pointer path crossing the hero CTA eight times over 6.5 seconds
+revealed repeated intent preloads, animated shadow painting and flower layout
+work. The hero link now loads on activation; its glow crossfades static layers.
+Flower placement and scale use transforms with fixed dimensions and the original
+100:91 aspect ratio.
+
+- Local development Chrome replay: hover fetches 17 to 0, Layout events 141 to 23,
+  Paint events 546 to 328, and RasterTask events 814 to 314. The pointer path,
+  viewport and pixel density were kept the same.
+- Frame intervals remained around 16.8ms at the 95th percentile in both runs.
+  These measurements demonstrate less work, not a measured FPS improvement on
+  the user's computer. Router beforeLoad requests repeat during intent preload
+  even with the existing loader preload stale time.
+- The real Hero and TanStack Router regression test verifies repeated hover and
+  keyboard focus perform no access or loader calls. Clicking still runs both.
+- Production browser checks confirm hover glow/lift, particle display, click
+  passthrough and successful navigation to /login. Reduced motion removes the
+  lift, fades and flowers. EN/RU/KK pass at 360/390/768/1440px without overflow.
+- Formatting, strict lint, TypeScript, 186 tests in 35 files and the production
+  build pass. All six shadcn lint rules remain errors.
+
+Evidence: output/hero-hover/profile.json, optimized.json, interaction.json,
+*-trace.json and screens/. Profiling used local headless Chrome at 2x density;
+visual and navigation checks used the production preview. No deployment was made.
+
+## Hero hover feedback loop, 2026-10-14
+
+Native browser tests reproduced a feedback loop at the hero CTA's bottom edge:
+the 3px lift moved the link away from the cursor, ended hover, and moved it back
+under the cursor. The earlier paint/request reductions did not resolve this.
+The navigation CTA remained stable under the same small vertical movements.
+
+Hero now keeps the link's interactive area fixed and lifts a nested visible
+surface. The surface and its descendants ignore pointer events, while the link
+owns hover, active state, focus and navigation. The existing shape, gradient,
+glow, 3px lift and reduced-motion behavior are preserved.
+
+- A controlled browser comparison restored the prior CSS and markup only in the
+  baseline page. Holding the cursor still produced four hover events before and
+  one initial entry after, with no cycling. Small vertical sweeps produced 60
+  events before and the five expected boundary crossings after, matching nav.
+- Link bounds stay fixed while the surface lifts. Production checks confirm the
+  glow and lift, pointer hit, click navigation to /login, reduced motion, and no
+  hover fetches. EN/RU/KK pass at 360/390/768/1440px without overflow or page errors.
+- Formatting, strict lint, TypeScript, 186 tests in 35 files and the production
+  build pass. The existing Hero routing regression continues to pass.
+
+Evidence: output/pointer-motion/edge-final.json, edge-before.json, edge-after.json,
+interaction.json, screens/checks.json and screenshots. CSS edge behavior was
+checked in Chrome; the baseline restoration was limited to disposable browser
+contexts. No production authentication bypass or deployment was added.
+
+## Hero button compositor layers, 2026-10-14
+
+The hero surface now transitions transform instead of translate and reserves
+three compositor layers only for fine pointers with hover and motion enabled.
+Touch devices skip hover feedback; keyboard focus receives the brighter glow.
+The fixed hit area, gradient, skew and reduced-motion behavior are retained.
+
+A local Chrome comparison at 1440 × 900 and 2x density replayed eight hover cycles
+with eye animation and cursor flowers disabled in both contexts. Paint events
+fell from 89 to 9, RasterTask events from 180 to 85, and Layout events from 35 to 3. Both traces had zero hover fetches. These counts show reduced painting work;
+they do not establish a real-device FPS or total CPU improvement. The additional
+layers reserve compositor memory on eligible desktop devices.
+
+Formatting, strict lint, TypeScript, all 186 tests in 35 files and the production
+build pass. Browser checks cover RU/KK/EN at 320/360/390/768/1440px, button bounds,
+label fit, fixed hover hit area, press, keyboard focus and activation, touch
+navigation, and reduced motion. Evidence: output/hero-button/profile.json,
+verification.json, traces and screenshots. No deployment was made.
