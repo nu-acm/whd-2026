@@ -10,7 +10,7 @@ import { AuthCard } from '@/components/ui/auth-card';
 import { EmailForm } from '@/components/login/EmailForm';
 import { OtpForm } from '@/components/login/OtpForm';
 import { GoogleButton } from '@/components/login/GoogleButton';
-import { getDemoLogin, getSession, isGoogleSignInEnabled } from '@/lib/auth.server';
+import { getSession, isGoogleSignInEnabled } from '@/lib/auth.server';
 import { isRegistrationOpen } from '@/lib/registration.server';
 import { Notice } from '@/components/ui/notice';
 import { getParticipant } from '@/lib/onboarding.server';
@@ -31,7 +31,6 @@ const getPostLoginDestination = createServerFn({ method: 'GET' }).handler(async 
 const getLoginOptions = createServerFn({ method: 'GET' }).handler(() => ({
   googleEnabled: isGoogleSignInEnabled(),
   registrationOpen: isRegistrationOpen(),
-  demo: getDemoLogin(),
 }));
 
 export const Route = createFileRoute('/login')({
@@ -51,10 +50,9 @@ export const Route = createFileRoute('/login')({
 function LoginPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { googleEnabled, registrationOpen, demo } = Route.useLoaderData();
+  const { googleEnabled, registrationOpen } = Route.useLoaderData();
   const search = Route.useSearch();
   const [email, setEmail] = useState<string | null>(null);
-  const isDemo = !!demo && email?.trim().toLowerCase() === demo.email;
 
   const handleVerified = async () => {
     const destination = (await getPostLoginDestination()) ?? '/onboarding';
@@ -83,7 +81,6 @@ function LoginPage() {
             </>
           )}
           <EmailForm onSent={setEmail} />
-          {demo && <DemoHint label={t('login.demoAccount')} value={demo.email} />}
         </AuthCard>
       ) : (
         <AuthCard
@@ -92,26 +89,9 @@ function LoginPage() {
           subtitle={t('login.otpSubtitle', { email })}
           illustration={<LoginVisual />}
         >
-          {isDemo && <DemoHint label={t('login.demoCode')} value={demo.code} mono />}
           <OtpForm email={email} onVerified={handleVerified} onChangeEmail={() => setEmail(null)} />
         </AuthCard>
       )}
     </AccountShell>
-  );
-}
-
-/** TEMPORARY: shows the demo admin login (see getDemoLogin). */
-function DemoHint({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div className="mb-5 rounded-xl border border-dashed border-whd-pink/60 bg-whd-pink/10 px-4 py-3 text-sm last:mt-5 last:mb-0">
-      <span className="text-whd-text-muted">{label} </span>
-      <span
-        className={
-          mono ? 'font-mono text-lg tracking-eyebrow text-foreground' : 'text-foreground select-all'
-        }
-      >
-        {value}
-      </span>
-    </div>
   );
 }

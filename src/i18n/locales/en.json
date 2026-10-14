@@ -235,8 +235,6 @@
     "googleFailed": "Could not start Google sign-in. Please try again.",
     "sendFailed": "Could not send the code. Please try again.",
     "verifyFailed": "That code is not right. Please try again.",
-    "demoAccount": "Demo admin account:",
-    "demoCode": "Demo code:",
     "registrationClosed": "Registration is closed. If you already registered, you can still sign in to see your team.",
     "welcome": "Your team. Your next step.",
     "welcomeHint": "Sign in to get ready for Women’s Hack Day."

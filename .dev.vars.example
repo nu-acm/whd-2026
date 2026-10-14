@@ -8,7 +8,7 @@ BETTER_AUTH_URL=http://localhost:3000
 # Any long random string. Generate one with: openssl rand -base64 32
 BETTER_AUTH_SECRET=
 
-# ISO 8601 instant when registration closes. Leave blank to keep it open.
+# ISO 8601 instant when registration closes. Leave blank to use the event deadline.
 # The landing page counts down to it. Afterwards onboarding, CV changes and
 # team create/join/leave/kick are blocked, and every page says registration is closed.
 # REGISTRATION_DEADLINE=2026-10-20T23:59:59+05:00
@@ -24,9 +24,3 @@ GOOGLE_CLIENT_SECRET=
 
 # Comma-separated emails allowed into /admin and /checkin.
 ADMIN_EMAILS=
-
-# TEMPORARY demo login for showing /admin to others. This email always gets this
-# 6-digit code (no email sent) and the login page shows it. Anyone can then sign
-# in as it, so keep it out of ADMIN_EMAILS once real participants register.
-# DEMO_LOGIN_EMAIL=admin@example.com
-# DEMO_LOGIN_CODE=246810

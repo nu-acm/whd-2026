@@ -1,5 +1,5 @@
 import { defineConfig, lazyPlugins, type Plugin } from 'vite-plus';
-import { fileURLToPath } from 'node:url';
+import { cloudflareTest, readD1Migrations } from '@cloudflare/vitest-plugin';
 
 export default defineConfig({
   lint: {
@@ -18,7 +18,7 @@ export default defineConfig({
       'src/routeTree.gen.ts',
       '.agents/skills/**',
     ],
-    settings: { shadcn: { note: 'Follow DESIGN.md. Use WHD tokens and component variants.' } },
+    settings: { shadcn: { note: 'Use WHD tokens and component variants.' } },
     rules: {
       'shadcn/no-restyle': ['error', { allow: ['layout'] }],
       'shadcn/no-raw-colors': 'error',
@@ -198,8 +198,8 @@ export default defineConfig({
     ],
   },
   test: {
-    include: ['src/**/*.test.{ts,tsx}'],
-    environment: 'node',
+    include: ['tests/server/**/*.test.ts'],
+    setupFiles: ['./tests/server/setup.ts'],
   },
   fmt: {
     semi: true,
@@ -222,19 +222,28 @@ export default defineConfig({
   server: { port: 3000, strictPort: true },
   resolve: {
     tsconfigPaths: true,
-    alias:
-      process.env.VITEST === 'true'
-        ? {
-            // Node tests use isolated bindings instead of Cloudflare services.
-            'cloudflare:workers': fileURLToPath(
-              new URL('./src/test/cloudflare-workers.ts', import.meta.url),
-            ),
-          }
-        : {},
   },
   plugins: lazyPlugins(async () => {
-    // Node and jsdom tests must not initialize the Workers application plugins.
-    if (process.env.VITEST === 'true') return [];
+    if (process.env.VITEST === 'true') {
+      return [
+        cloudflareTest({
+          miniflare: {
+            compatibilityDate: '2026-10-13',
+            compatibilityFlags: ['nodejs_compat'],
+            d1Databases: ['DB'],
+            bindings: {
+              TEST_MIGRATIONS: await readD1Migrations('./drizzle'),
+              BETTER_AUTH_URL: 'http://localhost:3000',
+              BETTER_AUTH_SECRET: 'test-only-auth-secret-with-at-least-32-characters',
+              GAS_URL: 'https://mail.example.test/exec',
+              GAS_SECRET: 'test-only-webhook-secret',
+              ADMIN_EMAILS: 'admin@example.test',
+              REGISTRATION_DEADLINE: '2099-01-01T00:00:00Z',
+            },
+          },
+        }),
+      ];
+    }
 
     const [
       { devtools },

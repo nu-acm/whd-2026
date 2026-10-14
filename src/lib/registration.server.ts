@@ -13,7 +13,7 @@ interface AppEnv {
 }
 
 /** An explicit environment override takes precedence over the event deadline. */
-export function getRegistrationDeadline(): Date {
+function getRegistrationDeadline(): Date {
   const raw = (env as unknown as AppEnv).REGISTRATION_DEADLINE?.trim();
   if (!raw) return new Date(DEFAULT_REGISTRATION_DEADLINE);
   const d = new Date(raw);

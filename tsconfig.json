@@ -1,5 +1,12 @@
 {
-  "include": ["src", "vite.config.ts", "drizzle.config.ts", "drizzle.config.local.ts"],
+  "include": [
+    "src",
+    "tests",
+    "playwright.config.ts",
+    "vite.config.ts",
+    "drizzle.config.ts",
+    "drizzle.config.local.ts"
+  ],
   "compilerOptions": {
     "target": "ES2022",
     "jsx": "react-jsx",
@@ -8,7 +15,12 @@
       "@/*": ["./src/*"]
     },
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["node", "vite/client", "@cloudflare/workers-types"],
+    "types": [
+      "node",
+      "vite/client",
+      "@cloudflare/workers-types",
+      "@cloudflare/vitest-plugin/types"
+    ],
 
     /* Bundler mode */
     "moduleResolution": "bundler",

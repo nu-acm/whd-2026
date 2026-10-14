@@ -17,7 +17,7 @@ export type AdminColumnMeta = {
   label: string;
   tone?: 'default' | 'muted' | 'numeric' | 'slug';
 };
-export const adminTableFeatures = tableFeatures({
+const adminTableFeatures = tableFeatures({
   rowSortingFeature,
   columnVisibilityFeature,
   sortedRowModel: createSortedRowModel(),

@@ -1,24 +1,6 @@
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
 
-export function FieldSet({ className, ...props }: React.ComponentProps<'fieldset'>) {
-  return <fieldset data-slot="field-set" className={cn('whd-field-set', className)} {...props} />;
-}
-export function FieldLegend({
-  className,
-  variant = 'legend',
-  ...props
-}: React.ComponentProps<'legend'> & { variant?: 'legend' | 'label' }) {
-  return (
-    <legend
-      data-slot="field-legend"
-      data-variant={variant}
-      className={cn('whd-field-legend', className)}
-      {...props}
-    />
-  );
-}
 export function FieldGroup({ className, ...props }: React.ComponentProps<'div'>) {
   return <div data-slot="field-group" className={cn('whd-field-group', className)} {...props} />;
 }
@@ -37,16 +19,8 @@ export function Field({
     />
   );
 }
-export function FieldContent({ className, ...props }: React.ComponentProps<'div'>) {
-  return (
-    <div data-slot="field-content" className={cn('whd-field-content', className)} {...props} />
-  );
-}
 export function FieldLabel({ className, ...props }: React.ComponentProps<'label'>) {
   return <label data-slot="field-label" className={cn('whd-field-label', className)} {...props} />;
-}
-export function FieldTitle({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="field-label" className={cn('whd-field-label', className)} {...props} />;
 }
 export function FieldDescription({ className, ...props }: React.ComponentProps<'p'>) {
   return (
@@ -55,24 +29,6 @@ export function FieldDescription({ className, ...props }: React.ComponentProps<'
       className={cn('whd-field-description', className)}
       {...props}
     />
-  );
-}
-export function FieldSeparator({ className, children, ...props }: React.ComponentProps<'div'>) {
-  return (
-    <div
-      data-slot="field-separator"
-      data-content={!!children}
-      className={cn('whd-field-separator', className)}
-      {...props}
-    >
-      <Separator />
-      {children && (
-        <>
-          <span data-slot="field-separator-content">{children}</span>
-          <Separator />
-        </>
-      )}
-    </div>
   );
 }
 export function FieldError({

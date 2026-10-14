@@ -530,15 +530,10 @@
 }
 
 /* Field composition stays reusable; FormField owns the app's label/error wiring. */
-.whd-field-set,
 .whd-field-group,
-.whd-field,
-.whd-field-content {
+.whd-field {
   display: flex;
   flex-direction: column;
-}
-.whd-field-set {
-  gap: 16px;
 }
 .whd-field-group {
   width: 100%;
@@ -554,10 +549,6 @@
   flex-direction: row;
   align-items: center;
 }
-.whd-field-content {
-  flex: 1;
-  gap: 2px;
-}
 .whd-field-label {
   font-size: 14px;
   font-weight: 500;
@@ -568,14 +559,6 @@
   flex-direction: column;
   gap: 8px;
   width: 100%;
-}
-.whd-field-legend {
-  margin-bottom: 6px;
-  font-size: 16px;
-  font-weight: 500;
-}
-.whd-field-legend[data-variant='label'] {
-  font-size: 14px;
 }
 .whd-field-description {
   font-size: 14px;
@@ -588,19 +571,6 @@
 .whd-field-error {
   font-size: 14px;
   color: var(--destructive);
-}
-.whd-field-separator {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: var(--muted-foreground);
-}
-.whd-field-separator > [data-slot='separator'] {
-  flex: 1;
-}
-.whd-field-separator > [data-slot='field-separator-content'] {
-  background: var(--background);
 }
 @container field-group (min-width: 28rem) {
   .whd-field[data-orientation='responsive'] {

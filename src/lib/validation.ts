@@ -62,7 +62,7 @@ export type OtpInput = z.infer<typeof otpSchema>;
 const phoneRegex = /^\+?[\d][\d\s\-().]{5,24}$/;
 
 /** Reduce a phone number to digits so stored values are comparable. */
-export function stripPhoneDigits(phone: string): string {
+function stripPhoneDigits(phone: string): string {
   return phone.replace(/\D/g, '');
 }
 
