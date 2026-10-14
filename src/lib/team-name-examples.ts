@@ -1,6 +1,6 @@
 /**
- * Real team names from past HackNU hackathons at Nazarbayev University — the
- * few-shot examples for the AI team-name generator (see ai.server.ts).
+ * Team names from past Nazarbayev University hackathons and additional examples
+ * for the AI team-name generator (see ai.server.ts).
  */
 export const TEAM_NAME_EXAMPLES: string[] = [
   '3A',

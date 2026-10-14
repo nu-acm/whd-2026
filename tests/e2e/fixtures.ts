@@ -49,7 +49,7 @@ export const test = base.extend<{ app: App }>({
     };
     // Inline config avoids loading the developer's secrets or remote bindings.
     const config = {
-      name: 'whd-browser-test',
+      name: 'whd-2026-browser-test',
       main: resolve('dist/server/index.js'),
       no_bundle: true,
       find_additional_modules: true,
@@ -60,8 +60,8 @@ export const test = base.extend<{ app: App }>({
       d1_databases: [
         {
           binding: 'DB',
-          database_name: 'browser-test',
-          database_id: 'local-browser-test',
+          database_name: 'whd-2026-browser-test',
+          database_id: 'local-whd-2026-browser-test',
           migrations_dir: resolve('drizzle'),
         },
       ],

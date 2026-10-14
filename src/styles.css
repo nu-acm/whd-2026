@@ -10,9 +10,8 @@
 @import '@fontsource-variable/montserrat';
 @import '@fontsource-variable/jetbrains-mono';
 
-/* Kazakh Cyrillic characters missing from fontsource's cyrillic-ext subset.
-   Carried over from hacknu-2026 along with the woff2 itself — without it
-   Әә Ғғ Ққ Ңң Ұұ Һһ fall back to a system font mid-word. */
+/* Covers Kazakh Cyrillic characters missing from fontsource's cyrillic-ext subset.
+   Without this local font, Әә Ғғ Ққ Ңң Ұұ Һһ fall back to a system font mid-word. */
 @font-face {
   font-family: 'JetBrains Mono Variable';
   font-style: normal;

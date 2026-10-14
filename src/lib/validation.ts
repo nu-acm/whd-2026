@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
 /**
- * Women's Hack Day is open to school, college and university students, so the
- * list starts at School — unlike HackNU, which is university-only.
+ * Women's Hack Day is open to school, college and university students.
  */
 export const EDUCATION_LEVELS = [
   'School',
