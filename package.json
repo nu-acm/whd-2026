@@ -77,7 +77,8 @@
     "vite-plus": "catalog:",
     "wrangler": "^4.150.0",
     "@cloudflare/vitest-plugin": "1.4.1",
-    "@playwright/test": "1.64.0"
+    "@playwright/test": "1.64.0",
+    "vitest": "catalog:"
   },
   "packageManager": "pnpm@12.11.2"
 }

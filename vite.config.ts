@@ -200,6 +200,8 @@ export default defineConfig({
   test: {
     include: ['tests/server/**/*.test.ts'],
     setupFiles: ['./tests/server/setup.ts'],
+    // The Workers runner cannot read Vitest's filesystem module cache.
+    fsModuleCache: false,
   },
   fmt: {
     semi: true,

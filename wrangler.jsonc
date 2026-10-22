@@ -4,6 +4,9 @@
   "compatibility_date": "2026-10-13",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
+  "vars": {
+    "BETTER_AUTH_URL": "https://whd.nuacmw.kz",
+  },
   "observability": {
     "enabled": true,
   },
@@ -11,7 +14,7 @@
     {
       "binding": "DB",
       "database_name": "whd-2026",
-      "database_id": "7a96f83f-95c6-4306-80b9-7f399c3bd74b",
+      "database_id": "d61783dd-35a8-40ad-938e-ea0de4327c4e",
       "migrations_dir": "drizzle",
     },
   ],

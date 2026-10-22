@@ -20,7 +20,10 @@ const BRAND = {
   name: "Women's Hack Day",
   pink: '#fd5cc3',
   purple: '#602aaf',
+  lavender: '#e6dcf7',
   dark: '#0e0e13',
+  deepPurple: '#4b2091',
+  muted: '#b9b1cc',
 };
 
 const OTP_PATTERN = /^\d{6}$/;
@@ -67,15 +70,12 @@ function sendOtp(body) {
     to: email,
     subject: otp + ' is your ' + BRAND.name + ' code',
     body:
-      'Your ' +
-      BRAND.name +
-      ' sign-in code is ' +
       otp +
-      '.\n\n' +
-      'It expires in ' +
+      ' is your ' +
+      BRAND.name +
+      ' code. It expires in ' +
       CODE_LIFETIME_MINUTES +
-      ' minutes. ' +
-      "If you didn't request it, you can ignore this email.",
+      ' minutes.',
     htmlBody: otpHtml(otp),
     name: BRAND.name,
   });
@@ -84,34 +84,32 @@ function sendOtp(body) {
 }
 
 function otpHtml(otp) {
-  return (
-    '<div style="background:' +
-    BRAND.dark +
-    ';padding:32px 16px;font-family:Arial,sans-serif">' +
-    '<div style="max-width:420px;margin:0 auto;background:' +
-    BRAND.pink +
-    ';border-radius:20px;padding:12px 12px 16px">' +
-    '<div style="background:' +
-    BRAND.purple +
-    ';border-radius:12px 12px 0 0;padding:20px;color:#fff">' +
-    '<div style="font-size:20px;font-weight:bold">' +
-    BRAND.name +
-    '</div>' +
-    '<div style="font-size:14px;opacity:.85;margin-top:4px">Your sign-in code</div>' +
-    '</div>' +
-    '<div style="background:' +
-    BRAND.purple +
-    ';border-radius:0 0 12px 12px;margin-top:8px;padding:20px;color:#fff;text-align:center">' +
-    '<div style="font-size:40px;font-weight:bold;letter-spacing:10px">' +
-    otp +
-    '</div>' +
-    '<div style="font-size:13px;opacity:.8;margin-top:12px">Expires in ' +
-    CODE_LIFETIME_MINUTES +
-    " minutes. If you didn't request it, ignore this email.</div>" +
-    '</div>' +
-    '</div>' +
-    '</div>'
-  );
+  const sans = 'Arial,Helvetica,sans-serif';
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body style="margin:0;padding:0">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%">
+<tr><td align="center" style="padding:32px 16px">
+<table role="presentation" align="center" width="320" cellpadding="0" cellspacing="0" border="0" bgcolor="${BRAND.pink}" style="width:100%;max-width:320px;margin:0 auto;background:${BRAND.pink};border-radius:18px">
+<tr><td style="padding:3px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr><td align="center" bgcolor="${BRAND.purple}" style="background:${BRAND.purple};border-radius:15px;padding:28px 20px;text-align:center;font-family:${sans};color:#ffffff">
+<div style="font-family:${sans};font-size:14px;line-height:20px;color:${BRAND.lavender}">${BRAND.name}</div>
+<div style="font-family:${sans};font-size:40px;line-height:48px;font-weight:bold;letter-spacing:10px;padding-left:10px;margin:12px 0;color:#ffffff">${otp}</div>
+<div style="font-family:${sans};font-size:14px;line-height:20px;color:${BRAND.lavender}">Expires in ${CODE_LIFETIME_MINUTES} minutes</div>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
 }
 
 /**
@@ -167,6 +165,39 @@ function reply(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(
     ContentService.MimeType.JSON,
   );
+}
+
+/** Move sent WHD code messages older than 24 hours to Trash. */
+function cleanupOldCodes() {
+  const sender = Session.getEffectiveUser().getEmail().trim().toLowerCase();
+  if (!EMAIL_PATTERN.test(sender)) throw new Error('Cannot identify the sending account');
+
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  const threads = GmailApp.search(
+    'in:sent -in:trash older_than:1d from:' + sender + ' subject:"is your ' + BRAND.name + ' code"',
+    0,
+    100,
+  );
+
+  for (const thread of threads) {
+    for (const message of thread.getMessages()) {
+      const rawFrom = message.getFrom();
+      const from = (rawFrom.match(/<([^>]+)>/)?.[1] || rawFrom).trim().toLowerCase();
+      const subject = message.getSubject();
+      const otp = subject.slice(0, 6);
+
+      if (
+        from === sender &&
+        OTP_PATTERN.test(otp) &&
+        subject === otp + ' is your ' + BRAND.name + ' code' &&
+        message.getDate().getTime() < cutoff &&
+        !message.isDraft() &&
+        !message.isInTrash()
+      ) {
+        message.moveToTrash();
+      }
+    }
+  }
 }
 
 /**
