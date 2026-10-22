@@ -12,7 +12,7 @@ export default function InfoCards() {
       icon: FaCalendarAlt,
       accent: 'pink' as const,
       label: t('infoCards.when'),
-      metric: '25',
+      metric: '14',
       subLabel: t('infoCards.monthYear'),
       description: t('infoCards.whenDetail'),
     },

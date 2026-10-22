@@ -11,6 +11,10 @@ for (const [locale, copy] of Object.entries({ en, ru, kk })) {
     await expect(
       page.getByRole('link', { name: copy.hero.cta.register, exact: true }).first(),
     ).toBeVisible();
+    const eventDetails = page.getByRole('region', { name: copy.infoCards.label });
+    await expect(eventDetails.getByRole('definition').first()).toHaveText('14');
+    await expect(eventDetails.getByText(copy.infoCards.monthYear, { exact: true })).toBeVisible();
+    await expect(page.getByText(copy.timeline.items.event, { exact: true })).toBeVisible();
     await page.getByRole('heading', { name: copy.gallery.title }).scrollIntoViewIfNeeded();
     await expect(page.getByRole('heading', { name: copy.gallery.title })).toBeVisible();
     const brokenImages = await page.locator('img').evaluateAll(async (images) => {

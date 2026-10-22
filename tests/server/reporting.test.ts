@@ -75,12 +75,14 @@ it('escapes CSV fields, neutralizes formulas, and preserves leading-zero identif
 it('shares the event deadline between status and server checks, closing at the boundary', () => {
   bindings.REGISTRATION_DEADLINE = '';
   vi.useFakeTimers({ toFake: ['Date'] });
-  vi.setSystemTime(new Date(DEFAULT_REGISTRATION_DEADLINE).getTime() - 1);
+  vi.setSystemTime(new Date('2026-10-22T12:00:00+05:00'));
+  expect(isRegistrationOpen()).toBe(true);
+  vi.setSystemTime(new Date('2026-11-12T23:59:58+05:00'));
   expect(isRegistrationOpen()).toBe(true);
   expect(getRegistrationStatus().deadline).toBe(
     new Date(DEFAULT_REGISTRATION_DEADLINE).toISOString(),
   );
-  vi.setSystemTime(new Date(DEFAULT_REGISTRATION_DEADLINE));
+  vi.setSystemTime(new Date('2026-11-12T23:59:59+05:00'));
   expect(isRegistrationOpen()).toBe(false);
   expect(getRegistrationStatus().open).toBe(false);
 });

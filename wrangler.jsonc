@@ -4,6 +4,17 @@
   "compatibility_date": "2026-10-13",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    {
+      "pattern": "whd.nuacmw.kz",
+      "zone_name": "nuacmw.kz",
+      "custom_domain": true,
+      "enabled": true,
+      "previews_enabled": false,
+    },
+  ],
   "vars": {
     "BETTER_AUTH_URL": "https://whd.nuacmw.kz",
   },

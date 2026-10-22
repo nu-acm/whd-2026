@@ -63,7 +63,7 @@
   },
   "infoCards": {
     "when": "When?",
-    "whenAnswer": "October 25",
+    "whenAnswer": "November 14",
     "whenDetail": "one day, three rounds",
     "where": "Where?",
     "whereAnswer": "Nazarbayev University",
@@ -73,7 +73,7 @@
     "howAnswer": "Teams of 3-4",
     "howDetail": "Register, then build your team",
     "label": "Event details",
-    "monthYear": "October 2026",
+    "monthYear": "November 2026",
     "mapLink": "View on map",
     "teamLabel": "Team",
     "teamMembers": "participants per team"
@@ -96,11 +96,11 @@
     "kicker": "Dates",
     "title": "Save the dates",
     "items": {
-      "registration": "October 6-20",
+      "registration": "October 26 - November 12",
       "registrationLabel": "Registration Period",
-      "confirmation": "October 20-21",
+      "confirmation": "November 12-13",
       "confirmationLabel": "Confirmation Period",
-      "event": "October 25",
+      "event": "November 14",
       "eventLabel": "Women’s Hack Day"
     }
   },
@@ -174,7 +174,7 @@
       },
       "howToParticipate": {
         "q": "How can I participate?",
-        "a": "Sign up on this site with your email, fill in your details, and create a team of 3-4 people or join one with an invite link. Registration is open until October 20, 2026. Then come to Nazarbayev University on October 25, 2026."
+        "a": "Sign up on this site with your email, fill in your details, and create a team of 3-4 people or join one with an invite link. Registration is open until November 12, 2026. Then come to Nazarbayev University on November 14, 2026."
       },
       "online": {
         "q": "Can I participate online?",

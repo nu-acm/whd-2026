@@ -11,7 +11,7 @@ BETTER_AUTH_SECRET=
 # ISO 8601 instant when registration closes. Leave blank to use the event deadline.
 # The landing page counts down to it. Afterwards onboarding, CV changes and
 # team create/join/leave/kick are blocked, and every page says registration is closed.
-# REGISTRATION_DEADLINE=2026-10-20T23:59:59+05:00
+# REGISTRATION_DEADLINE=2026-11-12T23:59:59+05:00
 
 # Google Apps Script webhook used to deliver OTP emails and store CVs.
 # Leave blank in development — OTP codes are printed to the server console.
