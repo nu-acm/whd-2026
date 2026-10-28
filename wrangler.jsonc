@@ -19,6 +19,20 @@
   ],
   "vars": {
     "BETTER_AUTH_URL": "https://whd.nuacmw.kz",
+    // Blank uses the event deadline. A var, so .dev.vars can still override it (see secrets below).
+    "REGISTRATION_DEADLINE": "",
+  },
+  // A deploy fails while any of these is not set on the Worker. Local dev only warns, and loads only
+  // these names and the vars above from .dev.vars.
+  "secrets": {
+    "required": [
+      "BETTER_AUTH_SECRET",
+      "GAS_URL",
+      "GAS_SECRET",
+      "GOOGLE_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET",
+      "ADMIN_EMAILS",
+    ],
   },
   "observability": {
     "enabled": true,
