@@ -1,6 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "whd-2026",
+  // The nu-acm account, so wrangler never asks which account to use (or reuses a cached choice).
+  "account_id": "f4071f1b770277fe78925ee11779e59d",
   "compatibility_date": "2026-10-13",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
