@@ -28,17 +28,20 @@ account even during local development; the rest of the app works without it.
 Local secrets belong in `.dev.vars`; deployed secrets use
 `vp exec wrangler secret put <NAME>`. Never commit either.
 
-| Setting                                    | Purpose                                                   |
-| ------------------------------------------ | --------------------------------------------------------- |
-| `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`    | Session signing and the site's origin                     |
-| D1 `database_id` in `wrangler.jsonc`       | Deployment database                                       |
-| `GAS_URL`, `GAS_SECRET`                    | OTP mail, CV storage, and report API authentication       |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Optional Google sign-in                                   |
-| `ADMIN_EMAILS`                             | Organisers allowed into `/admin` and `/checkin`           |
-| `REGISTRATION_DEADLINE`                    | Optional override of October 20, 2026, 23:59:59 in Astana |
+| Setting                                    | Purpose                                                            |
+| ------------------------------------------ | ------------------------------------------------------------------ |
+| `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`    | Session signing and the site's origin                              |
+| D1 `database_id` in `wrangler.jsonc`       | Deployment database                                                |
+| `GAS_URL`, `GAS_SECRET`                    | OTP mail, CV storage, and report API authentication                |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Optional Google sign-in                                            |
+| `ADMIN_EMAILS`                             | Organisers allowed into `/admin` and `/checkin`                    |
+| `REGISTRATION_DEADLINE`                    | Optional override of November 12, 2026, 23:59:59 in Astana (UTC+5) |
 
-Teams have three to four members. Registration closure blocks profile, team,
-AI name generation, and CV mutations on the server.
+Teams must have exactly three members to compete. A captain can create a team
+and invite two teammates; joining is blocked once the team has three members.
+Incomplete teams and existing four-member teams are ineligible and excluded
+from check-in. Registration closure blocks profile, team, AI name generation,
+and CV mutations on the server.
 
 ```sh
 vp run db:generate         # Generate migrations after schema changes.

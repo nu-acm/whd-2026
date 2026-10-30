@@ -14,16 +14,17 @@ it('admits exactly one competing join into the final team slot', async () => {
   for (let i = 0; i < 6; i++) await seedParticipant(`u${i}`);
   const team = await createTeam('u0', 'Final Slot');
   await joinTeamBySlug('u1', team.inviteSlug);
-  await joinTeamBySlug('u2', team.inviteSlug);
   const results = await Promise.allSettled(
-    ['u3', 'u4', 'u5'].map((id) => joinTeamBySlug(id, team.inviteSlug)),
+    ['u2', 'u3', 'u4', 'u5'].map((id) => joinTeamBySlug(id, team.inviteSlug)),
   );
   expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
-  expect((await getTeamByParticipant('u0'))?.members).toHaveLength(4);
+  expect((await getTeamByParticipant('u0'))?.members).toHaveLength(3);
   for (const result of results) {
     if (result.status === 'rejected')
       expect(result.reason).toMatchObject({ message: TEAM_ERRORS.full });
   }
+  await seedParticipant('fourth');
+  await expect(joinTeamBySlug('fourth', team.inviteSlug)).rejects.toThrow(TEAM_ERRORS.full);
 });
 
 it('keeps one membership when team creation competes with joining', async () => {

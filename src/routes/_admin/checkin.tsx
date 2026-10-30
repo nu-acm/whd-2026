@@ -69,7 +69,7 @@ const attendedCount = (team: CheckinTeam) => team.members.filter((m) => m.attend
 
 function teamStatus(team: CheckinTeam): TeamStatus {
   const present = attendedCount(team);
-  if (present >= MIN_TEAM_SIZE) return 'ready';
+  if (present === MIN_TEAM_SIZE) return 'ready';
   return present > 0 ? 'partial' : 'no-show';
 }
 

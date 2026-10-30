@@ -36,6 +36,28 @@ it('reports joined rosters and attendance, checking in only eligible teams', asy
   await expect(setAttendance('missing', true)).rejects.toThrow('Participant not found');
 });
 
+it('excludes incomplete and previously oversized teams from eligibility and check-in', async () => {
+  for (const id of ['captain', 'second', 'third', 'fourth']) await seedParticipant(id);
+  const team = await createTeam('captain', 'Roster Size');
+  await joinTeamBySlug('second', team.inviteSlug);
+  expect((await getReportData()).teams[0].eligible).toBe(false);
+  expect((await getCheckinData()).teams).toEqual([]);
+
+  await joinTeamBySlug('third', team.inviteSlug);
+  expect((await getReportData()).teams[0].eligible).toBe(true);
+  expect((await getCheckinData()).participants).toHaveLength(3);
+
+  // An existing four-person roster must not qualify under the new rule.
+  await bindings.DB.prepare('UPDATE participant SET team_id = ? WHERE id = ?')
+    .bind(team.id, 'fourth')
+    .run();
+  const report = await getReportData();
+  expect(report.teams[0]).toMatchObject({ memberCount: 4, eligible: false });
+  expect(report.participants.every((p) => !p.teamEligible)).toBe(true);
+  expect(report.stats.eligibleTeams).toBe(0);
+  expect(await getCheckinData()).toEqual({ participants: [], teams: [] });
+});
+
 it('requires the report secret and returns actual data only to authorized requests', async () => {
   await seedParticipant('owner');
   const handlers = Route.options.server?.handlers;

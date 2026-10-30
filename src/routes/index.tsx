@@ -33,9 +33,9 @@ async function getFunnelState() {
   const profile = await getParticipant(session.user.id);
   if (!profile) return { session, nextStep: 'onboarding' as NextStep };
   if (!profile.teamId) return { session, nextStep: 'team' as NextStep };
-  // Having a team is not enough: it only competes once it reaches MIN_TEAM_SIZE.
+  // A team competes with exactly MIN_TEAM_SIZE members.
   const team = await getTeamByParticipant(session.user.id);
-  const ready = !!team && team.members.length >= MIN_TEAM_SIZE;
+  const ready = !!team && team.members.length === MIN_TEAM_SIZE;
   return { session, nextStep: (ready ? 'ready' : 'incomplete') as NextStep };
 }
 

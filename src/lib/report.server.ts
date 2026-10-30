@@ -24,7 +24,7 @@ export type ReportParticipant = {
   teamName: string | null;
   /** Links the participant row to its team row in the admin table. */
   teamSlug: string | null;
-  /** In a team that has reached MIN_TEAM_SIZE. */
+  /** In a team with exactly MIN_TEAM_SIZE members. */
   teamEligible: boolean;
   attended: boolean;
   createdAt: string;
@@ -35,7 +35,7 @@ export type ReportTeam = {
   inviteSlug: string;
   captainName: string;
   memberCount: number;
-  /** A team only competes once it reaches MIN_TEAM_SIZE. */
+  /** A team competes with exactly MIN_TEAM_SIZE members. */
   eligible: boolean;
   /** Captain first. */
   members: { id: string; fullName: string }[];
@@ -76,7 +76,7 @@ export async function getReportData(): Promise<{
   ]);
 
   const eligibleTeamIds = new Set(
-    teamRows.filter((t) => t.members.length >= MIN_TEAM_SIZE).map((t) => t.id),
+    teamRows.filter((t) => t.members.length === MIN_TEAM_SIZE).map((t) => t.id),
   );
 
   const participants: ReportParticipant[] = participantRows.map((p) => ({
@@ -108,7 +108,7 @@ export async function getReportData(): Promise<{
       inviteSlug: t.inviteSlug,
       captainName: t.captain?.fullName ?? '',
       memberCount: t.members.length,
-      eligible: t.members.length >= MIN_TEAM_SIZE,
+      eligible: t.members.length === MIN_TEAM_SIZE,
       members: ordered,
       createdAt: toIso(t.createdAt),
     };
