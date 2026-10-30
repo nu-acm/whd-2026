@@ -16,6 +16,37 @@ for (const [locale, copy] of Object.entries({ en, ru, kk })) {
     await expect(eventDetails.getByRole('definition').last()).toHaveText('3');
     await expect(eventDetails.getByText(copy.infoCards.monthYear, { exact: true })).toBeVisible();
     await expect(page.getByText(copy.timeline.items.event, { exact: true })).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
+    const viewport = page.viewportSize();
+    if (!viewport) throw new Error('A viewport is required');
+    const timeline = page.getByRole('region', { name: copy.timeline.title });
+    for (const width of new Set([viewport.width, 320, 768, 1024, 1280, 1920])) {
+      await page.setViewportSize({ ...viewport, width });
+      const clippedContent = await timeline.locator('.date-stat').evaluateAll((cards) =>
+        cards.flatMap((card, index) => {
+          const bounds = card.getBoundingClientRect();
+          return Array.from(
+            card.querySelectorAll('.date-stat-icon, .date-stat-value, .date-stat-label'),
+          )
+            .filter((child) => {
+              const rect = child.getBoundingClientRect();
+              return (
+                rect.left < bounds.left - 1 ||
+                rect.right > bounds.right + 1 ||
+                rect.top < bounds.top - 1 ||
+                rect.bottom > bounds.bottom + 1 ||
+                child.scrollWidth > child.clientWidth + 1
+              );
+            })
+            .map((child) => ({ card: index, element: child.classList.value }));
+        }),
+      );
+      expect(clippedContent, `Timeline content fits at ${width}px in ${locale}`).toEqual([]);
+    }
+    await page.setViewportSize(viewport);
+    await timeline.screenshot({
+      path: `output/playwright/screenshots/${testInfo.project.name}-${locale}-timeline.png`,
+    });
     await page.getByRole('heading', { name: copy.gallery.title }).scrollIntoViewIfNeeded();
     await expect(page.getByRole('heading', { name: copy.gallery.title })).toBeVisible();
     const brokenImages = await page.locator('img').evaluateAll(async (images) => {

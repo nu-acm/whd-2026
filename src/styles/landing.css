@@ -708,10 +708,11 @@
 .date-stat {
   position: relative;
   overflow: hidden;
-  display: flex;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-content: center;
   align-items: center;
-  justify-content: center;
-  gap: 14px;
+  gap: 6px 14px;
   flex: 1 1 360px;
   max-width: 460px;
   min-height: 104px;
@@ -730,6 +731,7 @@
   --date-accent: #e4ff94;
 }
 .date-stat-icon {
+  grid-row: 1 / span 2;
   width: 24px;
   height: 24px;
   flex-shrink: 0;
@@ -740,14 +742,15 @@
   transform: rotate(-3deg) scale(1.08);
 }
 .date-stat-value {
-  flex-shrink: 0;
+  min-width: 0;
+  overflow-wrap: break-word;
   font-size: clamp(1.125rem, 1.75vw, 1.5rem);
   font-weight: 750;
   line-height: 1.25;
   letter-spacing: -0.035em;
 }
 .date-stat-label {
-  max-width: 16ch;
+  grid-column: 2;
   color: var(--whd-text-muted);
   font-size: 0.8125rem;
   line-height: 1.5;
@@ -768,19 +771,6 @@
 @keyframes date-stat-shine {
   to {
     transform: translateX(110%);
-  }
-}
-@media (max-width: 359px) {
-  .date-stat {
-    display: grid;
-    grid-template-columns: 20px minmax(0, 1fr);
-    column-gap: 12px;
-    row-gap: 6px;
-  }
-  .date-stat .date-stat-label {
-    grid-column: 2;
-    max-width: none;
-    margin-left: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1608,9 +1598,9 @@
   }
   .date-stat {
     flex-basis: 100%;
-    justify-content: flex-start;
+    grid-template-columns: 20px minmax(0, 1fr);
     padding: 20px 16px;
-    gap: 12px;
+    gap: 6px 12px;
     min-height: 92px;
   }
   .date-stat-value {
@@ -1622,7 +1612,6 @@
   }
   .date-stat-label {
     font-size: 0.75rem;
-    margin-left: auto;
   }
   .schedule-columns {
     grid-template-columns: 1fr;
