@@ -33,7 +33,7 @@ function StatTile({
 /** At-a-glance status: is my registration complete, which team, when and where. */
 export function DashboardStats({ team }: { team: TeamData | null }) {
   const { t } = useTranslation();
-  const ready = !!team && team.members.length >= MIN_TEAM_SIZE;
+  const ready = !!team && team.members.length === MIN_TEAM_SIZE;
 
   return (
     <div className="dashboard-stats">

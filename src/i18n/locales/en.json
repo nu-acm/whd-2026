@@ -41,13 +41,13 @@
       "onboarding": "You are signed in. fill in your details to complete registration.",
       "team": "Your details are saved. Next, create or join a team.",
       "ready": "You are registered with a team. See you at the event!",
-      "incomplete": "Your team needs at least {{min}} members to compete. Invite more teammates."
+      "incomplete": "Your team must have exactly {{min}} members to compete."
     },
     "closedStatus": {
       "register": "Already registered? Sign in to see your team.",
       "onboarding": "Registration closed before you finished your details.",
       "team": "Registration is closed, and you are not in a team.",
-      "incomplete": "Registration is closed. Your team has fewer than {{min}} members. contact the organisers."
+      "incomplete": "Registration is closed. Your team must have exactly {{min}} members. Contact the organisers."
     }
   },
   "countdown": {
@@ -70,7 +70,7 @@
     "whereDetail": "Astana",
     "whereAction": "map",
     "how": "How?",
-    "howAnswer": "Teams of 3-4",
+    "howAnswer": "Teams of 3",
     "howDetail": "Register, then build your team",
     "label": "Event details",
     "monthYear": "November 2026",
@@ -89,7 +89,7 @@
     "prizePool": "prize pool",
     "title": "One day.",
     "titleHighlight": "Three challenges.",
-    "description": "For high school, college and university girls. Bring your curiosity and a team of 3-4. No professional experience needed.",
+    "description": "For high school, college and university girls. Bring your curiosity and a team of 3. No professional experience needed.",
     "organizers": "Organised by NU ACM-W Student Chapter, the first ACM-W chapter in Kazakhstan and Central Asia."
   },
   "timeline": {
@@ -158,11 +158,11 @@
       },
       "otherEvents": {
         "q": "Are there any other events for girls?",
-        "a": "Yes! CodeW is an individual programming contest. Code Girl Summer is a two-week web development camp. Follow our Telegram and Instagram for details."
+        "a": "Yes! CodeW is an individual programming contest. Code Girl Summer is a two-week web development camp. WISH is a 24-hour hackathon for women. Follow our Telegram and Instagram for details."
       },
       "whoCanParticipate": {
         "q": "Who can participate?",
-        "a": "Girls who are high school, college, and university students. Participation is in teams of 3-4 people."
+        "a": "Girls who are high school, college, and university students. Participation is in teams of 3 people."
       },
       "professional": {
         "q": "Do I need to be a professional?",
@@ -174,7 +174,7 @@
       },
       "howToParticipate": {
         "q": "How can I participate?",
-        "a": "Sign up on this site with your email, fill in your details, and create a team of 3-4 people or join one with an invite link. Registration is open until November 12, 2026. Then come to Nazarbayev University on November 14, 2026."
+        "a": "Sign up on this site with your email, fill in your details, and create a team of 3 people or join one with an invite link. Registration is open until November 12, 2026. Then come to Nazarbayev University on November 14, 2026."
       },
       "online": {
         "q": "Can I participate online?",
@@ -283,7 +283,7 @@
     "kick": "Remove",
     "leave": "Leave team",
     "dissolve": "Dissolve team",
-    "teamIncomplete": "A team needs at least {{min}} members to compete.",
+    "teamIncomplete": "A team must have exactly {{min}} members to compete.",
     "teamReady": "Your team is ready.",
     "actionFailed": "That did not work. Please try again.",
     "statusLabel": "Status",
@@ -378,7 +378,7 @@
     "showingCount": "{{shown}} of {{total}}",
     "teamSearchPlaceholder": "Search team, captain, member…",
     "eligibleBreakdown": "{{eligible}} eligible / {{other}} not",
-    "checkinScope": "Only teams with at least {{min}} members are listed.",
+    "checkinScope": "Only teams with exactly {{min}} members are listed.",
     "statEligibleParticipants": "Eligible participants",
     "attendanceBreakdown": "{{present}} in / {{absent}} not yet",
     "teamStatusBreakdown": "{{ready}} ready / {{partial}} partial / {{noShow}} no-show",

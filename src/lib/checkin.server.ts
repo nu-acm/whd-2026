@@ -1,5 +1,5 @@
 import { env } from 'cloudflare:workers';
-import { count, eq, gte, isNotNull, sql } from 'drizzle-orm';
+import { count, eq, isNotNull, sql } from 'drizzle-orm';
 import { getDb } from '@/db';
 import { MIN_TEAM_SIZE, participant, team } from '@/db/schema';
 
@@ -37,7 +37,7 @@ export type CheckinTeam = {
   members: CheckinTeamMember[];
 };
 
-/** Only people in eligible teams (MIN_TEAM_SIZE or more) are checked in. */
+/** Only people in eligible teams (exactly MIN_TEAM_SIZE members) are checked in. */
 export type CheckinData = {
   participants: CheckinParticipant[];
   teams: CheckinTeam[];
@@ -58,7 +58,7 @@ export async function getCheckinData(): Promise<CheckinData> {
         .from(participant)
         .where(isNotNull(participant.teamId))
         .groupBy(participant.teamId)
-        .having(gte(count(), MIN_TEAM_SIZE)),
+        .having(eq(count(), MIN_TEAM_SIZE)),
     );
 
   const teamsQuery = db

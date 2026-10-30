@@ -44,7 +44,7 @@ function TermsPage() {
 
       <LegalSection title="4. Teams">
         <p>
-          Teams must have between 3 and 4 members to compete. A team below the minimum at the end of
+          Teams must have exactly 3 members to compete. A team of any other size at the end of
           registration is not eligible. The team captain may remove members while registration is
           open.
         </p>
