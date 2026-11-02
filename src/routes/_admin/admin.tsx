@@ -196,9 +196,9 @@ function AdminPage() {
     });
     return (iso: string) => {
       const d = new Date(iso);
-      return isNaN(d.getTime()) ? '—' : fmt.format(d);
+      return isNaN(d.getTime()) ? t('common.notProvided') : fmt.format(d);
     };
-  }, [i18n.language]);
+  }, [i18n.language, t]);
 
   const eligibleParticipants = participants.filter((p) => p.teamEligible).length;
 
@@ -285,7 +285,9 @@ function AdminPage() {
         accessorFn: (p) => p.parentPhone,
         meta: { label: t('admin.col.parentPhone') },
         cell: ({ row }) =>
-          row.original.parentPhone ?? <span className="text-muted-foreground">—</span>,
+          row.original.parentPhone ?? (
+            <span className="text-muted-foreground">{t('common.notProvided')}</span>
+          ),
       },
       {
         id: 'city',
@@ -321,7 +323,7 @@ function AdminPage() {
               {t('admin.cvOpen')}
             </LinkButton>
           ) : (
-            <span className="text-muted-foreground">—</span>
+            <span className="text-muted-foreground">{t('cv.none')}</span>
           ),
       },
       {
@@ -335,7 +337,7 @@ function AdminPage() {
               {teamName}
             </Button>
           ) : (
-            <span className="text-muted-foreground">—</span>
+            <span className="text-muted-foreground">{t('dashboard.noTeamShort')}</span>
           );
         },
       },
@@ -364,7 +366,7 @@ function AdminPage() {
         sortFn: (a, b) => compareTeamNumbers(a.original.number, b.original.number),
         cell: ({ row }) =>
           row.original.number === null ? (
-            <span className="text-muted-foreground">—</span>
+            <span className="text-muted-foreground">{t('common.notProvided')}</span>
           ) : (
             formatTeamNumber(row.original.number)
           ),
@@ -397,7 +399,7 @@ function AdminPage() {
           <span
             className={row.original.eligible ? 'text-whd-pink-bright' : 'text-muted-foreground'}
           >
-            {row.original.eligible ? '✓' : '—'}
+            {row.original.eligible ? '✓' : t('common.no')}
           </span>
         ),
       },
@@ -409,7 +411,8 @@ function AdminPage() {
         sortFn: (a, b) => Number(a.original.unconfirmed) - Number(b.original.unconfirmed),
         cell: ({ row }) => {
           const { eligible, unconfirmed, number, inviteSlug, name } = row.original;
-          if (!eligible) return <span className="text-muted-foreground">—</span>;
+          if (!eligible)
+            return <span className="text-muted-foreground">{t('common.notApplicable')}</span>;
           return (
             <Checkbox
               checked={!unconfirmed}

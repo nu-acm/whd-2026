@@ -79,6 +79,24 @@ it('refuses profile writes without explicit consent to the current policy', asyn
   expect((await bindings.DB.prepare('SELECT id FROM participant').all()).results).toHaveLength(0);
 });
 
+it('enforces guardian contact on the server for a minor attending college', async () => {
+  await seedParticipant('college-minor');
+  const minor = {
+    userId: 'college-minor',
+    ...profile,
+    iin: '101101600001',
+    educationLevel: 'College',
+  } as const;
+  await expect(upsertParticipant(minor)).rejects.toThrow('validation.parentPhoneRequired');
+  expect((await getParticipant('college-minor'))?.iin).toBe(profile.iin);
+  await upsertParticipant({ ...minor, parentPhone: '+7 702 000 00 00' });
+  expect(await getParticipant('college-minor')).toMatchObject({
+    iin: minor.iin,
+    educationLevel: 'College',
+    parentPhone: '77020000000',
+  });
+});
+
 it('records acceptance for legacy profiles without inventing earlier consent', async () => {
   await seedParticipant('legacy');
   await bindings.DB.prepare(

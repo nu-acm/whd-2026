@@ -3,11 +3,15 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
 import { AuthHeader } from '@/components/AuthHeader';
 import FAQ from '@/components/landing/FAQ';
+import { pageMetadata } from '@/lib/metadata';
 
 export const Route = createFileRoute('/faq')({
   component: FAQPage,
   head: ({ match }) => ({
-    meta: [{ title: `${match.context.i18n.t('faq.allTitle')} — Women’s Hack Day` }],
+    meta: pageMetadata(
+      `${match.context.i18n.t('faq.allTitle')} | Women’s Hack Day 2026`,
+      match.context.i18n.t('metadata.faqDescription'),
+    ),
   }),
 });
 

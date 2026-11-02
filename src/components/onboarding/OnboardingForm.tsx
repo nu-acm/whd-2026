@@ -9,7 +9,7 @@ import { FormField } from '@/components/ui/form-field';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   EDUCATION_LEVELS,
-  MINOR_EDUCATION_LEVELS,
+  requiresGuardianPhone,
   onboardingSchema,
   type EducationLevel,
   type OnboardingInput,
@@ -53,8 +53,7 @@ export function OnboardingForm({
     (v: (typeof values)[K]) =>
       setValues((prev) => ({ ...prev, [key]: v }));
 
-  // School students are usually minors, so we ask for a guardian's number.
-  const needsParentPhone = MINOR_EDUCATION_LEVELS.includes(values.educationLevel as EducationLevel);
+  const needsParentPhone = requiresGuardianPhone(values.iin);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,7 +181,7 @@ export function OnboardingForm({
               disabled={pending}
             >
               <option value="" disabled>
-                —
+                {t('onboarding.educationPlaceholder')}
               </option>
               {EDUCATION_LEVELS.map((level) => (
                 <option key={level} value={level}>

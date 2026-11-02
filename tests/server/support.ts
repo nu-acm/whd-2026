@@ -20,7 +20,7 @@ export const bindings = env as unknown as {
 
 export const profile = {
   fullName: 'Test Participant',
-  iin: '000000000001',
+  iin: '060101600001',
   phone: '77010000000',
   city: 'Astana',
   placeOfStudy: 'Nazarbayev University',

@@ -1,24 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { ContactLink, LegalPage, LegalSection } from '@/components/LegalPage';
 import { CONTACT_EMAIL } from '@/lib/event';
+import { pageMetadata } from '@/lib/metadata';
 
 export const Route = createFileRoute('/terms')({
   component: TermsPage,
   head: () => ({
-    meta: [
-      { title: 'Terms of Service — Women’s Hack Day' },
-      {
-        name: 'description',
-        content:
-          'Terms of service for Women’s Hack Day — rules and conditions for using the registration platform.',
-      },
-    ],
+    meta: pageMetadata(
+      'Terms of Service | Women’s Hack Day 2026',
+      'Rules and conditions for registering for Women’s Hack Day 2026 and using the event platform.',
+    ),
   }),
 });
 
 function TermsPage() {
   return (
-    <LegalPage title="Terms of Service" updated="October 31, 2026">
+    <LegalPage title="Terms of Service" updated="November 2, 2026">
       <LegalSection title="1. Acceptance of terms">
         <p>
           By registering for Women’s Hack Day and using this platform (whd.nuacmw.kz), you agree to
@@ -30,8 +27,9 @@ function TermsPage() {
         <p>
           Women’s Hack Day is a team competition for school, college and university students. You
           must meet the eligibility criteria published by the organizers to take part. Participation
-          is subject to verification by the organizers. Participants who are minors must provide a
-          parent or guardian contact number.
+          is subject to verification by the organizers. Participants who will be under 18 on
+          November 14, 2026 must provide a parent or guardian contact number. A contact is also
+          required if the IIN does not contain a usable birth date for the age check.
         </p>
       </LegalSection>
 

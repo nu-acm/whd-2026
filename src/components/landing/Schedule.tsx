@@ -26,7 +26,10 @@ export default function Schedule() {
                   }
                 >
                   <span className="schedule-time">{event.time}</span>
-                  <span>{t(`schedule.events.${event.id}`)}</span>
+                  <span>
+                    {t(`schedule.events.${event.id}`)}
+                    <span className="schedule-venue">{t(`schedule.venues.${event.venue}`)}</span>
+                  </span>
                 </li>
               ))}
             </ol>

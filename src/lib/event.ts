@@ -16,16 +16,19 @@ export const SOCIAL_LINKS = {
 } as const;
 
 /** Participant chat — used by the FAQ answers. */
-export const TELEGRAM_CHAT_URL = 'https://t.me/WHD_chat';
+export const TELEGRAM_CHAT_URL = 'https://t.me/whd_2026';
+
+/** Calendar date in Astana, used for participant age on the event day. */
+export const EVENT_DATE = '2026-11-14';
 
 /** Shared program for the schedule and the three challenge cards. */
 export const EVENT_SCHEDULE = [
-  { time: '09:00 - 10:00', id: 'registration' },
-  { time: '10:00 - 11:00', id: 'opening' },
-  { time: '11:00 - 12:00', id: 'mathematics' },
-  { time: '12:00 - 13:00', id: 'programming' },
-  { time: '13:00 - 14:00', id: 'coffeeBreak' },
-  { time: '14:00 - 16:00', id: 'productDesign' },
-  { time: '16:00 - 17:00', id: 'pitching' },
-  { time: '17:30 - 18:30', id: 'closing' },
+  { time: '09:00 - 10:00', id: 'registration', venue: 'redHall' },
+  { time: '10:00 - 10:30', id: 'opening', venue: 'redHall' },
+  { time: '11:00 - 12:00', id: 'programming', venue: 'ballroomLeft' },
+  { time: '12:30 - 13:30', id: 'mathematics', venue: 'ballroomLeft' },
+  { time: '13:30 - 14:30', id: 'coffeeBreak', venue: 'c3Vestibule' },
+  { time: '14:45 - 16:45', id: 'productDesign', venue: 'ballroomLeft' },
+  { time: '17:00 - 18:00', id: 'pitching', venue: 'pitching' },
+  { time: '18:30 - 19:00', id: 'closing', venue: 'redHall' },
 ] as const;
