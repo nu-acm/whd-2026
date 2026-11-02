@@ -9,6 +9,7 @@ import { emailOTP } from 'better-auth/plugins';
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   appName: "Women's Hack Day",
+  rateLimit: { enabled: true, storage: 'database' },
   ...(process.env.GOOGLE_CLIENT_ID &&
     process.env.GOOGLE_CLIENT_SECRET && {
       socialProviders: {

@@ -40,6 +40,18 @@ it('issues a real session after OTP verification and revokes it on sign-out', as
   await expect(ensureSession(request)).rejects.toThrow('Unauthorized');
 });
 
+it('adds approved organisers without replacing the existing allowlist', () => {
+  bindings.ADDITIONAL_ADMIN_EMAILS = ' NEW-ADMIN@example.test, other@example.test ';
+  expect(sessionIsAdmin({ user: { email: 'admin@example.test' } })).toBe(true);
+  expect(sessionIsAdmin({ user: { email: 'new-admin@example.test' } })).toBe(true);
+  expect(sessionIsAdmin({ user: { email: 'other@example.test' } })).toBe(true);
+  expect(sessionIsAdmin({ user: { email: 'outsider@example.test' } })).toBe(false);
+  bindings.ADMIN_EMAILS = '';
+  expect(sessionIsAdmin({ user: { email: 'new-admin@example.test' } })).toBe(true);
+  delete bindings.ADDITIONAL_ADMIN_EMAILS;
+  expect(sessionIsAdmin({ user: { email: 'new-admin@example.test' } })).toBe(false);
+});
+
 it('rejects a wrong or expired OTP without creating a session', async () => {
   const email = 'rejected@example.test';
   let otp = '';
@@ -75,4 +87,47 @@ it('reports failed mail delivery instead of advancing login', async () => {
     message: 'Could not send the sign-in code',
   });
   expect((await bindings.DB.prepare('SELECT id FROM session').all()).results).toHaveLength(0);
+});
+
+it('shares OTP limits across auth instances and permits delivery after the window expires', async () => {
+  const webhook = mockWebhook();
+  const request = () => {
+    const request = authRequest('email-otp/send-verification-otp', {
+      email: 'limited@example.test',
+      type: 'sign-in',
+    });
+    request.headers.set('x-forwarded-for', `192.0.2.${Math.floor(Math.random() * 250) + 1}`);
+    return request;
+  };
+  for (let i = 0; i < 3; i++) expect((await getAuth().handler(request())).status).toBe(200);
+
+  const refused = await getAuth().handler(request());
+  expect(refused.status).toBe(429);
+  expect(Number(refused.headers.get('X-Retry-After'))).toBeGreaterThan(0);
+  expect(webhook).toHaveBeenCalledTimes(3);
+  expect((await bindings.DB.prepare('SELECT count FROM rate_limit').all()).results.length).toBe(1);
+
+  await bindings.DB.prepare('UPDATE rate_limit SET last_request = ?')
+    .bind(Date.now() - 61_000)
+    .run();
+  expect((await getAuth().handler(request())).status).toBe(200);
+  expect(webhook).toHaveBeenCalledTimes(4);
+});
+
+it('admits only three concurrent OTP deliveries for the same client', async () => {
+  const webhook = mockWebhook();
+  const responses = await Promise.all(
+    Array.from({ length: 6 }, (_, i) =>
+      getAuth().handler(
+        authRequest('email-otp/send-verification-otp', {
+          email: `concurrent-${i}@example.test`,
+          type: 'sign-in',
+        }),
+      ),
+    ),
+  );
+  expect(responses.map((response) => response.status).sort((a, b) => a - b)).toEqual([
+    200, 200, 200, 429, 429, 429,
+  ]);
+  expect(webhook).toHaveBeenCalledTimes(3);
 });

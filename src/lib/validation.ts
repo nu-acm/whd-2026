@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { REGISTRATION_POLICY_VERSION } from '@/lib/consent';
 
 /**
  * Women's Hack Day is open to school, college and university students.
@@ -39,6 +40,8 @@ const V = {
   placeOfStudyMax: 'validation.placeOfStudyMax',
   parentPhoneInvalid: 'validation.parentPhoneInvalid',
   parentPhoneRequired: 'validation.parentPhoneRequired',
+  consentRequired: 'validation.consentRequired',
+  policyChanged: 'validation.policyChanged',
 } as const;
 
 // ── Login step 1: email ──────────────────────────────────────────────────────
@@ -97,6 +100,8 @@ export const onboardingSchema = z
       })
       .transform((v) => (v ? stripPhoneDigits(v) : undefined)),
     educationLevel: z.enum(EDUCATION_LEVELS, { error: V.educationInvalid }),
+    consent: z.literal(true, { error: V.consentRequired }),
+    policyVersion: z.literal(REGISTRATION_POLICY_VERSION, { error: V.policyChanged }),
   })
   // School students are usually minors, so a guardian contact is required.
   .refine((d) => !MINOR_EDUCATION_LEVELS.includes(d.educationLevel) || !!d.parentPhone, {

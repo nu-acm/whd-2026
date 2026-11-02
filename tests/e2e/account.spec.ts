@@ -1,4 +1,8 @@
 import { test, expect, login, onboard, seedEligibleTeam } from './fixtures';
+import { REGISTRATION_POLICY_VERSION } from '@/lib/consent';
+import en from '@/i18n/locales/en.json' with { type: 'json' };
+import ru from '@/i18n/locales/ru.json' with { type: 'json' };
+import kk from '@/i18n/locales/kk.json' with { type: 'json' };
 
 test('registers, edits a profile, creates a team, and admits a teammate', async ({
   page,
@@ -21,6 +25,10 @@ test('registers, edits a profile, creates a team, and admits a teammate', async 
   const invite = page.getByRole('textbox', { name: 'Invite link' });
   await expect(invite).toHaveValue(/\/invite\/browser-team$/);
   const context = await browser.newContext({ baseURL: app.url, viewport: page.viewportSize() });
+  const thirdContext = await browser.newContext({
+    baseURL: app.url,
+    viewport: page.viewportSize(),
+  });
   try {
     const teammate = await context.newPage();
     app.observe(teammate);
@@ -42,8 +50,97 @@ test('registers, edits a profile, creates a team, and admits a teammate', async 
         .bind('Captain Updated')
         .first('city'),
     ).toBe('Almaty');
+    const third = await thirdContext.newPage();
+    app.observe(third);
+    await login(third, app.codes, 'third@example.test');
+    await onboard(third, 'Third');
+    await third.goto(new URL(await invite.inputValue()).pathname);
+    await third.getByRole('button', { name: 'Join team', exact: true }).click();
+    await expect(third.getByRole('heading', { name: 'Browser Team' })).toBeVisible();
+    expect(
+      (await app.db.prepare('SELECT id FROM participant WHERE team_id IS NOT NULL').all()).results,
+    ).toHaveLength(3);
+    await page.locator('input[type="file"]').setInputFiles({
+      name: 'registration-test.pdf',
+      mimeType: 'application/pdf',
+      buffer: Buffer.from('%PDF-1.7\nregistration browser test'),
+    });
+    await expect
+      .poll(() =>
+        app.db
+          .prepare('SELECT cv_url FROM participant WHERE full_name = ?')
+          .bind('Captain Updated')
+          .first('cv_url'),
+      )
+      .toBe('https://drive.google.com/file/d/testDriveFile123/view');
+    await page.reload();
+    await page.getByRole('button', { name: 'Delete', exact: true }).click();
+    await page.getByRole('button', { name: 'Click again to delete', exact: true }).click();
+    await expect
+      .poll(() =>
+        app.db
+          .prepare('SELECT cv_url FROM participant WHERE full_name = ?')
+          .bind('Captain Updated')
+          .first('cv_url'),
+      )
+      .toBeNull();
   } finally {
     await context.close();
+    await thirdContext.close();
+  }
+});
+
+test('requires consent and leaves legacy profiles unaccepted until they agree', async ({
+  page,
+  app,
+}) => {
+  await login(page, app.codes, 'consent@example.test');
+  const consent = page.getByRole('checkbox', { name: 'I agree to the terms' });
+  await expect(consent).not.toBeChecked();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(
+    page.getByText('Please agree to the terms and personal data processing to continue.'),
+  ).toBeVisible();
+  expect((await app.db.prepare('SELECT id FROM participant').all()).results).toHaveLength(0);
+  await onboard(page, 'Consent Participant');
+  const accepted = await app.db
+    .prepare('SELECT consented_at, consent_policy_version FROM participant')
+    .first<{ consented_at: number; consent_policy_version: string }>();
+  expect(accepted?.consented_at).toBeGreaterThan(0);
+  expect(accepted?.consent_policy_version).toBe(REGISTRATION_POLICY_VERSION);
+
+  await app.db
+    .prepare('UPDATE participant SET consented_at = NULL, consent_policy_version = NULL')
+    .run();
+  await page.goto('/onboarding');
+  await expect(consent).not.toBeChecked();
+});
+
+test('shows accessible consent and policy links in each language', async ({
+  page,
+  context,
+  app,
+}, testInfo) => {
+  await login(page, app.codes, 'languages@example.test');
+  for (const [locale, copy] of Object.entries({ en, ru, kk })) {
+    await context.addCookies([{ name: 'locale', value: locale, url: app.url }]);
+    await page.goto('/onboarding');
+    const consent = page.getByRole('checkbox', { name: copy.onboarding.consent, exact: true });
+    await expect(consent).not.toBeChecked();
+    await expect(consent).toHaveAttribute('aria-required', 'true');
+    await expect(page.locator('a[href="/privacy"]')).toHaveAttribute('target', '_blank');
+    await expect(page.locator('a[href="/terms"]')).toHaveAttribute('target', '_blank');
+    await consent.focus();
+    await page.keyboard.press('Space');
+    await expect(consent).toBeChecked();
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.screenshot({
+      path: `output/playwright/screenshots/${testInfo.project.name}-${locale}-consent.png`,
+      fullPage: true,
+    });
   }
 });
 

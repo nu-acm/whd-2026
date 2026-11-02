@@ -8,9 +8,11 @@ beforeEach(async () => {
   await bindings.DB.batch([
     bindings.DB.prepare('DELETE FROM user'),
     bindings.DB.prepare('DELETE FROM verification'),
+    bindings.DB.prepare('DELETE FROM rate_limit'),
   ]);
   bindings.REGISTRATION_DEADLINE = '2099-01-01T00:00:00Z';
   bindings.ADMIN_EMAILS = 'admin@example.test';
+  delete bindings.ADDITIONAL_ADMIN_EMAILS;
 });
 
 afterEach(() => {

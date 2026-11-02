@@ -172,6 +172,7 @@ export async function onboard(page: Page, name: string) {
     .getByRole('textbox', { name: 'School, college or university' })
     .fill('Nazarbayev University');
   await page.getByRole('textbox', { name: 'City' }).fill('Astana');
+  await page.getByRole('checkbox', { name: 'I agree to the terms' }).check();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
 }

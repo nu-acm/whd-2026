@@ -60,6 +60,8 @@ export const participant = sqliteTable(
     // Required in the UI for school students, optional at the storage layer.
     parentPhone: text('parent_phone'),
     educationLevel: text('education_level').notNull(),
+    consentedAt: integer('consented_at', { mode: 'timestamp_ms' }),
+    consentPolicyVersion: text('consent_policy_version'),
     cvUrl: text('cv_url'),
     attended: integer('attended', { mode: 'boolean' }).default(false).notNull(),
     teamId: text('team_id').references(() => team.id, { onDelete: 'set null' }),

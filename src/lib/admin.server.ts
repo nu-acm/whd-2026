@@ -2,11 +2,13 @@ import { env } from 'cloudflare:workers';
 
 interface AppEnv {
   ADMIN_EMAILS?: string;
+  ADDITIONAL_ADMIN_EMAILS?: string;
 }
 
-/** Emails allowed into /admin and /checkin, from the ADMIN_EMAILS secret. */
+/** Additional organiser grants preserve the existing ADMIN_EMAILS allowlist. */
 function getAdminEmails(): string[] {
-  const raw = (env as unknown as AppEnv).ADMIN_EMAILS?.trim();
+  const { ADMIN_EMAILS, ADDITIONAL_ADMIN_EMAILS } = env as unknown as AppEnv;
+  const raw = [ADMIN_EMAILS, ADDITIONAL_ADMIN_EMAILS].filter(Boolean).join(',').trim();
   if (!raw) return [];
   return raw
     .split(/[,\s]+/)
@@ -14,7 +16,7 @@ function getAdminEmails(): string[] {
     .filter(Boolean);
 }
 
-/** True only when ADMIN_EMAILS is non-empty and lists this session's email. */
+/** True only when a configured allowlist includes this session's email. */
 export function sessionIsAdmin(session: { user: { email?: string | null } } | null): boolean {
   if (!session?.user?.email) return false;
   const adminEmails = getAdminEmails();

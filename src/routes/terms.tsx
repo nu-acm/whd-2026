@@ -18,7 +18,7 @@ export const Route = createFileRoute('/terms')({
 
 function TermsPage() {
   return (
-    <LegalPage title="Terms of Service" updated="October 2026">
+    <LegalPage title="Terms of Service" updated="October 31, 2026">
       <LegalSection title="1. Acceptance of terms">
         <p>
           By registering for Women’s Hack Day and using this platform (whd.nuacmw.kz), you agree to
