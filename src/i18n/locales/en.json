@@ -73,7 +73,7 @@
     "whereDetail": "Astana",
     "whereAction": "map",
     "how": "How?",
-    "howAnswer": "Teams of 1",
+    "howAnswer": "Teams of 3",
     "howDetail": "Register, then build your team",
     "label": "Event details",
     "monthYear": "November 2026",
@@ -92,7 +92,7 @@
     "prizePool": "prize pool",
     "title": "One day.",
     "titleHighlight": "Three challenges.",
-    "description": "For girls aged 16 to 20 in high school, college or university. Compete individually in programming, mathematics and product design.",
+    "description": "For girls aged 16 to 20 in high school, college or university. Compete in teams of 3 in programming, mathematics and product design.",
     "organizers": "Organised by NU ACM-W Student Chapter, the first ACM-W chapter in Kazakhstan and Central Asia."
   },
   "timeline": {
@@ -171,7 +171,7 @@
       },
       "whoCanParticipate": {
         "q": "Who can participate?",
-        "a": "Girls aged 16 to 20 studying at a high school, college or university. Compete individually."
+        "a": "Girls aged 16 to 20 studying at a high school, college or university. Compete in teams of 3."
       },
       "professional": {
         "q": "Do I need to be a professional?",
@@ -183,7 +183,7 @@
       },
       "howToParticipate": {
         "q": "How can I participate?",
-        "a": "Sign up on this site with your email and fill in your details. During this temporary format, each participant competes individually. Registration is currently closed. The event is at Nazarbayev University on November 14, 2026."
+        "a": "Sign up on this site with your email, fill in your details, and create a team of 3 people or join one with an invite link. Registration is open until November 12, 2026. Then come to Nazarbayev University on November 14, 2026."
       },
       "online": {
         "q": "Can I participate online?",
@@ -505,8 +505,8 @@
   },
   "metadata": {
     "title": "Women’s Hack Day 2026",
-    "description": "November 14 at Nazarbayev University, Astana. Participants compete individually in programming, mathematics and product design for a 425 000 ₸ prize pool.",
+    "description": "November 14 at Nazarbayev University, Astana. Teams of 3 compete in programming, mathematics and product design for a 425 000 ₸ prize pool.",
     "imageAlt": "Women’s Hack Day 2026",
-    "faqDescription": "Answers about Women’s Hack Day 2026: eligibility, individual participation, registration, the November 14 programme and prizes."
+    "faqDescription": "Answers about Women’s Hack Day 2026: eligibility, teams of 3, registration, the November 14 programme and prizes."
   }
 }
