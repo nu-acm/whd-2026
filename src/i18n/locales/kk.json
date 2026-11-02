@@ -123,10 +123,10 @@
     "morning": "Таңертең және түсте",
     "afternoon": "Түстен кейін",
     "venues": {
-      "redHall": "Қызыл зал",
-      "ballroomLeft": "Ballroom, сол жақ бөлігі",
+      "redHall": "Red Hall",
+      "ballroomLeft": "Ballroom Left",
       "c3Vestibule": "C3 вестибюлі",
-      "pitching": "C3 аудиториялары + Ballroom, сол жақ бөлігі"
+      "pitching": "C3 аудиториялары + Ballroom Left"
     }
   },
   "benefits": {

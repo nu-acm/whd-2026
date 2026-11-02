@@ -123,10 +123,10 @@
     "morning": "Утро и полдень",
     "afternoon": "Вторая половина дня",
     "venues": {
-      "redHall": "Красный зал",
-      "ballroomLeft": "Ballroom, левая часть",
+      "redHall": "Red Hall",
+      "ballroomLeft": "Ballroom Left",
       "c3Vestibule": "Вестибюль C3",
-      "pitching": "Аудитории C3 + Ballroom, левая часть"
+      "pitching": "Аудитории C3 + Ballroom Left"
     }
   },
   "benefits": {
