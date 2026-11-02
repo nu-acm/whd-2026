@@ -257,7 +257,9 @@
     "closedTitle": "Registration is closed",
     "closedNew": "Registration closed before you finished your details, so you can no longer sign up.",
     "closedExisting": "Registration is closed, so your details can no longer be changed.",
-    "backHome": "Back to the main page"
+    "backHome": "Back to the main page",
+    "consent": "I agree to the terms and consent to the processing of my personal data.",
+    "consentHint": "Read the <privacy>Privacy Policy</privacy> and <terms>Terms of Service</terms>. CV upload is optional."
   },
   "dashboard": {
     "title": "Dashboard",
@@ -336,7 +338,9 @@
     "placeOfStudyRequired": "Place of study is required",
     "placeOfStudyMax": "Place of study is too long",
     "parentPhoneInvalid": "Enter a valid phone number",
-    "parentPhoneRequired": "A parent or guardian phone is required for school students"
+    "parentPhoneRequired": "A parent or guardian phone is required for school students",
+    "consentRequired": "Please agree to the terms and personal data processing to continue.",
+    "policyChanged": "The registration policy has changed. Reload this page and review it before continuing."
   },
   "education": {
     "School": "School",
@@ -449,7 +453,7 @@
   },
   "cv": {
     "title": "Your CV",
-    "hint": "Optional. Upload a PDF up to {{mb}} MB — our partners may look at it. Only the organisers can open it.",
+    "hint": "Optional. Upload a PDF up to {{mb}} MB. It is stored in the organisers’ private Google Drive folder. By uploading, you agree that organisers may review your CV and share it with event partners for recruitment.",
     "locked": "Registration is closed, so your CV can no longer be changed.",
     "uploaded": "Uploaded",
     "none": "Not uploaded",

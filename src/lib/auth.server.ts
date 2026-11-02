@@ -4,7 +4,7 @@ import { emailOTP } from 'better-auth/plugins';
 import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { env } from 'cloudflare:workers';
 import { getDb } from '@/db';
-import { user, session, account, verification } from '@/db/auth-schema';
+import { user, session, account, verification, rateLimit } from '@/db/auth-schema';
 import { callGas, isGasConfigured } from '@/lib/gas.server';
 
 interface AuthEnv {
@@ -46,11 +46,13 @@ export function getAuth() {
   return betterAuth({
     database: drizzleAdapter(db, {
       provider: 'sqlite',
-      schema: { user, session, account, verification },
+      schema: { user, session, account, verification, rateLimit },
     }),
     secret,
     appName: "Women's Hack Day",
     baseURL: url,
+    rateLimit: { enabled: true, storage: 'database' },
+    advanced: { ipAddress: { ipAddressHeaders: ['cf-connecting-ip'] } },
     ...(socialProviders && { socialProviders }),
     hooks: {
       before: createAuthMiddleware(async (ctx) => {

@@ -54,3 +54,18 @@ it('provides the same translation keys in each supported language', () => {
   expect(keys(ru)).toEqual(keys(en));
   expect(keys(kk)).toEqual(keys(en));
 });
+
+it('requires explicit consent to the current policy version', () => {
+  for (const consent of [undefined, false, 'true']) {
+    const result = onboardingSchema.safeParse({ ...profile, consent });
+    expect(result.success).toBe(false);
+    if (!result.success)
+      expect(result.error.issues).toContainEqual(
+        expect.objectContaining({ path: ['consent'], message: 'validation.consentRequired' }),
+      );
+  }
+  expect(onboardingSchema.safeParse({ ...profile, policyVersion: '2026-10-01' }).success).toBe(
+    false,
+  );
+  expect(onboardingSchema.safeParse(profile).success).toBe(true);
+});

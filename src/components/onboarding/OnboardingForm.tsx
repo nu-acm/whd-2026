@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useId, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import { Link } from '@tanstack/react-router';
 import { useWebHaptics } from 'web-haptics/react';
 import { Button } from '@/components/ui/button';
 import { Input, Select } from '@/components/ui/input';
-import { FieldGroup } from '@/components/ui/field';
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { FormField } from '@/components/ui/form-field';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   EDUCATION_LEVELS,
   MINOR_EDUCATION_LEVELS,
@@ -14,8 +16,11 @@ import {
 } from '@/lib/validation';
 import { webHapticsOptions } from '@/lib/web-haptics';
 import { REGISTRATION_CLOSED_I18N_KEY } from '@/lib/registration';
+import { REGISTRATION_POLICY_VERSION } from '@/lib/consent';
 
-export type OnboardingDefaults = Partial<Record<keyof OnboardingInput, string>>;
+export type OnboardingDefaults = Partial<
+  Record<Exclude<keyof OnboardingInput, 'consent'>, string>
+> & { consent?: boolean };
 
 type Errors = Partial<Record<keyof OnboardingInput | 'form', string>>;
 
@@ -27,6 +32,7 @@ export function OnboardingForm({
   onSubmit: (values: OnboardingInput) => Promise<void>;
 }) {
   const { t } = useTranslation();
+  const consentId = useId();
   const [values, setValues] = useState({
     fullName: defaults?.fullName ?? '',
     iin: defaults?.iin ?? '',
@@ -35,13 +41,17 @@ export function OnboardingForm({
     placeOfStudy: defaults?.placeOfStudy ?? '',
     parentPhone: defaults?.parentPhone ?? '',
     educationLevel: (defaults?.educationLevel ?? '') as EducationLevel | '',
+    consent: defaults?.consent ?? false,
+    policyVersion: REGISTRATION_POLICY_VERSION,
   });
   const [errors, setErrors] = useState<Errors>({});
   const [pending, setPending] = useState(false);
   const { trigger } = useWebHaptics(webHapticsOptions);
 
-  const set = (key: keyof typeof values) => (v: string) =>
-    setValues((prev) => ({ ...prev, [key]: v }));
+  const set =
+    <K extends keyof typeof values>(key: K) =>
+    (v: (typeof values)[K]) =>
+      setValues((prev) => ({ ...prev, [key]: v }));
 
   // School students are usually minors, so we ask for a guardian's number.
   const needsParentPhone = MINOR_EDUCATION_LEVELS.includes(values.educationLevel as EducationLevel);
@@ -168,7 +178,7 @@ export function OnboardingForm({
             <Select
               {...p}
               value={values.educationLevel}
-              onChange={(e) => set('educationLevel')(e.target.value)}
+              onChange={(e) => set('educationLevel')(e.target.value as EducationLevel | '')}
               disabled={pending}
             >
               <option value="" disabled>
@@ -231,6 +241,33 @@ export function OnboardingForm({
             />
           )}
         </FormField>
+
+        <Field data-invalid={!!errors.consent} data-disabled={pending || undefined}>
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id={consentId}
+              name="consent"
+              checked={values.consent}
+              onCheckedChange={set('consent')}
+              disabled={pending}
+              aria-required="true"
+              aria-invalid={!!errors.consent}
+              aria-describedby={`${consentId}-hint${errors.consent ? ` ${consentId}-error` : ''}`}
+            />
+            <FieldLabel htmlFor={consentId}>{t('onboarding.consent')}</FieldLabel>
+          </div>
+          <FieldDescription id={`${consentId}-hint`}>
+            <Trans
+              i18nKey="onboarding.consentHint"
+              components={{
+                privacy: <Link to="/privacy" target="_blank" rel="noopener" />,
+                terms: <Link to="/terms" target="_blank" rel="noopener" />,
+              }}
+            />
+          </FieldDescription>
+          {errors.consent && <FieldError id={`${consentId}-error`}>{errors.consent}</FieldError>}
+          {errors.policyVersion && <FieldError>{errors.policyVersion}</FieldError>}
+        </Field>
 
         {errors.form && (
           <p role="alert" className="text-sm text-destructive">

@@ -2,6 +2,7 @@ import { env } from 'cloudflare:workers';
 import { vi } from 'vite-plus/test';
 import { getAuth } from '@/lib/auth.server';
 import { upsertParticipant } from '@/lib/onboarding.server';
+import { REGISTRATION_POLICY_VERSION } from '@/lib/consent';
 
 export const bindings = env as unknown as {
   DB: D1Database;
@@ -24,7 +25,9 @@ export const profile = {
   city: 'Astana',
   placeOfStudy: 'Nazarbayev University',
   educationLevel: "Bachelor's",
-};
+  consent: true,
+  policyVersion: REGISTRATION_POLICY_VERSION,
+} as const;
 
 export async function seedParticipant(id: string) {
   await bindings.DB.prepare('INSERT INTO user (id, name, email) VALUES (?, ?, ?)')
@@ -50,6 +53,7 @@ export function authRequest(path: string, body?: object, cookie?: string) {
     method: body ? 'POST' : 'GET',
     headers: {
       origin: bindings.BETTER_AUTH_URL,
+      'cf-connecting-ip': '198.51.100.10',
       ...(body && { 'content-type': 'application/json' }),
       ...(cookie && { cookie }),
     },

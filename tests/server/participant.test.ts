@@ -6,6 +6,7 @@ import { createTeam } from '@/lib/team.server';
 import { setAttendance } from '@/lib/checkin.server';
 import { Route } from '@/routes/api/cv';
 import { bindings, mockWebhook, profile, seedParticipant, signIn } from './support';
+import { REGISTRATION_POLICY_VERSION } from '@/lib/consent';
 
 const handlers = (() => {
   const configured = Route.options.server?.handlers;
@@ -44,6 +45,9 @@ it('edits profile fields without resetting membership, attendance, CV, or regist
   await setAttendance('owner', true);
   mockWebhook();
   await uploadCv('owner', new File(['%PDF-1.7\ncontent'], 'cv.pdf'));
+  await bindings.DB.prepare('UPDATE participant SET consented_at = 1 WHERE id = ?')
+    .bind('owner')
+    .run();
   const original = await getParticipant('owner');
   await upsertParticipant({
     userId: 'owner',
@@ -58,7 +62,47 @@ it('edits profile fields without resetting membership, attendance, CV, or regist
     attended: true,
     cvUrl: driveFileUrl('testDriveFile123'),
     createdAt: original?.createdAt,
+    consentedAt: original?.consentedAt,
+    consentPolicyVersion: REGISTRATION_POLICY_VERSION,
   });
+});
+
+it('refuses profile writes without explicit consent to the current policy', async () => {
+  const valid = { userId: 'no-consent', ...profile };
+  for (const data of [
+    { ...valid, consent: false },
+    { ...valid, consent: undefined },
+    { ...valid, policyVersion: 'previous-policy' },
+  ]) {
+    await expect(upsertParticipant(data as typeof valid)).rejects.toThrow('validation.');
+  }
+  expect((await bindings.DB.prepare('SELECT id FROM participant').all()).results).toHaveLength(0);
+});
+
+it('records acceptance for legacy profiles without inventing earlier consent', async () => {
+  await seedParticipant('legacy');
+  await bindings.DB.prepare(
+    'UPDATE participant SET consented_at = NULL, consent_policy_version = NULL WHERE id = ?',
+  )
+    .bind('legacy')
+    .run();
+  expect(await getParticipant('legacy')).toMatchObject({
+    consentedAt: null,
+    consentPolicyVersion: null,
+  });
+  const before = Date.now();
+  await upsertParticipant({ userId: 'legacy', ...profile });
+  const accepted = await getParticipant('legacy');
+  expect(accepted?.consentedAt?.getTime()).toBeGreaterThanOrEqual(before);
+  expect(accepted?.consentPolicyVersion).toBe(REGISTRATION_POLICY_VERSION);
+
+  await bindings.DB.prepare(
+    'UPDATE participant SET consented_at = 1, consent_policy_version = ? WHERE id = ?',
+  )
+    .bind('previous-policy', 'legacy')
+    .run();
+  await upsertParticipant({ userId: 'legacy', ...profile });
+  expect((await getParticipant('legacy'))?.consentedAt?.getTime()).toBeGreaterThanOrEqual(before);
 });
 
 it('retains the previous CV on failed upload or deletion and saves replacements before cleanup', async () => {

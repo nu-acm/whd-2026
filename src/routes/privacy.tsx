@@ -18,7 +18,7 @@ export const Route = createFileRoute('/privacy')({
 
 function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy" updated="October 2026">
+    <LegalPage title="Privacy Policy" updated="October 31, 2026">
       <LegalSection title="1. Who we are">
         <p>
           Women’s Hack Day is an annual team competition organized by the NU ACM-W Student Chapter
@@ -43,6 +43,10 @@ function PrivacyPage() {
             <strong className="text-foreground">Team data:</strong> your team’s name and members.
           </li>
           <li>
+            <strong className="text-foreground">Optional CV:</strong> the PDF file you choose to
+            upload, including any personal information it contains.
+          </li>
+          <li>
             <strong className="text-foreground">Attendance:</strong> whether you checked in at the
             event.
           </li>
@@ -54,7 +58,10 @@ function PrivacyPage() {
           <li>To verify your identity and manage your registration</li>
           <li>To organize teams and communicate event logistics</li>
           <li>To check you in at the venue</li>
-          <li>To share participant information with partners where the event requires it</li>
+          <li>
+            If you upload a CV, to let organizers review it and share it with event partners for
+            recruitment opportunities
+          </li>
           <li>To comply with legal obligations and keep the event safe</li>
         </ul>
       </LegalSection>
@@ -68,17 +75,23 @@ function PrivacyPage() {
 
       <LegalSection title="5. Legal basis and consent">
         <p>
-          We process your data based on the consent you give when you register. You may withdraw
-          consent at any time by contacting us; this may affect your ability to take part in the
-          event.
+          Before submitting your registration details, you must agree to the Terms of Service and
+          consent to the processing of your personal data as described in this policy. We record
+          when you accept and the policy version you accepted. Uploading a CV is optional and is not
+          required to participate. By uploading one, you agree to its storage, review and sharing as
+          described above. You may withdraw consent at any time by contacting us; this may affect
+          your ability to take part in the event.
         </p>
       </LegalSection>
 
       <LegalSection title="6. Storage and security">
         <p>
-          Your data is stored on Cloudflare’s infrastructure (Cloudflare D1) and transmitted over
-          HTTPS. Organizers may export registration data to spreadsheets under our organization’s
-          control. We do not sell your data.
+          Account and registration data is stored on Cloudflare’s infrastructure (Cloudflare D1) and
+          transmitted over HTTPS. We use Google Apps Script to send sign-in codes and store uploaded
+          CVs in a private Google Drive folder controlled by the organizers. CV links are not
+          public; organizers control access and may share a CV with event partners for the purpose
+          described above. Organizers may export registration data to spreadsheets under our
+          organization’s control. We do not sell your data.
         </p>
       </LegalSection>
 

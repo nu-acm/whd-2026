@@ -1,7 +1,8 @@
 import { env } from 'cloudflare:workers';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { getDb } from '@/db';
 import { participant } from '@/db/schema';
+import { onboardingSchema, type OnboardingInput } from '@/lib/validation';
 
 interface AppEnv {
   DB: D1Database;
@@ -18,41 +19,34 @@ export async function getParticipant(userId: string) {
 }
 
 /** Create or update a participant profile. Onboarding is re-runnable. */
-export async function upsertParticipant(data: {
-  userId: string;
-  fullName: string;
-  iin: string;
-  phone: string;
-  city: string;
-  placeOfStudy: string;
-  parentPhone?: string | null;
-  educationLevel: string;
-}) {
+export async function upsertParticipant(
+  data: Omit<OnboardingInput, 'parentPhone'> & { userId: string; parentPhone?: string },
+) {
   const db = getAppDb();
+  const { consent: _consent, policyVersion, ...profile } = onboardingSchema.parse(data);
+  const now = new Date();
 
   await db
     .insert(participant)
     .values({
       id: data.userId,
-      fullName: data.fullName,
-      iin: data.iin,
-      phone: data.phone,
-      city: data.city,
-      placeOfStudy: data.placeOfStudy,
-      parentPhone: data.parentPhone ?? null,
-      educationLevel: data.educationLevel,
+      ...profile,
+      parentPhone: profile.parentPhone ?? null,
+      consentedAt: now,
+      consentPolicyVersion: policyVersion,
     })
     .onConflictDoUpdate({
       target: participant.id,
       set: {
-        fullName: data.fullName,
-        iin: data.iin,
-        phone: data.phone,
-        city: data.city,
-        placeOfStudy: data.placeOfStudy,
-        parentPhone: data.parentPhone ?? null,
-        educationLevel: data.educationLevel,
-        updatedAt: new Date(),
+        ...profile,
+        parentPhone: profile.parentPhone ?? null,
+        consentedAt: sql`case
+          when ${participant.consentPolicyVersion} = ${policyVersion}
+            then coalesce(${participant.consentedAt}, ${now.getTime()})
+          else ${now.getTime()}
+        end`,
+        consentPolicyVersion: policyVersion,
+        updatedAt: now,
       },
     });
 }
