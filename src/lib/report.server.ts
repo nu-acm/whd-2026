@@ -22,6 +22,8 @@ export type ReportParticipant = {
   /** Google Drive link to the uploaded PDF; organisers need access to the CV folder. */
   cvUrl: string | null;
   teamName: string | null;
+  /** The team's table number, once finalized. */
+  teamNumber: number | null;
   /** Links the participant row to its team row in the admin table. */
   teamSlug: string | null;
   /** In a team with exactly MIN_TEAM_SIZE members. */
@@ -37,6 +39,10 @@ export type ReportTeam = {
   memberCount: number;
   /** A team competes with exactly MIN_TEAM_SIZE members. */
   eligible: boolean;
+  /** Marked by organisers after the confirmation period; such a team gets no number. */
+  unconfirmed: boolean;
+  /** Table number, set by finalizeTeams. The password is never part of the report. */
+  number: number | null;
   /** Captain first. */
   members: { id: string; fullName: string }[];
   createdAt: string;
@@ -46,6 +52,10 @@ export type ReportStats = {
   participants: number;
   teams: number;
   eligibleTeams: number;
+  /** Teams with a table number. */
+  numberedTeams: number;
+  /** Eligible, confirmed teams still without a number: what finalizeTeams would number. */
+  awaitingNumber: number;
   teamless: number;
   attended: number;
 };
@@ -64,7 +74,7 @@ export async function getReportData(): Promise<{
     db.query.participant.findMany({
       with: {
         user: { columns: { email: true } },
-        team: { columns: { name: true, inviteSlug: true } },
+        team: { columns: { name: true, inviteSlug: true, number: true } },
       },
     }),
     db.query.team.findMany({
@@ -91,6 +101,7 @@ export async function getReportData(): Promise<{
     educationLevel: p.educationLevel,
     cvUrl: p.cvUrl,
     teamName: p.team?.name ?? null,
+    teamNumber: p.team?.number ?? null,
     teamSlug: p.team?.inviteSlug ?? null,
     teamEligible: !!p.teamId && eligibleTeamIds.has(p.teamId),
     attended: p.attended,
@@ -109,6 +120,8 @@ export async function getReportData(): Promise<{
       captainName: t.captain?.fullName ?? '',
       memberCount: t.members.length,
       eligible: t.members.length === MIN_TEAM_SIZE,
+      unconfirmed: t.unconfirmed,
+      number: t.number,
       members: ordered,
       createdAt: toIso(t.createdAt),
     };
@@ -121,6 +134,8 @@ export async function getReportData(): Promise<{
       participants: participants.length,
       teams: teams.length,
       eligibleTeams: teams.filter((t) => t.eligible).length,
+      numberedTeams: teams.filter((t) => t.number !== null).length,
+      awaitingNumber: teams.filter((t) => t.eligible && !t.unconfirmed && t.number === null).length,
       teamless: participants.filter((p) => !p.teamName).length,
       attended: participants.filter((p) => p.attended).length,
     },
@@ -140,6 +155,7 @@ export function participantsToCsv(rows: ReportParticipant[]): string {
     'Education level',
     'CV',
     'Team',
+    'Team number',
     'Attended',
     'Registered at',
   ];
@@ -164,6 +180,7 @@ export function participantsToCsv(rows: ReportParticipant[]): string {
       r.educationLevel,
       r.cvUrl,
       r.teamName,
+      r.teamNumber === null ? null : String(r.teamNumber),
       r.attended ? 'yes' : 'no',
       r.createdAt,
     ]

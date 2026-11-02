@@ -1,6 +1,6 @@
 import { expect, it } from 'vite-plus/test';
 import { safeInviteRedirect, validateRedirectSearch } from '@/lib/redirect';
-import { onboardingSchema } from '@/lib/validation';
+import { createTeamSchema, onboardingSchema } from '@/lib/validation';
 import en from '@/i18n/locales/en.json';
 import ru from '@/i18n/locales/ru.json';
 import kk from '@/i18n/locales/kk.json';
@@ -29,6 +29,16 @@ it('requires a valid guardian phone for school students and normalizes stored ph
     parentPhone: '77020000000',
   });
   expect(onboardingSchema.safeParse(profile).success).toBe(true);
+});
+
+it('rejects team names the Codeforces users file cannot carry', () => {
+  expect(createTeamSchema.parse({ name: '  Binary Blossoms ' })).toEqual({
+    name: 'Binary Blossoms',
+  });
+  for (const name of ['Bits | Bytes', 'Line\nBreak', 'Carriage\rReturn'])
+    expect(createTeamSchema.safeParse({ name }).error?.issues[0]?.message).toBe(
+      'validation.teamNameChars',
+    );
 });
 
 it('provides the same translation keys in each supported language', () => {

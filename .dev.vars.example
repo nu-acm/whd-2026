@@ -13,6 +13,12 @@ BETTER_AUTH_SECRET=
 # team create/join/leave/kick are blocked, and every page says registration is closed.
 # REGISTRATION_DEADLINE=2026-11-12T23:59:59+05:00
 
+# Contest access on the dashboard of finalized teams. wrangler.jsonc sets the production
+# values; override them here, e.g. to point the upload button at a local proctoring dev server.
+# CF_LOGIN_PREFIX=team
+# PROCTORING_URL=http://localhost:5173
+# CONTEST_START=2026-11-14T12:00:00+05:00
+
 # Google Apps Script webhook used to deliver OTP emails and store CVs.
 # Leave blank in development — OTP codes are printed to the server console.
 GAS_URL=

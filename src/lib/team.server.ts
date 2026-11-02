@@ -2,6 +2,8 @@ import { env } from 'cloudflare:workers';
 import { and, eq, exists, isNull, lt, sql } from 'drizzle-orm';
 import { getDb } from '@/db';
 import { team, participant, MAX_TEAM_SIZE } from '@/db/schema';
+import type { ContestAccess } from '@/lib/contest';
+import { getContestAccess } from '@/lib/contest.server';
 import { TEAM_ERRORS } from '@/lib/team-errors';
 
 interface AppEnv {
@@ -121,7 +123,18 @@ export type TeamData = {
   inviteSlug: string;
   captainId: string;
   members: TeamMember[];
+  /** Table number, login and password once the team is finalized; only its members get this. */
+  contest: ContestAccess | null;
 };
+
+/** A team with a number is final: its roster can no longer change (finalizeTeams). */
+const unnumberedTeam = (teamId: string) =>
+  exists(
+    getAppDb()
+      .select({ id: team.id })
+      .from(team)
+      .where(and(eq(team.id, teamId), isNull(team.number))),
+  );
 
 // ── Queries ──────────────────────────────────────────────────────────────────
 
@@ -151,6 +164,7 @@ export async function getTeamByParticipant(userId: string): Promise<TeamData | n
       fullName: m.fullName,
       isCaptain: m.id === t.captainId,
     })),
+    contest: getContestAccess(t),
   };
 }
 
@@ -209,6 +223,9 @@ export async function createTeam(userId: string, name: string): Promise<TeamData
                 nameCanonical: sql<string>`${canonicalName}`.as('name_canonical'),
                 inviteSlug: sql<string>`${inviteSlug}`.as('invite_slug'),
                 captainId: participant.id,
+                unconfirmed: sql<boolean>`0`.as('unconfirmed'),
+                number: sql<number | null>`null`.as('number'),
+                contestPassword: sql<string | null>`null`.as('contest_password'),
                 createdAt: sql<number>`${now.getTime()}`.as('created_at'),
                 updatedAt: sql<number>`${now.getTime()}`.as('updated_at'),
               })
@@ -279,6 +296,7 @@ export async function joinTeamBySlug(userId: string, slug: string): Promise<Team
     with: { members: { columns: { id: true } } },
   });
   if (!t) throw new Error(TEAM_ERRORS.invalidInvite);
+  if (t.number !== null) throw new Error(TEAM_ERRORS.finalized);
   if (t.members.length >= MAX_TEAM_SIZE) throw new Error(TEAM_ERRORS.full);
 
   // The count and membership condition are evaluated inside this single write.
@@ -289,7 +307,7 @@ export async function joinTeamBySlug(userId: string, slug: string): Promise<Team
       and(
         eq(participant.id, userId),
         isNull(participant.teamId),
-        exists(db.select({ id: team.id }).from(team).where(eq(team.id, t.id))),
+        unnumberedTeam(t.id),
         lt(db.$count(participant, eq(participant.teamId, t.id)), MAX_TEAM_SIZE),
       ),
     )
@@ -302,8 +320,12 @@ export async function joinTeamBySlug(userId: string, slug: string): Promise<Team
     });
     if (!current) throw new Error(TEAM_ERRORS.noProfile);
     if (current.teamId) throw new Error(TEAM_ERRORS.alreadyInTeam);
-    const currentTeam = await getTeamBySlug(slug);
-    throw new Error(currentTeam ? TEAM_ERRORS.full : TEAM_ERRORS.invalidInvite);
+    const currentTeam = await db.query.team.findFirst({
+      where: eq(team.inviteSlug, slug),
+      columns: { number: true },
+    });
+    if (!currentTeam) throw new Error(TEAM_ERRORS.invalidInvite);
+    throw new Error(currentTeam.number === null ? TEAM_ERRORS.full : TEAM_ERRORS.finalized);
   }
 
   const result = await getTeamByParticipant(userId);
@@ -325,10 +347,11 @@ export async function kickMember(captainId: string, targetUserId: string): Promi
 
   const t = await db.query.team.findFirst({
     where: eq(team.id, captainParticipant.teamId),
-    columns: { id: true, captainId: true },
+    columns: { id: true, captainId: true, number: true },
   });
   if (!t) throw new Error(TEAM_ERRORS.notFound);
   if (t.captainId !== captainId) throw new Error(TEAM_ERRORS.captainOnlyRemove);
+  if (t.number !== null) throw new Error(TEAM_ERRORS.finalized);
 
   const target = await db.query.participant.findFirst({
     where: eq(participant.id, targetUserId),
@@ -336,10 +359,14 @@ export async function kickMember(captainId: string, targetUserId: string): Promi
   });
   if (!target || target.teamId !== t.id) throw new Error(TEAM_ERRORS.memberNotInTeam);
 
-  await db
+  const removed = await db
     .update(participant)
     .set({ teamId: null, updatedAt: new Date() })
-    .where(and(eq(participant.id, targetUserId), eq(participant.teamId, t.id)));
+    .where(
+      and(eq(participant.id, targetUserId), eq(participant.teamId, t.id), unnumberedTeam(t.id)),
+    )
+    .returning({ id: participant.id });
+  if (!removed.length) throw new Error(TEAM_ERRORS.failed);
 }
 
 /** Leave a team. Captains must dissolve instead. */
@@ -354,15 +381,20 @@ export async function leaveTeam(userId: string): Promise<void> {
 
   const t = await db.query.team.findFirst({
     where: eq(team.id, p.teamId),
-    columns: { captainId: true },
+    columns: { captainId: true, number: true },
   });
   if (!t) throw new Error(TEAM_ERRORS.notFound);
   if (t.captainId === userId) throw new Error(TEAM_ERRORS.captainCannotLeave);
+  if (t.number !== null) throw new Error(TEAM_ERRORS.finalized);
 
-  await db
+  const left = await db
     .update(participant)
     .set({ teamId: null, updatedAt: new Date() })
-    .where(and(eq(participant.id, userId), eq(participant.teamId, p.teamId)));
+    .where(
+      and(eq(participant.id, userId), eq(participant.teamId, p.teamId), unnumberedTeam(p.teamId)),
+    )
+    .returning({ id: participant.id });
+  if (!left.length) throw new Error(TEAM_ERRORS.failed);
 }
 
 /** Dissolve a team. Captain only: detach every member, then delete the row. */
@@ -377,11 +409,16 @@ export async function dissolveTeam(userId: string): Promise<void> {
 
   const t = await db.query.team.findFirst({
     where: eq(team.id, p.teamId),
-    columns: { id: true, captainId: true },
+    columns: { id: true, captainId: true, number: true },
   });
   if (!t) throw new Error(TEAM_ERRORS.notFound);
   if (t.captainId !== userId) throw new Error(TEAM_ERRORS.captainOnlyDissolve);
+  if (t.number !== null) throw new Error(TEAM_ERRORS.finalized);
 
   // ON DELETE SET NULL detaches all members atomically with the deletion.
-  await db.delete(team).where(and(eq(team.id, t.id), eq(team.captainId, userId)));
+  const deleted = await db
+    .delete(team)
+    .where(and(eq(team.id, t.id), eq(team.captainId, userId), isNull(team.number)))
+    .returning({ id: team.id });
+  if (!deleted.length) throw new Error(TEAM_ERRORS.failed);
 }

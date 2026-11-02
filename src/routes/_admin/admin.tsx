@@ -3,17 +3,23 @@ import { useTranslation } from 'react-i18next';
 import { createFileRoute } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
-import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
+import { queryOptions, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { z } from 'zod';
 
 import { useAdminTable, type AdminColumnDef } from '@/components/admin/use-admin-table';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Empty, EmptyDescription } from '@/components/ui/empty';
 import { Button, LinkButton } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Segmented } from '@/components/ui/segmented';
 import { ColumnToggleBar, AdminDataTable, StatCard } from '@/components/admin/table';
 import { getSession } from '@/lib/auth.server';
 import { sessionIsAdmin } from '@/lib/admin.server';
+import { compareTeamNumbers, formatTeamNumber } from '@/lib/contest';
+import { finalizeTeams, getProctoringCsv, setTeamUnconfirmed } from '@/lib/contest.server';
+import { isRegistrationOpen } from '@/lib/registration.server';
 import {
   getReportData,
   participantsToCsv,
@@ -22,20 +28,50 @@ import {
 } from '@/lib/report.server';
 import { useAdminRefresh } from '@/lib/use-admin-refresh';
 
-const loadReport = createServerFn({ method: 'GET' }).handler(async () => {
-  // Re-checked here as well: the layout guard protects navigation, this
-  // protects the data itself.
+// Re-checked in every server function: the layout guard protects navigation,
+// this protects the data itself.
+async function assertAdmin() {
   const session = await getSession(getRequest());
   if (!sessionIsAdmin(session)) throw new Error('Forbidden');
-  return getReportData();
+}
+
+const loadReport = createServerFn({ method: 'GET' }).handler(async () => {
+  await assertAdmin();
+  return { ...(await getReportData()), registrationOpen: isRegistrationOpen() };
 });
 
 const downloadCsv = createServerFn({ method: 'GET' }).handler(async () => {
-  const session = await getSession(getRequest());
-  if (!sessionIsAdmin(session)) throw new Error('Forbidden');
+  await assertAdmin();
   const { participants } = await getReportData();
   return participantsToCsv(participants);
 });
+
+const setTeamUnconfirmedFn = createServerFn({ method: 'POST' })
+  .validator(z.object({ inviteSlug: z.string().min(1), unconfirmed: z.boolean() }))
+  .handler(async ({ data }) => {
+    await assertAdmin();
+    return setTeamUnconfirmed(data.inviteSlug, data.unconfirmed);
+  });
+
+const finalizeTeamsFn = createServerFn({ method: 'POST' }).handler(async () => {
+  await assertAdmin();
+  return finalizeTeams();
+});
+
+/** Holds every team's password: a POST, so nothing along the way caches it. */
+const downloadProctoringCsv = createServerFn({ method: 'POST' }).handler(async () => {
+  await assertAdmin();
+  return getProctoringCsv();
+});
+
+function downloadFile(text: string, prefix: string) {
+  const url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${prefix}-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 /** Cached for 5 minutes; organisers pull fresh data with the header's Refresh. */
 const reportQueryOptions = queryOptions({
@@ -58,11 +94,80 @@ const teamId = (row: ReportTeam) => row.inviteSlug;
 const matches = (needle: string, ...fields: (string | null)[]) =>
   fields.some((f) => f?.toLowerCase().includes(needle));
 
+/** An i18n key and its values, translated when shown. */
+type Notice = { type: 'success' | 'error'; key: string; values?: Record<string, string | number> };
+
 function AdminPage() {
   const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
   const { data, isFetching, refetch } = useSuspenseQuery(reportQueryOptions);
-  const { participants, teams, stats } = data;
+  const { participants, teams, stats, registrationOpen } = data;
   useAdminRefresh(refetch, isFetching);
+
+  const [notice, setNotice] = useState<Notice | null>(null);
+  const [finalizeOpen, setFinalizeOpen] = useState(false);
+  const [finalizing, setFinalizing] = useState(false);
+  const [pendingSlugs, setPendingSlugs] = useState<ReadonlySet<string>>(() => new Set());
+
+  const setUnconfirmed = useCallback(
+    async (inviteSlug: string, unconfirmed: boolean) => {
+      const setPending = (pending: boolean) =>
+        setPendingSlugs((prev) => {
+          const next = new Set(prev);
+          if (pending) next.add(inviteSlug);
+          else next.delete(inviteSlug);
+          return next;
+        });
+      setPending(true);
+      setNotice(null);
+      // Tick the box at once; the refetch brings the counts and rolls back a refusal.
+      queryClient.setQueryData(
+        reportQueryOptions.queryKey,
+        (d) =>
+          d && {
+            ...d,
+            teams: d.teams.map((team) =>
+              team.inviteSlug === inviteSlug ? { ...team, unconfirmed } : team,
+            ),
+          },
+      );
+      try {
+        await setTeamUnconfirmedFn({ data: { inviteSlug, unconfirmed } });
+      } catch (err) {
+        setNotice({
+          type: 'error',
+          key: err instanceof Error ? err.message : 'admin.unconfirmedFailed',
+        });
+      } finally {
+        await refetch();
+        setPending(false);
+      }
+    },
+    [queryClient, refetch],
+  );
+
+  const finalize = async () => {
+    setFinalizing(true);
+    setNotice(null);
+    try {
+      const { assigned, badNames } = await finalizeTeamsFn();
+      setNotice(
+        badNames.length
+          ? { type: 'error', key: 'admin.finalizeBadNames', values: { names: badNames.join(', ') } }
+          : assigned
+            ? { type: 'success', key: 'admin.finalizeDone', values: { count: assigned } }
+            : { type: 'success', key: 'admin.finalizeNothing' },
+      );
+    } catch (err) {
+      setNotice({
+        type: 'error',
+        key: err instanceof Error ? err.message : 'admin.finalizeFailed',
+      });
+    } finally {
+      await refetch();
+      setFinalizing(false);
+    }
+  };
 
   const [tab, setTab] = useState<Tab>('participants');
   const [participantQuery, setParticipantQuery] = useState('');
@@ -253,6 +358,18 @@ function AdminPage() {
   const teamCols = useMemo<AdminColumnDef<ReportTeam>[]>(
     () => [
       {
+        id: 'number',
+        accessorFn: (team) => team.number,
+        meta: { label: t('admin.col.number'), tone: 'numeric' },
+        sortFn: (a, b) => compareTeamNumbers(a.original.number, b.original.number),
+        cell: ({ row }) =>
+          row.original.number === null ? (
+            <span className="text-muted-foreground">—</span>
+          ) : (
+            formatTeamNumber(row.original.number)
+          ),
+      },
+      {
         id: 'name',
         accessorFn: (team) => team.name,
         meta: { label: t('admin.col.name') },
@@ -285,6 +402,30 @@ function AdminPage() {
         ),
       },
       {
+        // Unticked for teams that didn't confirm participation; final once a team has a number.
+        id: 'confirmed',
+        accessorFn: (team) => !team.unconfirmed,
+        meta: { label: t('admin.col.confirmed') },
+        sortFn: (a, b) => Number(a.original.unconfirmed) - Number(b.original.unconfirmed),
+        cell: ({ row }) => {
+          const { eligible, unconfirmed, number, inviteSlug, name } = row.original;
+          if (!eligible) return <span className="text-muted-foreground">—</span>;
+          return (
+            <Checkbox
+              checked={!unconfirmed}
+              disabled={number !== null || pendingSlugs.has(inviteSlug)}
+              onCheckedChange={(checked) => void setUnconfirmed(inviteSlug, !checked)}
+              aria-label={t(
+                unconfirmed ? 'admin.markConfirmedLabel' : 'admin.markUnconfirmedLabel',
+                {
+                  name,
+                },
+              )}
+            />
+          );
+        },
+      },
+      {
         id: 'members',
         enableSorting: false,
         meta: { label: t('admin.col.members') },
@@ -311,7 +452,7 @@ function AdminPage() {
         cell: ({ row }) => formatDate(row.original.createdAt),
       },
     ],
-    [t, formatDate, goToParticipant],
+    [t, formatDate, goToParticipant, pendingSlugs, setUnconfirmed],
   );
   const participantTable = useAdminTable(
     participantMatches,
@@ -343,15 +484,9 @@ function AdminPage() {
     };
   }, [scrollTarget, tab]);
 
-  const exportCsv = async () => {
-    const csv = await downloadCsv();
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `whd-participants-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  const exportCsv = async () => downloadFile(await downloadCsv(), 'whd-participants');
+  const exportProctoring = async () =>
+    downloadFile(await downloadProctoringCsv(), 'whd-proctoring-teams');
 
   const eligibilityOptions = [
     { value: 'all', label: t('admin.filterAll') },
@@ -370,11 +505,60 @@ function AdminPage() {
     <main className="mx-auto w-full max-w-admin flex-1 px-6 py-10 sm:px-8 lg:px-12">
       <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-3xl font-bold text-foreground md:text-4xl">{t('admin.title')}</h1>
-          <Button variant="secondary" size="sm" onClick={exportCsv}>
-            {t('admin.exportCsv')}
-          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground md:text-4xl">{t('admin.title')}</h1>
+            <p className="mt-2 text-sm text-whd-text-muted">
+              {registrationOpen
+                ? t('admin.finalizeRegistrationOpen')
+                : t('admin.numberingStatus', {
+                    numbered: stats.numberedTeams,
+                    awaiting: stats.awaitingNumber,
+                  })}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setFinalizeOpen(true)}
+              disabled={registrationOpen || stats.awaitingNumber === 0 || finalizing}
+            >
+              {t('admin.finalize')}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={exportProctoring}
+              disabled={stats.numberedTeams === 0 || stats.awaitingNumber > 0}
+            >
+              {t('admin.exportProctoring')}
+            </Button>
+            <Button variant="secondary" size="sm" onClick={exportCsv}>
+              {t('admin.exportCsv')}
+            </Button>
+          </div>
         </div>
+        <ConfirmDialog
+          open={finalizeOpen}
+          onOpenChange={setFinalizeOpen}
+          title={t('admin.finalizeTitle')}
+          description={t('admin.finalizeBody', { count: stats.awaitingNumber })}
+          confirmLabel={t('admin.finalizeConfirm')}
+          cancelLabel={t('common.cancel')}
+          onConfirm={() => void finalize()}
+        />
+        {notice && (
+          <p
+            role={notice.type === 'error' ? 'alert' : 'status'}
+            className={
+              notice.type === 'error'
+                ? 'mb-6 text-sm text-destructive'
+                : 'mb-6 text-sm text-whd-pink-soft'
+            }
+          >
+            {t(notice.key, notice.values)}
+          </p>
+        )}
 
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard

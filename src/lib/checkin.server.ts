@@ -18,6 +18,8 @@ export type CheckinParticipant = {
   phone: string;
   teamId: string;
   teamName: string;
+  /** Table number, once the teams are finalized. */
+  teamNumber: number | null;
   placeOfStudy: string;
   educationLevel: string;
   attended: boolean;
@@ -32,6 +34,8 @@ export type CheckinTeamMember = {
 export type CheckinTeam = {
   id: string;
   name: string;
+  /** Table number, once the teams are finalized. */
+  number: number | null;
   captainName: string;
   /** Captain first, then alphabetical. */
   members: CheckinTeamMember[];
@@ -63,7 +67,7 @@ export async function getCheckinData(): Promise<CheckinData> {
 
   const teamsQuery = db
     .with(eligible)
-    .select({ id: team.id, name: team.name, captainId: team.captainId })
+    .select({ id: team.id, name: team.name, number: team.number, captainId: team.captainId })
     .from(team)
     .innerJoin(eligible, eq(team.id, eligible.teamId))
     .orderBy(sql`${team.name} collate nocase`);
@@ -102,6 +106,7 @@ export async function getCheckinData(): Promise<CheckinData> {
         phone: m.phone,
         teamId: t.id,
         teamName: t.name,
+        teamNumber: t.number,
         placeOfStudy: m.placeOfStudy,
         educationLevel: m.educationLevel,
         attended: m.attended,
@@ -120,6 +125,7 @@ export async function getCheckinData(): Promise<CheckinData> {
     return {
       id: t.id,
       name: t.name,
+      number: t.number,
       captainName: members.find((m) => m.id === t.captainId)?.fullName ?? '',
       members,
     };

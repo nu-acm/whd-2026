@@ -14,5 +14,6 @@ export const TEAM_ERRORS = {
   memberNotInTeam: 'teamErrors.memberNotInTeam',
   captainCannotLeave: 'teamErrors.captainCannotLeave',
   captainOnlyDissolve: 'teamErrors.captainOnlyDissolve',
+  finalized: 'teamErrors.finalized',
   failed: 'dashboard.actionFailed',
 } as const;

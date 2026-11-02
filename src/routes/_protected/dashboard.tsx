@@ -8,6 +8,7 @@ import { z } from 'zod';
 
 import { AccountShell } from '@/components/AccountShell';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { ContestCard } from '@/components/dashboard/ContestCard';
 import { TeamCard, type PendingTeamAction } from '@/components/dashboard/TeamCard';
 import { NoTeamCard } from '@/components/dashboard/NoTeamCard';
 import { CvCard } from '@/components/dashboard/CvCard';
@@ -173,6 +174,7 @@ function DashboardPage() {
           />
         }
       >
+        {team?.contest && <ContestCard contest={team.contest} />}
         {team ? (
           <TeamCard
             team={team}

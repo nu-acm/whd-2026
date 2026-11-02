@@ -17,6 +17,7 @@ import { ColumnToggleBar, AdminDataTable, StatCard } from '@/components/admin/ta
 import { MIN_TEAM_SIZE } from '@/db/schema';
 import { getSession } from '@/lib/auth.server';
 import { sessionIsAdmin } from '@/lib/admin.server';
+import { compareTeamNumbers, formatTeamNumber } from '@/lib/contest';
 import {
   getCheckinData,
   setAttendance,
@@ -66,6 +67,18 @@ const participantId = (row: CheckinData['participants'][number]) => row.id;
 const teamId = (row: CheckinTeam) => row.id;
 
 const attendedCount = (team: CheckinTeam) => team.members.filter((m) => m.attended).length;
+
+/** Staff type a table number as 7 or 07; only the whole number matches. */
+const isTableNumber = (number: number | null, needle: string) =>
+  number !== null && (needle === String(number) || needle === formatTeamNumber(number));
+
+function TableNumber({ number }: { number: number | null }) {
+  return number === null ? (
+    <span className="text-muted-foreground">—</span>
+  ) : (
+    formatTeamNumber(number)
+  );
+}
 
 function teamStatus(team: CheckinTeam): TeamStatus {
   const present = attendedCount(team);
@@ -183,11 +196,13 @@ function CheckinPage() {
     const needle = participantQuery.trim().toLowerCase();
     const filtered = !needle
       ? participantsInFilter
-      : participantsInFilter.filter((p) =>
-          // IIN and phone too: the check-in desk often asks for one of them.
-          [p.fullName, p.iin, p.phone, p.teamName, p.placeOfStudy, p.educationLevel].some((f) =>
-            f.toLowerCase().includes(needle),
-          ),
+      : participantsInFilter.filter(
+          (p) =>
+            isTableNumber(p.teamNumber, needle) ||
+            // IIN and phone too: the check-in desk often asks for one of them.
+            [p.fullName, p.iin, p.phone, p.teamName, p.placeOfStudy, p.educationLevel].some((f) =>
+              f.toLowerCase().includes(needle),
+            ),
         );
     return filtered;
   }, [participantsInFilter, participantQuery]);
@@ -196,10 +211,12 @@ function CheckinPage() {
     const needle = teamQuery.trim().toLowerCase();
     const filtered = !needle
       ? teamsInFilter
-      : teamsInFilter.filter((team) =>
-          [team.name, team.captainName, ...team.members.map((m) => m.fullName)].some((f) =>
-            f.toLowerCase().includes(needle),
-          ),
+      : teamsInFilter.filter(
+          (team) =>
+            isTableNumber(team.number, needle) ||
+            [team.name, team.captainName, ...team.members.map((m) => m.fullName)].some((f) =>
+              f.toLowerCase().includes(needle),
+            ),
         );
     return filtered;
   }, [teamsInFilter, teamQuery]);
@@ -268,6 +285,13 @@ function CheckinPage() {
         cell: ({ row }) => row.original.fullName,
       },
       {
+        id: 'teamNumber',
+        accessorFn: (p) => p.teamNumber,
+        meta: { label: t('admin.col.number'), tone: 'numeric' },
+        sortFn: (a, b) => compareTeamNumbers(a.original.teamNumber, b.original.teamNumber),
+        cell: ({ row }) => <TableNumber number={row.original.teamNumber} />,
+      },
+      {
         id: 'teamName',
         accessorFn: (p) => p.teamName,
         meta: { label: t('admin.col.teamName'), tone: 'muted' },
@@ -290,6 +314,13 @@ function CheckinPage() {
   );
   const teamCols = useMemo<AdminColumnDef<CheckinTeam>[]>(
     () => [
+      {
+        id: 'number',
+        accessorFn: (team) => team.number,
+        meta: { label: t('admin.col.number'), tone: 'numeric' },
+        sortFn: (a, b) => compareTeamNumbers(a.original.number, b.original.number),
+        cell: ({ row }) => <TableNumber number={row.original.number} />,
+      },
       {
         id: 'name',
         accessorFn: (team) => team.name,
@@ -335,7 +366,13 @@ function CheckinPage() {
     'fullName',
     participantId,
   );
-  const teamTable = useAdminTable(teamMatches, teamCols, 'name', teamId);
+  // Once the teams are finalized, staff look them up by table number.
+  const teamTable = useAdminTable(
+    teamMatches,
+    teamCols,
+    teams.some((team) => team.number !== null) ? 'number' : 'name',
+    teamId,
+  );
 
   const isParticipants = tab === 'participants';
   const shown = isParticipants

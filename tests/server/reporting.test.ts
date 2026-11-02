@@ -21,6 +21,8 @@ it('reports joined rosters and attendance, checking in only eligible teams', asy
     participants: 5,
     teams: 2,
     eligibleTeams: 1,
+    numberedTeams: 0,
+    awaitingNumber: 1,
     teamless: 1,
     attended: 1,
   });
