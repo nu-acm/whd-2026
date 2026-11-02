@@ -1,24 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { ContactLink, LegalPage, LegalSection } from '@/components/LegalPage';
 import { CONTACT_EMAIL } from '@/lib/event';
+import { pageMetadata } from '@/lib/metadata';
 
 export const Route = createFileRoute('/privacy')({
   component: PrivacyPage,
   head: () => ({
-    meta: [
-      { title: 'Privacy Policy — Women’s Hack Day' },
-      {
-        name: 'description',
-        content:
-          'Privacy policy for Women’s Hack Day — how we collect, use and protect your personal data.',
-      },
-    ],
+    meta: pageMetadata(
+      'Privacy Policy | Women’s Hack Day 2026',
+      'How Women’s Hack Day collects, uses and protects your personal data on the event registration platform.',
+    ),
   }),
 });
 
 function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy" updated="October 31, 2026">
+    <LegalPage title="Privacy Policy" updated="November 2, 2026">
       <LegalSection title="1. Who we are">
         <p>
           Women’s Hack Day is an annual team competition organized by the NU ACM-W Student Chapter
@@ -37,7 +34,7 @@ function PrivacyPage() {
           <li>
             <strong className="text-foreground">Registration data:</strong> full name, IIN
             (individual identification number), phone number, city, place of study, level of study,
-            and a parent or guardian’s phone number for school students.
+            and a parent or guardian’s phone number when required by the age check.
           </li>
           <li>
             <strong className="text-foreground">Team data:</strong> your team’s name and members.
@@ -68,8 +65,10 @@ function PrivacyPage() {
 
       <LegalSection title="4. Minors">
         <p>
-          School students taking part are usually under 18. We ask for a parent or guardian’s phone
-          number so we can reach them about the event.
+          Participants who will be under 18 on November 14, 2026 must provide a parent or guardian’s
+          phone number so we can reach them about the event. We use the birth date encoded in the
+          IIN for this check. If it does not contain a usable birth date, a parent or guardian
+          contact is also required. Organizers verify eligibility.
         </p>
       </LegalSection>
 

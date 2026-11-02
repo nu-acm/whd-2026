@@ -144,6 +144,54 @@ test('shows accessible consent and policy links in each language', async ({
   }
 });
 
+test('requires guardian contact by age and keeps unsaved details when changing language', async ({
+  page,
+  app,
+}) => {
+  await login(page, app.codes, 'minor@example.test');
+  await onboard(page, 'College Participant');
+  await page.getByRole('link', { name: 'Edit details' }).click();
+  await page.getByRole('textbox', { name: 'City' }).fill('Almaty');
+  await page.getByRole('combobox', { name: 'Level of study' }).selectOption('College');
+  await page.getByRole('textbox', { name: 'IIN' }).fill('101101600001');
+  await expect(page.getByRole('textbox', { name: en.onboarding.parentPhone })).toBeVisible();
+
+  for (const [locale, copy, label] of [
+    ['ru', ru, 'РУС'],
+    ['kk', kk, 'ҚАЗ'],
+    ['en', en, 'EN'],
+  ] as const) {
+    await page.getByRole('button', { name: new RegExp(`/ ${label}$`) }).click();
+    await expect(page.locator('html')).toHaveAttribute('lang', locale);
+    await expect(page.getByRole('textbox', { name: copy.onboarding.city })).toHaveValue('Almaty');
+    await expect(page.getByRole('textbox', { name: copy.onboarding.iin })).toHaveValue(
+      '101101600001',
+    );
+    await expect(page.getByRole('textbox', { name: copy.onboarding.parentPhone })).toBeVisible();
+  }
+
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(page.getByText(en.validation.parentPhoneRequired, { exact: true })).toBeVisible();
+  expect(
+    await app.db
+      .prepare('SELECT iin FROM participant WHERE full_name = ?')
+      .bind('College Participant')
+      .first('iin'),
+  ).toBe('060101600001');
+  await page.getByRole('textbox', { name: en.onboarding.parentPhone }).fill('+7 702 000 00 00');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.getByRole('link', { name: 'Edit details' }).click();
+  await expect(page.getByRole('textbox', { name: en.onboarding.parentPhone })).toHaveValue(
+    '77020000000',
+  );
+  await page.getByRole('combobox', { name: 'Level of study' }).selectOption('School');
+  await page.getByRole('textbox', { name: 'IIN' }).fill('081114600001');
+  await expect(page.getByRole('textbox', { name: en.onboarding.parentPhone })).toHaveCount(0);
+  await page.getByRole('textbox', { name: 'IIN' }).fill('000000000001');
+  await expect(page.getByRole('textbox', { name: en.onboarding.parentPhone })).toBeVisible();
+});
+
 test('blocks protected pages and refuses saved mutations after registration closes', async ({
   page,
   app,

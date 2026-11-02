@@ -107,7 +107,7 @@ export function FileUpload({
         {uploading && (
           <span className="file-upload-file">
             <FileText size={16} aria-hidden="true" />
-            {fileName} — {uploadingLabel}
+            {fileName}: {uploadingLabel}
           </span>
         )}
         {error && (

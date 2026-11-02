@@ -1,28 +1,28 @@
 {
   "short_name": "WHD",
-  "name": "Women’s Hack Day",
-  "description": "Women’s Hack Day — an annual three-round team competition in mathematics, competitive programming and product design, organized by the NU ACM-W Student Chapter.",
+  "name": "Women’s Hack Day 2026",
+  "description": "Women’s Hack Day 2026: the sixth annual team competition by NU ACM-W. November 14 at Nazarbayev University, Astana. Teams of 3, three rounds and a 425 000 ₸ prize pool.",
   "icons": [
     {
-      "src": "WHDlogo.svg",
+      "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     },
     {
-      "src": "logo192.png",
+      "src": "/logo192.png",
       "type": "image/png",
       "sizes": "192x192",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     },
     {
-      "src": "logo512.png",
+      "src": "/logo512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#bb046c",
-  "background_color": "#000000"
+  "theme_color": "#0e0e13",
+  "background_color": "#0e0e13"
 }

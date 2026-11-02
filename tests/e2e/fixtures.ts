@@ -165,7 +165,7 @@ export async function login(page: Page, codes: Map<string, string>, email: strin
 
 export async function onboard(page: Page, name: string) {
   await page.getByRole('textbox', { name: 'Full name' }).fill(name);
-  await page.getByRole('textbox', { name: 'IIN' }).fill('000000000001');
+  await page.getByRole('textbox', { name: 'IIN' }).fill('060101600001');
   await page.getByRole('textbox', { name: /^Phone\s*\*?$/ }).fill('+7 701 000 00 00');
   await page.getByRole('combobox', { name: 'Level of study' }).selectOption("Bachelor's");
   await page
@@ -191,7 +191,7 @@ export async function seedEligibleTeam(db: D1Database) {
       .prepare(
         'INSERT INTO participant (id, full_name, iin, phone, city, place_of_study, education_level) VALUES (?, ?, ?, ?, ?, ?, ?)',
       )
-      .bind(id, name, '000000000001', '77010000000', 'Astana', 'University', "Bachelor's")
+      .bind(id, name, '060101600001', '77010000000', 'Astana', 'University', "Bachelor's")
       .run();
   }
   await db

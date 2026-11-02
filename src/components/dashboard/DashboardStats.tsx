@@ -53,7 +53,7 @@ export function DashboardStats({ team }: { team: TeamData | null }) {
       <StatTile
         icon={Users}
         label={t('dashboard.teamLabel')}
-        value={team?.name ?? '—'}
+        value={team?.name ?? t('dashboard.noTeamShort')}
         detail={
           team
             ? t('dashboard.membersCount', { count: team.members.length, max: MAX_TEAM_SIZE })

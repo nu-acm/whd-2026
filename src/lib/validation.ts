@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { REGISTRATION_POLICY_VERSION } from '@/lib/consent';
+import { EVENT_DATE } from '@/lib/event';
 
 /**
  * Women's Hack Day is open to school, college and university students.
@@ -15,8 +16,36 @@ export const EDUCATION_LEVELS = [
 
 export type EducationLevel = (typeof EDUCATION_LEVELS)[number];
 
-/** Levels where we ask for a parent/guardian phone number. */
-export const MINOR_EDUCATION_LEVELS: readonly EducationLevel[] = ['School'];
+/** Use the IIN's encoded birth date; an unusable date also requires a contact. */
+export function requiresGuardianPhone(iin: string): boolean {
+  if (!/^\d{12}$/.test(iin)) return false;
+
+  const century = Number(iin[6]);
+  if (century < 1 || century > 6) return true;
+
+  const year = 1700 + Math.ceil(century / 2) * 100 + Number(iin.slice(0, 2));
+  const month = Number(iin.slice(2, 4));
+  const day = Number(iin.slice(4, 6));
+  const birthDate = new Date(Date.UTC(year, month - 1, day));
+  const eventDate = new Date(`${EVENT_DATE}T00:00:00Z`);
+  if (
+    birthDate.getUTCFullYear() !== year ||
+    birthDate.getUTCMonth() !== month - 1 ||
+    birthDate.getUTCDate() !== day ||
+    birthDate > eventDate
+  ) {
+    return true;
+  }
+
+  let age = eventDate.getUTCFullYear() - year;
+  if (
+    eventDate.getUTCMonth() < month - 1 ||
+    (eventDate.getUTCMonth() === month - 1 && eventDate.getUTCDate() < day)
+  ) {
+    age--;
+  }
+  return age < 18;
+}
 
 // Validation messages are i18n keys, resolved with t() in the UI.
 const V = {
@@ -103,8 +132,7 @@ export const onboardingSchema = z
     consent: z.literal(true, { error: V.consentRequired }),
     policyVersion: z.literal(REGISTRATION_POLICY_VERSION, { error: V.policyChanged }),
   })
-  // School students are usually minors, so a guardian contact is required.
-  .refine((d) => !MINOR_EDUCATION_LEVELS.includes(d.educationLevel) || !!d.parentPhone, {
+  .refine((d) => !requiresGuardianPhone(d.iin) || !!d.parentPhone, {
     message: V.parentPhoneRequired,
     path: ['parentPhone'],
   });

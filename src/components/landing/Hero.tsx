@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { NEXT_STEP_ROUTE, type NextStep } from '@/lib/next-step';
-import { MIN_TEAM_SIZE } from '@/db/schema';
 import HeroMascot from '@/components/landing/HeroMascot';
 import type { RegistrationStatus } from '@/lib/registration';
 
@@ -32,9 +31,6 @@ export default function Hero({
   const cta: Cta = isClosed
     ? closedCta(nextStep, t)
     : { to: NEXT_STEP_ROUTE[nextStep], label: t(`hero.cta.${nextStep}`) };
-  const statusKey =
-    isClosed && nextStep !== 'ready' ? `hero.closedStatus.${nextStep}` : `hero.status.${nextStep}`;
-  const showStatus = isClosed || nextStep !== 'register';
 
   return (
     <section id="top" className="landing-hero">
@@ -49,8 +45,8 @@ export default function Hero({
           />
         </h1>
         <p className="sr-only">{t('hero.tagline')}</p>
-        <div className="hero-action">
-          {cta && (
+        {cta && (
+          <div className="hero-action">
             <Link to={cta.to} preload={false} className="landing-cta hero-spy-cta">
               <span className="hero-cta-surface">
                 <span className="hero-cta-text-slot">
@@ -61,14 +57,8 @@ export default function Hero({
                 </span>
               </span>
             </Link>
-          )}
-          {isClosed && (
-            <p role="status" className="registration-status">
-              {t('countdown.ended')}
-            </p>
-          )}
-          {showStatus && <p className="hero-status">{t(statusKey, { min: MIN_TEAM_SIZE })}</p>}
-        </div>
+          </div>
+        )}
       </div>
       <HeroMascot
         registration={registration}

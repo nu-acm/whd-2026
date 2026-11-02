@@ -8,7 +8,10 @@
     "signOut": "Sign out",
     "copy": "Copy",
     "copied": "Copied",
-    "confirm": "Sure?"
+    "confirm": "Sure?",
+    "notProvided": "Not provided",
+    "notApplicable": "Not applicable",
+    "no": "No"
   },
   "navbar": {
     "about": "About",
@@ -38,7 +41,7 @@
       "signIn": "Sign in"
     },
     "status": {
-      "onboarding": "You are signed in. fill in your details to complete registration.",
+      "onboarding": "You are signed in. Fill in your details to complete registration.",
       "team": "Your details are saved. Next, create or join a team.",
       "ready": "You are registered with a team. See you at the event!",
       "incomplete": "Your team must have exactly {{min}} members to compete."
@@ -84,19 +87,19 @@
     "annualEdition": "annual edition",
     "roundsCount": "3",
     "rounds": "rounds",
-    "prizeAmount": "1 000 000",
+    "prizeAmount": "425 000",
     "prizeUnit": "₸",
     "prizePool": "prize pool",
     "title": "One day.",
     "titleHighlight": "Three challenges.",
-    "description": "For high school, college and university girls. Bring your curiosity and a team of 3. No professional experience needed.",
+    "description": "For girls aged 16 to 20 in high school, college or university. Compete in teams of 3 in programming, mathematics and product design.",
     "organizers": "Organised by NU ACM-W Student Chapter, the first ACM-W chapter in Kazakhstan and Central Asia."
   },
   "timeline": {
     "kicker": "Dates",
     "title": "Save the dates",
     "items": {
-      "registration": "October 26 - November 12",
+      "registration": "November 2-12",
       "registrationLabel": "Registration Period",
       "confirmation": "November 12-13",
       "confirmationLabel": "Confirmation Period",
@@ -117,13 +120,19 @@
       "pitching": "Pitching",
       "closing": "Closing Ceremony"
     },
-    "morning": "Morning",
-    "afternoon": "Afternoon"
+    "morning": "Morning & midday",
+    "afternoon": "Afternoon",
+    "venues": {
+      "redHall": "Red Hall",
+      "ballroomLeft": "Ballroom Left",
+      "c3Vestibule": "C3 Vestibule",
+      "pitching": "C3 rooms + Ballroom Left"
+    }
   },
   "benefits": {
     "kicker": "What you get",
     "title": "More than a competition",
-    "prizePool": "1,000,000 ₸ Prize Pool",
+    "prizePool": "425 000 ₸ Prize Pool",
     "welcomePackage": "Welcome Package",
     "merchandise": "Exclusive Merchandise",
     "coffeeBreak": "Coffee Break & Networking"
@@ -150,7 +159,7 @@
     "questions": {
       "whatIs": {
         "q": "What is Women’s Hack Day?",
-        "a": "WHD is an annual team competition for girls with three rounds: mathematics, competitive programming and product design."
+        "a": "Women’s Hack Day 2026 is the sixth annual team competition for girls. Three rounds: competitive programming, mathematics and product design."
       },
       "organizers": {
         "q": "Who are the organisers of WHD?",
@@ -162,7 +171,7 @@
       },
       "whoCanParticipate": {
         "q": "Who can participate?",
-        "a": "Girls who are high school, college, and university students. Participation is in teams of 3 people."
+        "a": "Girls aged 16 to 20 studying at a high school, college or university. Compete in teams of 3."
       },
       "professional": {
         "q": "Do I need to be a professional?",
@@ -170,7 +179,7 @@
       },
       "noTeam": {
         "q": "What if I don't have a team?",
-        "a": "You can find teammates in our <link href=\"https://t.me/WHD_chat\">Telegram chat</link>."
+        "a": "You can find teammates in our <link href=\"https://t.me/whd_2026\">Telegram chat</link>."
       },
       "howToParticipate": {
         "q": "How can I participate?",
@@ -182,11 +191,11 @@
       },
       "certificates": {
         "q": "Will there be prizes?",
-        "a": "Yes! Winners get cash prizes and merch, participants get welcome packages, and there is a coffee break for everyone."
+        "a": "Yes! The 425 000 ₸ prize pool includes 250 000 ₸ for first place, 125 000 ₸ for second and 50 000 ₸ for third. Winners get merch, all participants get welcome packages, and there is a coffee break for everyone."
       },
       "noAnswer": {
         "q": "I didn't find an answer to my question. What should I do?",
-        "a": "Join our <link href=\"https://t.me/WHD_chat\">Telegram chat</link> and ask your questions there, or contact us via email: <link href=\"https://mail.google.com/mail/u/0/?fs=1&to=acm_w@nu.edu.kz&su&body&tf=cm\">acm_w@nu.edu.kz.</link>"
+        "a": "Join our <link href=\"https://t.me/whd_2026\">Telegram chat</link> and ask your questions there, or contact us via email: <link href=\"https://mail.google.com/mail/u/0/?fs=1&to=acm_w@nu.edu.kz&su&body&tf=cm\">acm_w@nu.edu.kz.</link>"
       }
     },
     "chatLink": "Ask us in Telegram",
@@ -249,7 +258,7 @@
     "city": "City",
     "placeOfStudy": "School, college or university",
     "parentPhone": "Parent or guardian phone",
-    "parentPhoneHint": "Required for school students",
+    "parentPhoneHint": "Required if you will be under 18 on November 14, 2026, or your IIN has no usable birth date.",
     "educationLevel": "Level of study",
     "submit": "Continue",
     "saveFailed": "Could not save. Please try again.",
@@ -259,7 +268,8 @@
     "closedExisting": "Registration is closed, so your details can no longer be changed.",
     "backHome": "Back to the main page",
     "consent": "I agree to the terms and consent to the processing of my personal data.",
-    "consentHint": "Read the <privacy>Privacy Policy</privacy> and <terms>Terms of Service</terms>. CV upload is optional."
+    "consentHint": "Read the <privacy>Privacy Policy</privacy> and <terms>Terms of Service</terms>. CV upload is optional.",
+    "educationPlaceholder": "Select your level of study"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -338,7 +348,7 @@
     "placeOfStudyRequired": "Place of study is required",
     "placeOfStudyMax": "Place of study is too long",
     "parentPhoneInvalid": "Enter a valid phone number",
-    "parentPhoneRequired": "A parent or guardian phone is required for school students",
+    "parentPhoneRequired": "Enter a parent or guardian phone number. It is required for participants under 18 on the event day or when the IIN has no usable birth date.",
     "consentRequired": "Please agree to the terms and personal data processing to continue.",
     "policyChanged": "The registration policy has changed. Reload this page and review it before continuing."
   },
@@ -492,5 +502,11 @@
     "captainCannotLeave": "The captain must dissolve the team to leave.",
     "captainOnlyDissolve": "Only the captain can dissolve the team.",
     "finalized": "This team has its table number, so it can no longer change."
+  },
+  "metadata": {
+    "title": "Women’s Hack Day 2026 | November 14, Astana",
+    "description": "Women’s Hack Day 2026: November 14 at Nazarbayev University, Astana. Teams of 3 compete in programming, mathematics and product design for a 425 000 ₸ prize pool.",
+    "imageAlt": "Women’s Hack Day 2026",
+    "faqDescription": "Answers about Women’s Hack Day 2026: eligibility, teams of 3, registration, the November 14 programme and prizes."
   }
 }

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useRouter } from '@tanstack/react-router';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { languageNames, supportedLngs } from '@/i18n';
 
@@ -15,11 +16,13 @@ export function LanguageSwitcher({
   className,
 }: LanguageSwitcherProps) {
   const { i18n, t } = useTranslation();
+  const router = useRouter();
   const current = i18n.resolvedLanguage ?? i18n.language;
 
-  const changeLanguage = (lng: string) => {
-    void i18n.changeLanguage(lng);
+  const changeLanguage = async (lng: string) => {
+    await i18n.changeLanguage(lng);
     onLanguageChange?.();
+    await router.invalidate();
   };
 
   return (
@@ -27,7 +30,7 @@ export function LanguageSwitcher({
       variant="language"
       value={[current]}
       onValueChange={(values) => {
-        if (values[0]) changeLanguage(values[0]);
+        if (values[0]) void changeLanguage(values[0]);
       }}
       className={className}
       aria-label={t('common.switchLanguage')}

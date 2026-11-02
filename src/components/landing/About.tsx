@@ -5,7 +5,7 @@ import { EVENT_SCHEDULE } from '@/lib/event';
 import { parseTextWithLinks } from '@/lib/text';
 
 const ROUND_ICONS = { mathematics: FaCalculator, programming: FaCode, productDesign: FaPenRuler };
-const ROUNDS = ['mathematics', 'programming', 'productDesign'] as const;
+const ROUNDS = ['programming', 'mathematics', 'productDesign'] as const;
 const QUESTIONS = ['professional', 'noTeam'] as const;
 
 export default function About() {

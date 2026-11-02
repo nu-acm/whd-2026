@@ -31,9 +31,9 @@ export function getAuth() {
   const { DB: d1Binding, BETTER_AUTH_SECRET: secret, BETTER_AUTH_URL: url } = authEnv;
 
   if (!secret)
-    throw new Error('BETTER_AUTH_SECRET is not set — copy .dev.vars.example to .dev.vars');
-  if (!url) throw new Error('BETTER_AUTH_URL is not set — copy .dev.vars.example to .dev.vars');
-  if (!d1Binding) throw new Error('D1 binding (DB) is not configured — check wrangler.jsonc');
+    throw new Error('BETTER_AUTH_SECRET is not set. Copy .dev.vars.example to .dev.vars');
+  if (!url) throw new Error('BETTER_AUTH_URL is not set. Copy .dev.vars.example to .dev.vars');
+  if (!d1Binding) throw new Error('D1 binding (DB) is not configured. Check wrangler.jsonc');
 
   const db = getDb(d1Binding);
   const { GOOGLE_CLIENT_ID: googleId, GOOGLE_CLIENT_SECRET: googleSecret } = authEnv;

@@ -73,8 +73,9 @@ const isTableNumber = (number: number | null, needle: string) =>
   number !== null && (needle === String(number) || needle === formatTeamNumber(number));
 
 function TableNumber({ number }: { number: number | null }) {
+  const { t } = useTranslation();
   return number === null ? (
-    <span className="text-muted-foreground">—</span>
+    <span className="text-muted-foreground">{t('common.notProvided')}</span>
   ) : (
     formatTeamNumber(number)
   );
