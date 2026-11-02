@@ -12,7 +12,6 @@ beforeEach(async () => {
   ]);
   bindings.REGISTRATION_DEADLINE = '2099-01-01T00:00:00Z';
   bindings.ADMIN_EMAILS = 'admin@example.test';
-  delete bindings.ADDITIONAL_ADMIN_EMAILS;
 });
 
 afterEach(() => {

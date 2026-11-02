@@ -40,15 +40,16 @@ it('issues a real session after OTP verification and revokes it on sign-out', as
   await expect(ensureSession(request)).rejects.toThrow('Unauthorized');
 });
 
-it('adds approved organisers without replacing the existing allowlist', () => {
-  bindings.ADDITIONAL_ADMIN_EMAILS = ' NEW-ADMIN@example.test, other@example.test ';
+it('authorizes organisers from one comma- or whitespace-separated allowlist', () => {
+  bindings.ADMIN_EMAILS = ' ADMIN@example.test, NEW-ADMIN@example.test\nother@example.test ';
   expect(sessionIsAdmin({ user: { email: 'admin@example.test' } })).toBe(true);
   expect(sessionIsAdmin({ user: { email: 'new-admin@example.test' } })).toBe(true);
   expect(sessionIsAdmin({ user: { email: 'other@example.test' } })).toBe(true);
   expect(sessionIsAdmin({ user: { email: 'outsider@example.test' } })).toBe(false);
+  expect(sessionIsAdmin(null)).toBe(false);
+  expect(sessionIsAdmin({ user: {} })).toBe(false);
   bindings.ADMIN_EMAILS = '';
-  expect(sessionIsAdmin({ user: { email: 'new-admin@example.test' } })).toBe(true);
-  delete bindings.ADDITIONAL_ADMIN_EMAILS;
+  expect(sessionIsAdmin({ user: { email: 'admin@example.test' } })).toBe(false);
   expect(sessionIsAdmin({ user: { email: 'new-admin@example.test' } })).toBe(false);
 });
 
