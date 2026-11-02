@@ -42,9 +42,9 @@ function TermsPage() {
 
       <LegalSection title="4. Teams">
         <p>
-          Teams must have exactly 3 members to compete. A team of any other size at the end of
-          registration is not eligible. The team captain may remove members while registration is
-          open.
+          During this temporary registration closure, only teams with exactly 1 member are eligible
+          for finalization. Teams of any other size are not eligible. Team composition is frozen
+          while registration is closed.
         </p>
       </LegalSection>
 

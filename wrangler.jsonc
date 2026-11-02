@@ -22,8 +22,8 @@
   ],
   "vars": {
     "BETTER_AUTH_URL": "https://whd.nuacmw.kz",
-    // Blank uses the event deadline. A var, so .dev.vars can still override it (see secrets below).
-    "REGISTRATION_DEADLINE": "",
+    // Temporary registration closure. Restore to "" to use the event deadline.
+    "REGISTRATION_DEADLINE": "2026-11-02T00:00:00+05:00",
     // Codeforces logins are this prefix + the table number (team07). Proctoring's login prefix
     // setting must be the same.
     "CF_LOGIN_PREFIX": "team",
