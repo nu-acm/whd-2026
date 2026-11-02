@@ -360,6 +360,7 @@
 .dashboard-sidebar {
   min-width: 0;
 }
+.dashboard-team-column,
 .dashboard-sidebar {
   display: flex;
   flex-direction: column;

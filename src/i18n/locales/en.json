@@ -307,7 +307,14 @@
     "feedbackDissolved": "The team was dissolved.",
     "generateRateLimited": "Too many name suggestions. Please try again later.",
     "newTeamTitle": "Start a team",
-    "invitedTitle": "Have an invitation?"
+    "invitedTitle": "Have an invitation?",
+    "contestEyebrow": "Contest access",
+    "tableNumber": "Table {{number}}",
+    "contestHint": "Sign in to Codeforces with these during the contest. Don't share the password outside your team.",
+    "cfLogin": "Codeforces login",
+    "cfPassword": "Codeforces password",
+    "showPassword": "Show password",
+    "uploadVideo": "Upload video"
   },
   "validation": {
     "emailRequired": "Email is required",
@@ -321,6 +328,7 @@
     "educationInvalid": "Choose your level of study",
     "teamNameMin": "Team name must be at least 3 characters",
     "teamNameMax": "Team name must be 30 characters or fewer",
+    "teamNameChars": "Team name can't contain | or line breaks",
     "inviteCodeRequired": "Invite code is required",
     "inviteCodeInvalid": "That invite code is not valid",
     "cityRequired": "City is required",
@@ -391,6 +399,20 @@
     "confirmAbsentBody": "{{name}} will be marked as not checked in.",
     "markAbsent": "Undo check-in",
     "attendanceFailed": "Could not update attendance. Try again.",
+    "finalize": "Finalize teams",
+    "finalizeTitle": "Finalize teams?",
+    "finalizeBody": "Eligible, confirmed teams without a number ({{count}}) get table numbers and Codeforces passwords, in random order. Numbers can never be changed or taken back, and these teams can no longer change their members.",
+    "finalizeConfirm": "Finalize",
+    "finalizeDone": "Teams numbered: {{count}}.",
+    "finalizeNothing": "Every eligible, confirmed team already has a number.",
+    "finalizeBadNames": "Rename these teams first, without | or line breaks: {{names}}",
+    "finalizeRegistrationOpen": "Registration is still open. Finalize the teams once it closes.",
+    "finalizeFailed": "Could not finalize the teams. Try again.",
+    "numberingStatus": "Numbered: {{numbered}} · awaiting a number: {{awaiting}}",
+    "exportProctoring": "Export for proctoring",
+    "markUnconfirmedLabel": "Mark {{name}} as not confirmed",
+    "markConfirmedLabel": "Mark {{name}} as confirmed",
+    "unconfirmedFailed": "Could not update the team. Try again.",
     "col": {
       "fullName": "Name",
       "email": "Email",
@@ -409,7 +431,9 @@
       "eligible": "Eligible",
       "members": "Members",
       "inviteSlug": "Invite code",
-      "cvUrl": "CV"
+      "cvUrl": "CV",
+      "number": "Table",
+      "confirmed": "Confirmed"
     },
     "cvOpen": "Open"
   },
@@ -462,6 +486,7 @@
     "captainOnlyRemove": "Only the captain can remove members.",
     "memberNotInTeam": "This participant is not in your team.",
     "captainCannotLeave": "The captain must dissolve the team to leave.",
-    "captainOnlyDissolve": "Only the captain can dissolve the team."
+    "captainOnlyDissolve": "Only the captain can dissolve the team.",
+    "finalized": "This team has its table number, so it can no longer change."
   }
 }

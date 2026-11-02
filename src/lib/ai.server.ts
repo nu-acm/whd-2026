@@ -36,9 +36,10 @@ const THEMES = [
 
 /** Models like to wrap the answer in quotes or add a trailing full stop. */
 function cleanName(raw: string): string {
-  const firstLine = raw.trim().split('\n')[0] ?? '';
+  const firstLine = raw.trim().split(/\r?\n/)[0] ?? '';
   return firstLine
     .replace(/^["'«“]+|["'»”.!]+$/g, '')
+    .replace(/\s*\|+\s*/g, ' ') // forbid "|" because it'd break Codeforces
     .trim()
     .slice(0, MAX_LENGTH)
     .trim();

@@ -11,6 +11,9 @@ export const bindings = env as unknown as {
   GAS_SECRET: string;
   ADMIN_EMAILS: string;
   REGISTRATION_DEADLINE: string;
+  CF_LOGIN_PREFIX: string;
+  PROCTORING_URL: string;
+  CONTEST_START: string;
   AI?: { run: ReturnType<typeof vi.fn> };
 };
 

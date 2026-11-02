@@ -30,6 +30,7 @@ const V = {
   educationInvalid: 'validation.educationInvalid',
   teamNameMin: 'validation.teamNameMin',
   teamNameMax: 'validation.teamNameMax',
+  teamNameChars: 'validation.teamNameChars',
   inviteCodeRequired: 'validation.inviteCodeRequired',
   inviteCodeInvalid: 'validation.inviteCodeInvalid',
   cityRequired: 'validation.cityRequired',
@@ -106,8 +107,16 @@ export const onboardingSchema = z
 export type OnboardingInput = z.infer<typeof onboardingSchema>;
 
 // ── Teams ────────────────────────────────────────────────────────────────────
+/** The Codeforces users file separates columns with "|" and users with line breaks. */
+export const TEAM_NAME_FORBIDDEN = /[|\r\n]/;
+
 export const createTeamSchema = z.object({
-  name: z.string().trim().min(3, { error: V.teamNameMin }).max(30, { error: V.teamNameMax }),
+  name: z
+    .string()
+    .trim()
+    .min(3, { error: V.teamNameMin })
+    .max(30, { error: V.teamNameMax })
+    .refine((name) => !TEAM_NAME_FORBIDDEN.test(name), { error: V.teamNameChars }),
 });
 export type CreateTeamInput = z.infer<typeof createTeamSchema>;
 

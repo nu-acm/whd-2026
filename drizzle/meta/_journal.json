@@ -15,6 +15,13 @@
       "when": 1791868101130,
       "tag": "0001_ai_generation_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793254263404,
+      "tag": "0002_team_contest_identity",
+      "breakpoints": true
     }
   ]
 }

@@ -21,6 +21,14 @@
     "BETTER_AUTH_URL": "https://whd.nuacmw.kz",
     // Blank uses the event deadline. A var, so .dev.vars can still override it (see secrets below).
     "REGISTRATION_DEADLINE": "",
+    // Codeforces logins are this prefix + the table number (team07). Proctoring's login prefix
+    // setting must be the same.
+    "CF_LOGIN_PREFIX": "team",
+    // The proctoring upload page behind the dashboard's upload button.
+    "PROCTORING_URL": "https://proctoring.nuacmw.kz",
+    // ISO 8601 instant when the contest starts and the upload button appears. Blank hides it.
+    // Proctoring's contest start must be the same instant.
+    "CONTEST_START": "",
   },
   // A deploy fails while any of these is not set on the Worker. Local dev only warns, and loads only
   // these names and the vars above from .dev.vars.
