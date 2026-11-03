@@ -11,7 +11,7 @@ export interface FooterLinkGroup {
 }
 export interface Footer2Props {
   logo: ReactNode;
-  tagline: string;
+  tagline: ReactNode;
   socialLinks: SocialLink[];
   socialText: string;
   linkGroups: FooterLinkGroup[];

@@ -20,8 +20,31 @@ for (const [locale, copy] of Object.entries({ en, ru, kk })) {
     const viewport = page.viewportSize();
     if (!viewport) throw new Error('A viewport is required');
     const timeline = page.getByRole('region', { name: copy.timeline.title });
-    for (const width of new Set([viewport.width, 320, 768, 1024, 1280, 1920])) {
+    for (const width of new Set([viewport.width, 320, 375, 414, 768, 1024, 1280, 1920])) {
       await page.setViewportSize({ ...viewport, width });
+      for (const selector of ['#about-title', '.footer-two-brand h2']) {
+        const eventName = await page.locator(selector).evaluate((heading) => {
+          const name = Array.from(heading.childNodes).find((node) =>
+            node.textContent?.includes('Women’s Hack Day'),
+          );
+          if (!name) throw new Error('The heading must include the event name');
+          const range = document.createRange();
+          range.selectNodeContents(name);
+          return {
+            lines: range.getClientRects().length,
+            right: range.getBoundingClientRect().right,
+            containerRight: heading.getBoundingClientRect().right,
+          };
+        });
+        expect(
+          eventName.lines,
+          `${selector} keeps the name on one line at ${width}px in ${locale}`,
+        ).toBe(1);
+        expect(
+          eventName.right,
+          `${selector} fits the name at ${width}px in ${locale}`,
+        ).toBeLessThanOrEqual(eventName.containerRight + 1);
+      }
       const cta = page.locator('.hero-spy-cta');
       const labelBounds = await cta.locator('.hero-cta-label').boundingBox();
       const arrowBounds = await cta.locator('.hero-cta-arrow').boundingBox();
@@ -53,6 +76,12 @@ for (const [locale, copy] of Object.entries({ en, ru, kk })) {
       expect(clippedContent, `Timeline content fits at ${width}px in ${locale}`).toEqual([]);
     }
     await page.setViewportSize(viewport);
+    await page.locator('#about-title').screenshot({
+      path: `output/playwright/screenshots/${testInfo.project.name}-${locale}-about-title.png`,
+    });
+    await page.locator('.footer-two-brand h2').screenshot({
+      path: `output/playwright/screenshots/${testInfo.project.name}-${locale}-footer-title.png`,
+    });
     await timeline.screenshot({
       path: `output/playwright/screenshots/${testInfo.project.name}-${locale}-timeline.png`,
     });

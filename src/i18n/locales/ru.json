@@ -211,7 +211,7 @@
     "nuImpactAlt": "NU Impact Foundation"
   },
   "footer": {
-    "readyToJoin": "До встречи на Women’s Hack Day!",
+    "readyToJoin": "До встречи на <event>Women’s Hack Day!</event>",
     "register": "Регистрация",
     "instagram": "Instagram",
     "telegram": "Telegram",

@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { ArrowUpRight, Mail } from 'lucide-react';
 import { FaInstagram, FaTelegramPlane, FaTiktok } from 'react-icons/fa';
@@ -31,7 +31,16 @@ export default function Footer({
             <img src="/whd/logo.webp" alt="" width={200} height={101} />
           </a>
         }
-        tagline={registrationOpen ? t('footer.readyToJoin') : t('footer.registrationClosed')}
+        tagline={
+          registrationOpen ? (
+            <Trans
+              i18nKey="footer.readyToJoin"
+              components={{ event: <span className="footer-two-event-name" /> }}
+            />
+          ) : (
+            t('footer.registrationClosed')
+          )
+        }
         socialText={t('footer.follow')}
         socialLinks={SOCIALS.map(({ href, labelKey, icon: Icon }) => ({
           href,
