@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { REGISTRATION_POLICY_VERSION } from '@/lib/consent';
+import { DOCUMENTS_POLICY_VERSION, REGISTRATION_POLICY_VERSION } from '@/lib/consent';
 import { EVENT_DATE } from '@/lib/event';
 
 /**
@@ -71,6 +71,8 @@ const V = {
   parentPhoneRequired: 'validation.parentPhoneRequired',
   consentRequired: 'validation.consentRequired',
   policyChanged: 'validation.policyChanged',
+  documentsRequired: 'validation.documentsRequired',
+  documentsChanged: 'validation.documentsChanged',
 } as const;
 
 // ── Login step 1: email ──────────────────────────────────────────────────────
@@ -131,6 +133,8 @@ export const onboardingSchema = z
     educationLevel: z.enum(EDUCATION_LEVELS, { error: V.educationInvalid }),
     consent: z.literal(true, { error: V.consentRequired }),
     policyVersion: z.literal(REGISTRATION_POLICY_VERSION, { error: V.policyChanged }),
+    documentsRead: z.literal(true, { error: V.documentsRequired }),
+    documentsPolicyVersion: z.literal(DOCUMENTS_POLICY_VERSION, { error: V.documentsChanged }),
   })
   .refine((d) => !requiresGuardianPhone(d.iin) || !!d.parentPhone, {
     message: V.parentPhoneRequired,

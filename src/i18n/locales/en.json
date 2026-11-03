@@ -15,7 +15,7 @@
   },
   "navbar": {
     "about": "About",
-    "schedule": "Schedule",
+    "schedule": "Agenda",
     "partners": "Sponsors",
     "benefits": "Benefits",
     "gallery": "Gallery",
@@ -28,7 +28,7 @@
   },
   "hero": {
     "title": "Women’s Hack Day",
-    "tagline": "One team. Three challenges. A whole day to make your move in IT.",
+    "tagline": "Bring your team and join us for a day of programming, mathematics, and product design.",
     "registrationOpen": "Registration is open",
     "countdownLabel": "Registration closes in",
     "imageAlt": "Women’s Hack Day illustration",
@@ -90,16 +90,16 @@
     "prizeAmount": "425 000",
     "prizeUnit": "₸",
     "prizePool": "prize pool",
-    "title": "One day.",
-    "titleHighlight": "Three challenges.",
-    "description": "For girls aged 16 to 20 in high school, college or university. Compete in teams of 3 in programming, mathematics and product design.",
+    "title": "What is",
+    "titleHighlight": "Women’s Hack Day?",
+    "description": "Women’s Hack Day is a team competition for girls and young women aged 16 to 20 who study at schools, colleges, and universities. Participants form teams of three and compete in programming, mathematics, and product design.",
     "organizers": "Organised by NU ACM-W Student Chapter, the first ACM-W chapter in Kazakhstan and Central Asia."
   },
   "timeline": {
     "kicker": "Dates",
-    "title": "Save the dates",
+    "title": "Important dates",
     "items": {
-      "registration": "November 2-12",
+      "registration": "November 3-12",
       "registrationLabel": "Registration Period",
       "confirmation": "November 12-13",
       "confirmationLabel": "Confirmation Period",
@@ -109,7 +109,7 @@
   },
   "schedule": {
     "kicker": "Event day",
-    "title": "Your day at WHD",
+    "title": "Agenda",
     "events": {
       "registration": "Registration",
       "opening": "Opening Ceremony",
@@ -120,7 +120,7 @@
       "pitching": "Pitching",
       "closing": "Closing Ceremony"
     },
-    "morning": "Morning & midday",
+    "morning": "Morning & Noon",
     "afternoon": "Afternoon",
     "venues": {
       "redHall": "Red Hall",
@@ -131,7 +131,7 @@
   },
   "benefits": {
     "kicker": "What you get",
-    "title": "More than a competition",
+    "title": "What to expect",
     "prizePool": "425 000 ₸ Prize Pool",
     "welcomePackage": "Welcome Package",
     "merchandise": "Exclusive Merchandise",
@@ -149,7 +149,7 @@
   },
   "faq": {
     "kicker": "Questions",
-    "title": "Good questions. Clear answers.",
+    "title": "Have questions?",
     "categories": {
       "general": "General",
       "participation": "Participation",
@@ -200,7 +200,7 @@
     },
     "chatLink": "Ask us in Telegram",
     "allTitle": "All questions about WHD",
-    "viewAll": "All questions",
+    "viewAll": "View all FAQs",
     "contactUs": "Contact us",
     "backToHome": "Back to home"
   },
@@ -211,7 +211,7 @@
     "nuImpactAlt": "NU Impact Foundation"
   },
   "footer": {
-    "readyToJoin": "Your team. Your next move.",
+    "readyToJoin": "See you at Women’s Hack Day!",
     "register": "Register",
     "instagram": "Instagram",
     "telegram": "Telegram",
@@ -223,7 +223,7 @@
     "terms": "Terms of Service",
     "signIn": "Sign in",
     "registrationClosed": "Registration is closed",
-    "follow": "Stay in touch",
+    "follow": "Follow us for updates",
     "explore": "Explore",
     "documents": "Legal"
   },
@@ -245,8 +245,8 @@
     "sendFailed": "Could not send the code. Please try again.",
     "verifyFailed": "That code is not right. Please try again.",
     "registrationClosed": "Registration is closed. If you already registered, you can still sign in to see your team.",
-    "welcome": "Your team. Your next step.",
-    "welcomeHint": "Sign in to get ready for Women’s Hack Day."
+    "welcome": "Preparing for Women’s Hack Day",
+    "welcomeHint": "Sign in to set up your profile and join a team."
   },
   "onboarding": {
     "title": "Your details",
@@ -269,6 +269,8 @@
     "backHome": "Back to the main page",
     "consent": "I agree to the terms and consent to the processing of my personal data.",
     "consentHint": "Read the <privacy>Privacy Policy</privacy> and <terms>Terms of Service</terms>. CV upload is optional.",
+    "documentsRead": "I have read the Code of Conduct and Instructions and Rules.",
+    "documentsHint": "Read the <conduct>Code of Conduct</conduct> and <rules>Instructions and Rules</rules>.",
     "educationPlaceholder": "Select your level of study"
   },
   "dashboard": {
@@ -350,6 +352,8 @@
     "parentPhoneInvalid": "Enter a valid phone number",
     "parentPhoneRequired": "Enter a parent or guardian phone number. It is required for participants under 18 on the event day or when the IIN has no usable birth date.",
     "consentRequired": "Please agree to the terms and personal data processing to continue.",
+    "documentsRequired": "Please confirm that you have read the Code of Conduct and Instructions and Rules to continue.",
+    "documentsChanged": "The documents have changed. Reload this page and review them before confirming again.",
     "policyChanged": "The registration policy has changed. Reload this page and review it before continuing."
   },
   "education": {
@@ -484,7 +488,7 @@
     "errorSingleFile": "Please upload one PDF file at a time."
   },
   "closingCta": {
-    "title": "See you at <pink>WHD</pink>."
+    "title": "Join us at <pink>WHD</pink>!"
   },
   "teamErrors": {
     "noProfile": "Finish your profile first.",

@@ -3,6 +3,17 @@ import ru from '@/i18n/locales/ru.json' with { type: 'json' };
 import kk from '@/i18n/locales/kk.json' with { type: 'json' };
 import { test, expect } from './fixtures';
 
+test('defaults to Russian without a valid language preference', async ({ page, context, app }) => {
+  for (const locale of [undefined, 'invalid']) {
+    await context.clearCookies();
+    if (locale) await context.addCookies([{ name: 'locale', value: locale, url: app.url }]);
+    const response = await page.goto('/');
+    expect(await response!.text()).toContain('lang="ru"');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
+    await expect(page).toHaveTitle(ru.metadata.title);
+  }
+});
+
 for (const [locale, copy] of Object.entries({ en, ru, kk })) {
   test(`serves consistent page metadata in ${locale}`, async ({ page, context, app }) => {
     await context.addCookies([{ name: 'locale', value: locale, url: app.url }]);

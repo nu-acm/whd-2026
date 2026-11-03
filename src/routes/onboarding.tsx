@@ -13,7 +13,7 @@ import { LinkButton } from '@/components/ui/button';
 import { Notice } from '@/components/ui/notice';
 import { onboardingSchema } from '@/lib/validation';
 import { safeInviteRedirect, validateRedirectSearch } from '@/lib/redirect';
-import { REGISTRATION_POLICY_VERSION } from '@/lib/consent';
+import { DOCUMENTS_POLICY_VERSION, REGISTRATION_POLICY_VERSION } from '@/lib/consent';
 
 /** Existing profile values, so onboarding doubles as "edit my details". */
 const loadProfile = createServerFn({ method: 'GET' }).handler(async () => {
@@ -36,6 +36,8 @@ const loadProfile = createServerFn({ method: 'GET' }).handler(async () => {
       parentPhone: p.parentPhone ?? '',
       educationLevel: p.educationLevel,
       consent: !!p.consentedAt && p.consentPolicyVersion === REGISTRATION_POLICY_VERSION,
+      documentsRead:
+        !!p.documentsAcknowledgedAt && p.documentsPolicyVersion === DOCUMENTS_POLICY_VERSION,
     } satisfies OnboardingDefaults,
   };
 });

@@ -22,6 +22,15 @@ for (const [locale, copy] of Object.entries({ en, ru, kk })) {
     const timeline = page.getByRole('region', { name: copy.timeline.title });
     for (const width of new Set([viewport.width, 320, 768, 1024, 1280, 1920])) {
       await page.setViewportSize({ ...viewport, width });
+      const cta = page.locator('.hero-spy-cta');
+      const labelBounds = await cta.locator('.hero-cta-label').boundingBox();
+      const arrowBounds = await cta.locator('.hero-cta-arrow').boundingBox();
+      expect(labelBounds).not.toBeNull();
+      expect(arrowBounds).not.toBeNull();
+      expect(
+        labelBounds!.x + labelBounds!.width,
+        `Registration label clears its arrow at ${width}px in ${locale}`,
+      ).toBeLessThanOrEqual(arrowBounds!.x);
       const clippedContent = await timeline.locator('.date-stat').evaluateAll((cards) =>
         cards.flatMap((card, index) => {
           const bounds = card.getBoundingClientRect();

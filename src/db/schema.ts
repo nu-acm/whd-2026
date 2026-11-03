@@ -62,6 +62,8 @@ export const participant = sqliteTable(
     educationLevel: text('education_level').notNull(),
     consentedAt: integer('consented_at', { mode: 'timestamp_ms' }),
     consentPolicyVersion: text('consent_policy_version'),
+    documentsAcknowledgedAt: integer('documents_acknowledged_at', { mode: 'timestamp_ms' }),
+    documentsPolicyVersion: text('documents_policy_version'),
     cvUrl: text('cv_url'),
     attended: integer('attended', { mode: 'boolean' }).default(false).notNull(),
     teamId: text('team_id').references(() => team.id, { onDelete: 'set null' }),

@@ -23,7 +23,13 @@ export async function upsertParticipant(
   data: Omit<OnboardingInput, 'parentPhone'> & { userId: string; parentPhone?: string },
 ) {
   const db = getAppDb();
-  const { consent: _consent, policyVersion, ...profile } = onboardingSchema.parse(data);
+  const {
+    consent: _consent,
+    policyVersion,
+    documentsRead: _documentsRead,
+    documentsPolicyVersion,
+    ...profile
+  } = onboardingSchema.parse(data);
   const now = new Date();
 
   await db
@@ -34,6 +40,8 @@ export async function upsertParticipant(
       parentPhone: profile.parentPhone ?? null,
       consentedAt: now,
       consentPolicyVersion: policyVersion,
+      documentsAcknowledgedAt: now,
+      documentsPolicyVersion,
     })
     .onConflictDoUpdate({
       target: participant.id,
@@ -46,6 +54,12 @@ export async function upsertParticipant(
           else ${now.getTime()}
         end`,
         consentPolicyVersion: policyVersion,
+        documentsAcknowledgedAt: sql`case
+          when ${participant.documentsPolicyVersion} = ${documentsPolicyVersion}
+            then coalesce(${participant.documentsAcknowledgedAt}, ${now.getTime()})
+          else ${now.getTime()}
+        end`,
+        documentsPolicyVersion,
         updatedAt: now,
       },
     });

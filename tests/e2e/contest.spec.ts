@@ -32,6 +32,7 @@ test('finalizes teams, exports them for proctoring, and keeps the contest card f
 
   const context = await browser.newContext({ baseURL: app.url, viewport: page.viewportSize() });
   try {
+    await context.addCookies([{ name: 'locale', value: 'en', url: app.url }]);
     const captain = await context.newPage();
     app.observe(captain);
     await login(captain, app.codes, 'captain@example.test');

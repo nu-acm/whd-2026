@@ -2,7 +2,7 @@ import { env } from 'cloudflare:workers';
 import { vi } from 'vite-plus/test';
 import { getAuth } from '@/lib/auth.server';
 import { upsertParticipant } from '@/lib/onboarding.server';
-import { REGISTRATION_POLICY_VERSION } from '@/lib/consent';
+import { DOCUMENTS_POLICY_VERSION, REGISTRATION_POLICY_VERSION } from '@/lib/consent';
 
 export const bindings = env as unknown as {
   DB: D1Database;
@@ -27,6 +27,8 @@ export const profile = {
   educationLevel: "Bachelor's",
   consent: true,
   policyVersion: REGISTRATION_POLICY_VERSION,
+  documentsRead: true,
+  documentsPolicyVersion: DOCUMENTS_POLICY_VERSION,
 } as const;
 
 export async function seedParticipant(id: string) {

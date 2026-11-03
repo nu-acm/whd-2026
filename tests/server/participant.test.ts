@@ -6,7 +6,7 @@ import { createTeam } from '@/lib/team.server';
 import { setAttendance } from '@/lib/checkin.server';
 import { Route } from '@/routes/api/cv';
 import { bindings, mockWebhook, profile, seedParticipant, signIn } from './support';
-import { REGISTRATION_POLICY_VERSION } from '@/lib/consent';
+import { DOCUMENTS_POLICY_VERSION, REGISTRATION_POLICY_VERSION } from '@/lib/consent';
 
 const handlers = (() => {
   const configured = Route.options.server?.handlers;
@@ -45,7 +45,9 @@ it('edits profile fields without resetting membership, attendance, CV, or regist
   await setAttendance('owner', true);
   mockWebhook();
   await uploadCv('owner', new File(['%PDF-1.7\ncontent'], 'cv.pdf'));
-  await bindings.DB.prepare('UPDATE participant SET consented_at = 1 WHERE id = ?')
+  await bindings.DB.prepare(
+    'UPDATE participant SET consented_at = 1, documents_acknowledged_at = 2 WHERE id = ?',
+  )
     .bind('owner')
     .run();
   const original = await getParticipant('owner');
@@ -64,6 +66,8 @@ it('edits profile fields without resetting membership, attendance, CV, or regist
     createdAt: original?.createdAt,
     consentedAt: original?.consentedAt,
     consentPolicyVersion: REGISTRATION_POLICY_VERSION,
+    documentsAcknowledgedAt: original?.documentsAcknowledgedAt,
+    documentsPolicyVersion: DOCUMENTS_POLICY_VERSION,
   });
 });
 
@@ -77,6 +81,46 @@ it('refuses profile writes without explicit consent to the current policy', asyn
     await expect(upsertParticipant(data as typeof valid)).rejects.toThrow('validation.');
   }
   expect((await bindings.DB.prepare('SELECT id FROM participant').all()).results).toHaveLength(0);
+});
+
+it('refuses document acknowledgment bypasses without changing the saved profile', async () => {
+  await seedParticipant('documents');
+  const original = await getParticipant('documents');
+  const valid = { userId: 'documents', ...profile, fullName: 'Rejected change' };
+  for (const data of [
+    { ...valid, documentsRead: false },
+    { ...valid, documentsRead: undefined },
+    { ...valid, documentsRead: 'true' },
+    { ...valid, documentsPolicyVersion: undefined },
+    { ...valid, documentsPolicyVersion: 'previous-documents' },
+  ]) {
+    await expect(upsertParticipant(data as typeof valid)).rejects.toThrow('validation.documents');
+    expect(await getParticipant('documents')).toEqual(original);
+  }
+});
+
+it('records document acknowledgment for missing or outdated versions without inventing acceptance', async () => {
+  await seedParticipant('documents');
+  for (const [timestamp, version] of [
+    [null, null],
+    [null, DOCUMENTS_POLICY_VERSION],
+    [1, 'previous-documents'],
+  ] as const) {
+    await bindings.DB.prepare(
+      'UPDATE participant SET documents_acknowledged_at = ?, documents_policy_version = ? WHERE id = ?',
+    )
+      .bind(timestamp, version, 'documents')
+      .run();
+    const original = await getParticipant('documents');
+    expect(original?.documentsAcknowledgedAt?.getTime() ?? null).toBe(timestamp);
+    expect(original?.documentsPolicyVersion).toBe(version);
+    const before = Date.now();
+    await upsertParticipant({ userId: 'documents', ...profile });
+    const accepted = await getParticipant('documents');
+    expect(accepted?.documentsAcknowledgedAt?.getTime()).toBeGreaterThanOrEqual(before);
+    expect(accepted?.documentsPolicyVersion).toBe(DOCUMENTS_POLICY_VERSION);
+    expect(accepted?.consentedAt).toEqual(original?.consentedAt);
+  }
 });
 
 it('enforces guardian contact on the server for a minor attending college', async () => {

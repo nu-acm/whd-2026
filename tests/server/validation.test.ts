@@ -109,3 +109,21 @@ it('requires explicit consent to the current policy version', () => {
   );
   expect(onboardingSchema.safeParse(profile).success).toBe(true);
 });
+
+it('requires explicit document acknowledgment of the current version', () => {
+  for (const documentsRead of [undefined, false, 'true']) {
+    const result = onboardingSchema.safeParse({ ...profile, documentsRead });
+    expect(result.error?.issues).toContainEqual(
+      expect.objectContaining({ path: ['documentsRead'], message: 'validation.documentsRequired' }),
+    );
+  }
+  for (const documentsPolicyVersion of [undefined, 'previous-documents']) {
+    const result = onboardingSchema.safeParse({ ...profile, documentsPolicyVersion });
+    expect(result.error?.issues).toContainEqual(
+      expect.objectContaining({
+        path: ['documentsPolicyVersion'],
+        message: 'validation.documentsChanged',
+      }),
+    );
+  }
+});

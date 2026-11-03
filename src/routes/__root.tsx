@@ -17,14 +17,14 @@ import { AuthHeader } from '@/components/AuthHeader';
 import { AuthCard } from '@/components/ui/auth-card';
 import { Button } from '@/components/ui/button';
 import { buttonVariants } from '@/components/ui/button-variants';
-import { supportedLngs } from '@/i18n';
+import { defaultLanguage, supportedLngs } from '@/i18n';
 import { pageMetadata, SITE_URL } from '@/lib/metadata';
 import appCss from '@/styles.css?url';
 
 /** The locale is read from a cookie so the server renders the right language. */
 const getServerLocale = createServerFn({ method: 'GET' }).handler(async () => {
   const locale = getCookie('locale');
-  return supportedLngs.find((lng) => lng === locale) ?? 'en';
+  return supportedLngs.find((lng) => lng === locale) ?? defaultLanguage;
 });
 
 function NotFoundPage() {
@@ -116,7 +116,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; i18n
 function RootDocument({ children }: { children: React.ReactNode }) {
   const { i18n } = useTranslation();
   return (
-    <html lang={i18n.language || 'en'} className="dark">
+    <html lang={i18n.language || defaultLanguage} className="dark">
       <head>
         <HeadContent />
       </head>

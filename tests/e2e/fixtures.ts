@@ -146,6 +146,7 @@ export const test = base.extend<{ app: App }>({
   baseURL: async ({ app }, provideFixture) => provideFixture(app.url),
   page: async ({ page, app }, provideFixture) => {
     app.observe(page);
+    await page.context().addCookies([{ name: 'locale', value: 'en', url: app.url }]);
     await provideFixture(page);
   },
 });
@@ -173,6 +174,7 @@ export async function onboard(page: Page, name: string) {
     .fill('Nazarbayev University');
   await page.getByRole('textbox', { name: 'City' }).fill('Astana');
   await page.getByRole('checkbox', { name: 'I agree to the terms' }).check();
+  await page.getByRole('checkbox', { name: 'I have read the Code of Conduct' }).check();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
 }

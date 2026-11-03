@@ -1,5 +1,5 @@
 import { test, expect, login, onboard, seedEligibleTeam } from './fixtures';
-import { REGISTRATION_POLICY_VERSION } from '@/lib/consent';
+import { DOCUMENTS_POLICY_VERSION, REGISTRATION_POLICY_VERSION } from '@/lib/consent';
 import en from '@/i18n/locales/en.json' with { type: 'json' };
 import ru from '@/i18n/locales/ru.json' with { type: 'json' };
 import kk from '@/i18n/locales/kk.json' with { type: 'json' };
@@ -30,6 +30,8 @@ test('registers, edits a profile, creates a team, and admits a teammate', async 
     viewport: page.viewportSize(),
   });
   try {
+    await context.addCookies([{ name: 'locale', value: 'en', url: app.url }]);
+    await thirdContext.addCookies([{ name: 'locale', value: 'en', url: app.url }]);
     const teammate = await context.newPage();
     app.observe(teammate);
     await login(teammate, app.codes, 'teammate@example.test');
@@ -116,12 +118,66 @@ test('requires consent and leaves legacy profiles unaccepted until they agree', 
   await expect(consent).not.toBeChecked();
 });
 
+test('requires document acknowledgment and restores only acceptance of the current version', async ({
+  page,
+  app,
+}) => {
+  await login(page, app.codes, 'documents@example.test');
+  const documents = page.getByRole('checkbox', { name: en.onboarding.documentsRead, exact: true });
+  await expect(documents).not.toBeChecked();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(page.getByText(en.validation.documentsRequired, { exact: true })).toBeVisible();
+  await expect(documents).toHaveAttribute('aria-invalid', 'true');
+  const errorId = await page
+    .getByText(en.validation.documentsRequired, { exact: true })
+    .getAttribute('id');
+  expect(errorId).toBeTruthy();
+  expect((await documents.getAttribute('aria-describedby'))?.split(' ')).toContain(errorId);
+
+  await onboard(page, 'Documents Participant');
+  const accepted = await app.db
+    .prepare('SELECT documents_acknowledged_at, documents_policy_version FROM participant')
+    .first<{ documents_acknowledged_at: number; documents_policy_version: string }>();
+  expect(accepted?.documents_acknowledged_at).toBeGreaterThan(0);
+  expect(accepted?.documents_policy_version).toBe(DOCUMENTS_POLICY_VERSION);
+  await page.goto('/onboarding');
+  await expect(documents).toBeChecked();
+
+  for (const version of [null, 'previous-documents']) {
+    const previousTimestamp = version === null ? null : 1;
+    await app.db
+      .prepare('UPDATE participant SET documents_acknowledged_at = ?, documents_policy_version = ?')
+      .bind(previousTimestamp, version)
+      .run();
+    await page.reload();
+    await expect(documents).not.toBeChecked();
+    await expect(
+      page.getByRole('checkbox', { name: en.onboarding.consent, exact: true }),
+    ).toBeChecked();
+    await page.getByRole('button', { name: 'Continue', exact: true }).click();
+    await expect(page.getByText(en.validation.documentsRequired, { exact: true })).toBeVisible();
+    expect(
+      await app.db
+        .prepare('SELECT documents_acknowledged_at FROM participant')
+        .first('documents_acknowledged_at'),
+    ).toBe(previousTimestamp);
+    await documents.check();
+    await page.getByRole('button', { name: 'Continue', exact: true }).click();
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await page.goto('/onboarding');
+    await expect(documents).toBeChecked();
+  }
+});
+
 test('shows accessible consent and policy links in each language', async ({
   page,
   context,
   app,
 }, testInfo) => {
   await login(page, app.codes, 'languages@example.test');
+  await context.route('https://drive.google.com/**', (route) =>
+    route.fulfill({ contentType: 'text/html', body: '<title>Event document</title>' }),
+  );
   for (const [locale, copy] of Object.entries({ en, ru, kk })) {
     await context.addCookies([{ name: 'locale', value: locale, url: app.url }]);
     await page.goto('/onboarding');
@@ -130,6 +186,35 @@ test('shows accessible consent and policy links in each language', async ({
     await expect(consent).toHaveAttribute('aria-required', 'true');
     await expect(page.locator('a[href="/privacy"]')).toHaveAttribute('target', '_blank');
     await expect(page.locator('a[href="/terms"]')).toHaveAttribute('target', '_blank');
+    const documents = page.getByRole('checkbox', {
+      name: copy.onboarding.documentsRead,
+      exact: true,
+    });
+    await expect(documents).not.toBeChecked();
+    await expect(documents).toHaveAttribute('aria-required', 'true');
+    const documentLinks = [
+      page.locator(
+        'a[href="https://drive.google.com/file/d/1omx4qtnA4DYh6qeLnf9o_lQiF8wSb2HG/view?usp=sharing"]',
+      ),
+      page.locator(
+        'a[href="https://drive.google.com/file/d/1lblOCnzRenDdfWUR13vQMKcli6M9exZf/view?usp=sharing"]',
+      ),
+    ];
+    await documents.focus();
+    await page.keyboard.press('Space');
+    await expect(documents).toBeChecked();
+    for (const link of documentLinks) {
+      await expect(link).toBeVisible();
+      await expect(link).toHaveAttribute('target', '_blank');
+      await expect(link).toHaveAttribute('rel', 'noopener');
+      const opening = page.waitForEvent('popup');
+      await link.click();
+      const popup = await opening;
+      await expect(popup).toHaveURL((await link.getAttribute('href'))!);
+      await popup.close();
+      await expect(page).toHaveURL(/\/onboarding$/);
+      await expect(documents).toBeChecked();
+    }
     await consent.focus();
     await page.keyboard.press('Space');
     await expect(consent).toBeChecked();

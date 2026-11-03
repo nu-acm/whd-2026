@@ -16,11 +16,12 @@ import {
 } from '@/lib/validation';
 import { webHapticsOptions } from '@/lib/web-haptics';
 import { REGISTRATION_CLOSED_I18N_KEY } from '@/lib/registration';
-import { REGISTRATION_POLICY_VERSION } from '@/lib/consent';
+import { DOCUMENTS_POLICY_VERSION, REGISTRATION_POLICY_VERSION } from '@/lib/consent';
+import { CODE_OF_CONDUCT_URL, INSTRUCTIONS_AND_RULES_URL } from '@/lib/event';
 
 export type OnboardingDefaults = Partial<
-  Record<Exclude<keyof OnboardingInput, 'consent'>, string>
-> & { consent?: boolean };
+  Record<Exclude<keyof OnboardingInput, 'consent' | 'documentsRead'>, string>
+> & { consent?: boolean; documentsRead?: boolean };
 
 type Errors = Partial<Record<keyof OnboardingInput | 'form', string>>;
 
@@ -33,6 +34,7 @@ export function OnboardingForm({
 }) {
   const { t } = useTranslation();
   const consentId = useId();
+  const documentsId = useId();
   const [values, setValues] = useState({
     fullName: defaults?.fullName ?? '',
     iin: defaults?.iin ?? '',
@@ -43,6 +45,8 @@ export function OnboardingForm({
     educationLevel: (defaults?.educationLevel ?? '') as EducationLevel | '',
     consent: defaults?.consent ?? false,
     policyVersion: REGISTRATION_POLICY_VERSION,
+    documentsRead: defaults?.documentsRead ?? false,
+    documentsPolicyVersion: DOCUMENTS_POLICY_VERSION,
   });
   const [errors, setErrors] = useState<Errors>({});
   const [pending, setPending] = useState(false);
@@ -266,6 +270,37 @@ export function OnboardingForm({
           </FieldDescription>
           {errors.consent && <FieldError id={`${consentId}-error`}>{errors.consent}</FieldError>}
           {errors.policyVersion && <FieldError>{errors.policyVersion}</FieldError>}
+        </Field>
+
+        <Field data-invalid={!!errors.documentsRead} data-disabled={pending || undefined}>
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id={documentsId}
+              name="documentsRead"
+              checked={values.documentsRead}
+              onCheckedChange={set('documentsRead')}
+              disabled={pending}
+              aria-required="true"
+              aria-invalid={!!errors.documentsRead}
+              aria-describedby={`${documentsId}-hint${errors.documentsRead ? ` ${documentsId}-error` : ''}`}
+            />
+            <FieldLabel htmlFor={documentsId}>{t('onboarding.documentsRead')}</FieldLabel>
+          </div>
+          <FieldDescription id={`${documentsId}-hint`}>
+            <Trans
+              i18nKey="onboarding.documentsHint"
+              components={{
+                conduct: <a href={CODE_OF_CONDUCT_URL} target="_blank" rel="noopener" />,
+                rules: <a href={INSTRUCTIONS_AND_RULES_URL} target="_blank" rel="noopener" />,
+              }}
+            />
+          </FieldDescription>
+          {errors.documentsRead && (
+            <FieldError id={`${documentsId}-error`}>{errors.documentsRead}</FieldError>
+          )}
+          {errors.documentsPolicyVersion && (
+            <FieldError>{errors.documentsPolicyVersion}</FieldError>
+          )}
         </Field>
 
         {errors.form && (

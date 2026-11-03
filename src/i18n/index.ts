@@ -7,6 +7,7 @@ import kk from '@/i18n/locales/kk.json';
 import ru from '@/i18n/locales/ru.json';
 
 export const supportedLngs = ['en', 'ru', 'kk'] as const;
+export const defaultLanguage = 'ru';
 export type SupportedLng = (typeof supportedLngs)[number];
 
 /** Labels shown in the switcher, in each language's own script. */
@@ -30,10 +31,10 @@ export function createI18n() {
   void instance.init({
     // Hydrate in the language already rendered by the server. A first-visit
     // navigator preference must not replace that markup before hydration.
-    lng: isBrowser ? document.documentElement.lang || 'en' : 'en',
+    lng: isBrowser ? document.documentElement.lang || defaultLanguage : defaultLanguage,
     initAsync: false,
     resources,
-    fallbackLng: 'en',
+    fallbackLng: defaultLanguage,
     supportedLngs: [...supportedLngs],
     ...(isBrowser && {
       detection: {
