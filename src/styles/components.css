@@ -425,18 +425,6 @@
   gap: 16px;
   padding: 24px;
 }
-.freedom-broker-logo {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 572.663 / 172.142;
-}
-.freedom-broker-wordmark {
-  position: absolute;
-  top: 58.45%;
-  left: 33.33%;
-  height: 24.74%;
-  width: 39.79%;
-}
 @media (min-width: 640px) {
   .whd-auth-top {
     padding-inline: 32px;

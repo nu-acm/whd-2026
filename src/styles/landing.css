@@ -940,9 +940,6 @@
   gap: 36px;
   margin-block: auto;
 }
-.partner-logos > div {
-  width: 46%;
-}
 .partner-logos > img {
   width: 46%;
   height: auto;
@@ -1667,7 +1664,6 @@
     flex-direction: column;
     align-items: flex-start;
   }
-  .partner-logos > div,
   .partner-logos > img {
     width: min(100%, 280px);
   }
