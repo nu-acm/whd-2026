@@ -50,6 +50,53 @@ it('requires a valid guardian phone for minors at every study level and normaliz
   expect(onboardingSchema.safeParse(profile).success).toBe(true);
 });
 
+it('validates both phone fields as E.164 and preserves digits-only storage', () => {
+  for (const [input, digits] of [
+    ['+7 (701) 000-00-00', '77010000000'],
+    ['  +7 701 000 00 00  ', '77010000000'],
+    ['77010000000', '77010000000'],
+    ['+1.213.373.4253', '12133734253'],
+    ['+1234567', '1234567'],
+    ['+123456789012345', '123456789012345'],
+  ]) {
+    const parsed = onboardingSchema.parse({ ...profile, phone: input, parentPhone: input });
+    expect(parsed).toMatchObject({ phone: digits, parentPhone: digits });
+    expect(onboardingSchema.parse(parsed)).toEqual(parsed);
+  }
+  for (const input of [
+    '123456',
+    '+1234567890123456',
+    '+07010000000',
+    'call +77010000000',
+    '+77010000000 ext 123',
+    '++77010000000',
+    '7701+0000000',
+    '+7/701/0000000',
+  ]) {
+    for (const field of ['phone', 'parentPhone'] as const) {
+      const result = onboardingSchema.safeParse({ ...profile, [field]: input });
+      expect(result.error?.issues).toContainEqual(
+        expect.objectContaining({ path: [field], message: `validation.${field}Invalid` }),
+      );
+    }
+  }
+});
+
+it('preserves required and optional phone errors after trimming', () => {
+  for (const phone of ['', '   ']) {
+    expect(onboardingSchema.safeParse({ ...profile, phone }).error?.issues).toContainEqual(
+      expect.objectContaining({ path: ['phone'], message: 'validation.phoneRequired' }),
+    );
+  }
+  for (const parentPhone of [undefined, '', '   ']) {
+    expect(onboardingSchema.parse({ ...profile, parentPhone }).parentPhone).toBeUndefined();
+    const minor = { ...profile, iin: '101101600001', parentPhone };
+    expect(onboardingSchema.safeParse(minor).error?.issues).toContainEqual(
+      expect.objectContaining({ path: ['parentPhone'], message: 'validation.parentPhoneRequired' }),
+    );
+  }
+});
+
 it('checks age on the event date and requires a contact for unusable IIN birth dates', () => {
   // Turning 18 on the event day is adult; turning 18 the next day still needs a contact.
   expect(requiresGuardianPhone('081114600001')).toBe(false);

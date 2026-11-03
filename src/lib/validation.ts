@@ -93,11 +93,15 @@ export const otpSchema = z.object({
 });
 export type OtpInput = z.infer<typeof otpSchema>;
 
-const phoneRegex = /^\+?[\d][\d\s\-().]{5,24}$/;
-
-/** Reduce a phone number to digits so stored values are comparable. */
-function stripPhoneDigits(phone: string): string {
-  return phone.replace(/\D/g, '');
+function phoneSchema(error: string) {
+  return z
+    .string()
+    .transform((value) => {
+      const compact = value.replace(/[\s().-]/g, '');
+      return compact.startsWith('+') ? compact : `+${compact}`;
+    })
+    .pipe(z.e164({ error }))
+    .transform((value) => value.slice(1));
 }
 
 // ── Onboarding ───────────────────────────────────────────────────────────────
@@ -109,12 +113,7 @@ export const onboardingSchema = z
       .min(1, { error: V.fullNameRequired })
       .max(100, { error: V.fullNameMax }),
     iin: z.string().regex(/^\d{12}$/, { error: V.iinInvalid }),
-    phone: z
-      .string()
-      .min(1, { error: V.phoneRequired })
-      .regex(phoneRegex, { error: V.phoneInvalid })
-      .transform(stripPhoneDigits)
-      .pipe(z.string().min(6, { error: V.phoneInvalid }).max(25, { error: V.phoneInvalid })),
+    phone: z.string().trim().min(1, { error: V.phoneRequired }).pipe(phoneSchema(V.phoneInvalid)),
     city: z.string().trim().min(1, { error: V.cityRequired }).max(100, { error: V.cityMax }),
     placeOfStudy: z
       .string()
@@ -126,10 +125,7 @@ export const onboardingSchema = z
       .trim()
       .optional()
       .transform((v) => v || undefined)
-      .refine((v) => !v || (phoneRegex.test(v) && stripPhoneDigits(v).length >= 6), {
-        message: V.parentPhoneInvalid,
-      })
-      .transform((v) => (v ? stripPhoneDigits(v) : undefined)),
+      .pipe(phoneSchema(V.parentPhoneInvalid).optional()),
     educationLevel: z.enum(EDUCATION_LEVELS, { error: V.educationInvalid }),
     consent: z.literal(true, { error: V.consentRequired }),
     policyVersion: z.literal(REGISTRATION_POLICY_VERSION, { error: V.policyChanged }),

@@ -263,13 +263,21 @@ test('requires guardian contact by age and keeps unsaved details when changing l
       .bind('College Participant')
       .first('iin'),
   ).toBe('060101600001');
-  await page.getByRole('textbox', { name: en.onboarding.parentPhone }).fill('+7 702 000 00 00');
+  const phone = page.getByRole('textbox', { name: /^Phone\s*\*?$/ });
+  await phone.fill('123456');
+  await page.getByRole('textbox', { name: en.onboarding.parentPhone }).fill('+1234567890123456');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(page.getByText(en.validation.phoneInvalid, { exact: true })).toHaveCount(2);
+  await expect(page).toHaveURL(/\/onboarding$/);
+  await phone.fill('  +7 (701) 000-00-00  ');
+  await page.getByRole('textbox', { name: en.onboarding.parentPhone }).fill('  +7 702 000 00 00  ');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
   await page.getByRole('link', { name: 'Edit details' }).click();
   await expect(page.getByRole('textbox', { name: en.onboarding.parentPhone })).toHaveValue(
     '77020000000',
   );
+  await expect(phone).toHaveValue('77010000000');
   await page.getByRole('combobox', { name: 'Level of study' }).selectOption('School');
   await page.getByRole('textbox', { name: 'IIN' }).fill('081114600001');
   await expect(page.getByRole('textbox', { name: en.onboarding.parentPhone })).toHaveCount(0);
