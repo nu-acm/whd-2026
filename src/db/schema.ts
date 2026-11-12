@@ -80,6 +80,35 @@ export const participant = sqliteTable(
 export type Participant = typeof participant.$inferSelect;
 export type NewParticipant = typeof participant.$inferInsert;
 
+/** One publication snapshot; revision protects publishing against concurrent score changes. */
+export const scoringState = sqliteTable('scoring_state', {
+  id: text('id').primaryKey(),
+  revision: integer('revision').default(0).notNull(),
+  publishedResult: text('published_result'),
+});
+
+/** Raw round scores: ICPC out of 600 and Math out of 60. Null means not entered. */
+export const roundScore = sqliteTable('round_score', {
+  teamId: text('team_id')
+    .primaryKey()
+    .references(() => team.id, { onDelete: 'cascade' }),
+  icpc: integer('icpc'),
+  math: integer('math'),
+  updatedBy: text('updated_by').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+});
+
+/** An assignment exists before grading. Only complete submissions contribute to results. */
+export const juryAssessment = sqliteTable('jury_assessment', {
+  teamId: text('team_id')
+    .primaryKey()
+    .references(() => team.id, { onDelete: 'cascade' }),
+  jurorEmail: text('juror_email').notNull(),
+  scores: text('scores', { mode: 'json' }).$type<number[]>(),
+  comment: text('comment').default('').notNull(),
+  submittedAt: integer('submitted_at'),
+});
+
 /** Persistent per-user allowance for paid team-name suggestions. */
 export const aiGenerationLimit = sqliteTable('ai_generation_limit', {
   userId: text('user_id')

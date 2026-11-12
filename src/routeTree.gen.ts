@@ -13,12 +13,16 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as JuryRouteImport } from './routes/jury'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ResultsRouteImport } from './routes/results'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminAdminRouteImport } from './routes/_admin/admin'
 import { Route as AdminCheckinRouteImport } from './routes/_admin/checkin'
+import { Route as AdminRankingsRouteImport } from './routes/_admin/rankings'
+import { Route as AdminScoringRouteImport } from './routes/_admin/scoring'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
 import { Route as ApiCvRouteImport } from './routes/api/cv'
 import { Route as ApiReportRouteImport } from './routes/api/report'
@@ -43,6 +47,11 @@ const FaqRoute = FaqRouteImport.update({
   path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JuryRoute = JuryRouteImport.update({
+  id: '/jury',
+  path: '/jury',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -58,6 +67,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResultsRoute = ResultsRouteImport.update({
+  id: '/results',
+  path: '/results',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -71,6 +85,16 @@ const AdminAdminRoute = AdminAdminRouteImport.update({
 const AdminCheckinRoute = AdminCheckinRouteImport.update({
   id: '/checkin',
   path: '/checkin',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRankingsRoute = AdminRankingsRouteImport.update({
+  id: '/rankings',
+  path: '/rankings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminScoringRoute = AdminScoringRouteImport.update({
+  id: '/scoring',
+  path: '/scoring',
   getParentRoute: () => AdminRoute,
 } as any)
 const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
@@ -102,12 +126,16 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/faq': typeof FaqRoute
+  '/jury': typeof JuryRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
+  '/results': typeof ResultsRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AdminAdminRoute
   '/checkin': typeof AdminCheckinRoute
+  '/rankings': typeof AdminRankingsRoute
+  '/scoring': typeof AdminScoringRoute
   '/dashboard': typeof ProtectedDashboardRoute
   '/api/cv': typeof ApiCvRoute
   '/api/report': typeof ApiReportRoute
@@ -117,12 +145,16 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/faq': typeof FaqRoute
+  '/jury': typeof JuryRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
+  '/results': typeof ResultsRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AdminAdminRoute
   '/checkin': typeof AdminCheckinRoute
+  '/rankings': typeof AdminRankingsRoute
+  '/scoring': typeof AdminScoringRoute
   '/dashboard': typeof ProtectedDashboardRoute
   '/api/cv': typeof ApiCvRoute
   '/api/report': typeof ApiReportRoute
@@ -135,12 +167,16 @@ export interface FileRoutesById {
   '/_admin': typeof AdminRouteWithChildren
   '/_protected': typeof ProtectedRouteWithChildren
   '/faq': typeof FaqRoute
+  '/jury': typeof JuryRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
+  '/results': typeof ResultsRoute
   '/terms': typeof TermsRoute
   '/_admin/admin': typeof AdminAdminRoute
   '/_admin/checkin': typeof AdminCheckinRoute
+  '/_admin/rankings': typeof AdminRankingsRoute
+  '/_admin/scoring': typeof AdminScoringRoute
   '/_protected/dashboard': typeof ProtectedDashboardRoute
   '/api/cv': typeof ApiCvRoute
   '/api/report': typeof ApiReportRoute
@@ -152,12 +188,16 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/faq'
+    | '/jury'
     | '/login'
     | '/onboarding'
     | '/privacy'
+    | '/results'
     | '/terms'
     | '/admin'
     | '/checkin'
+    | '/rankings'
+    | '/scoring'
     | '/dashboard'
     | '/api/cv'
     | '/api/report'
@@ -167,12 +207,16 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/faq'
+    | '/jury'
     | '/login'
     | '/onboarding'
     | '/privacy'
+    | '/results'
     | '/terms'
     | '/admin'
     | '/checkin'
+    | '/rankings'
+    | '/scoring'
     | '/dashboard'
     | '/api/cv'
     | '/api/report'
@@ -184,12 +228,16 @@ export interface FileRouteTypes {
     | '/_admin'
     | '/_protected'
     | '/faq'
+    | '/jury'
     | '/login'
     | '/onboarding'
     | '/privacy'
+    | '/results'
     | '/terms'
     | '/_admin/admin'
     | '/_admin/checkin'
+    | '/_admin/rankings'
+    | '/_admin/scoring'
     | '/_protected/dashboard'
     | '/api/cv'
     | '/api/report'
@@ -202,9 +250,11 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   ProtectedRoute: typeof ProtectedRouteWithChildren
   FaqRoute: typeof FaqRoute
+  JuryRoute: typeof JuryRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
+  ResultsRoute: typeof ResultsRoute
   TermsRoute: typeof TermsRoute
   ApiCvRoute: typeof ApiCvRoute
   ApiReportRoute: typeof ApiReportRoute
@@ -242,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/jury': {
+      id: '/jury'
+      path: '/jury'
+      fullPath: '/jury'
+      preLoaderRoute: typeof JuryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -263,6 +320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/results': {
+      id: '/results'
+      path: '/results'
+      fullPath: '/results'
+      preLoaderRoute: typeof ResultsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -282,6 +346,20 @@ declare module '@tanstack/react-router' {
       path: '/checkin'
       fullPath: '/checkin'
       preLoaderRoute: typeof AdminCheckinRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/rankings': {
+      id: '/_admin/rankings'
+      path: '/rankings'
+      fullPath: '/rankings'
+      preLoaderRoute: typeof AdminRankingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/scoring': {
+      id: '/_admin/scoring'
+      path: '/scoring'
+      fullPath: '/scoring'
+      preLoaderRoute: typeof AdminScoringRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_protected/dashboard': {
@@ -325,11 +403,15 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminAdminRoute: typeof AdminAdminRoute
   AdminCheckinRoute: typeof AdminCheckinRoute
+  AdminRankingsRoute: typeof AdminRankingsRoute
+  AdminScoringRoute: typeof AdminScoringRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAdminRoute: AdminAdminRoute,
   AdminCheckinRoute: AdminCheckinRoute,
+  AdminRankingsRoute: AdminRankingsRoute,
+  AdminScoringRoute: AdminScoringRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -351,9 +433,11 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   ProtectedRoute: ProtectedRouteWithChildren,
   FaqRoute: FaqRoute,
+  JuryRoute: JuryRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,
+  ResultsRoute: ResultsRoute,
   TermsRoute: TermsRoute,
   ApiCvRoute: ApiCvRoute,
   ApiReportRoute: ApiReportRoute,

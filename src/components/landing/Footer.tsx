@@ -50,10 +50,13 @@ export default function Footer({
         linkGroups={[
           {
             title: t('footer.explore'),
-            links: SECTIONS.map((key) => ({
-              id: key,
-              content: <a href={`#${key}`}>{t(`navbar.${key}`)}</a>,
-            })),
+            links: [
+              ...SECTIONS.map((key) => ({
+                id: key,
+                content: <a href={`#${key}`}>{t(`navbar.${key}`)}</a>,
+              })),
+              { id: 'results', content: <Link to="/results">{t('scoring.resultsTitle')}</Link> },
+            ],
           },
           {
             title: t('footer.documents'),

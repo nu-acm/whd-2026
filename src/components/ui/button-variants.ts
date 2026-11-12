@@ -20,6 +20,8 @@ export const buttonVariants = cva(
         link: 'min-h-11 text-whd-pink-soft hover:text-whd-pink-bright',
         'table-link':
           'min-h-11 justify-start font-normal whitespace-normal text-left text-whd-pink-soft hover:text-whd-pink-bright hover:underline',
+        'table-hint':
+          'min-h-11 gap-1 font-normal text-muted-foreground underline decoration-dotted underline-offset-4 hover:text-foreground',
         'table-sort': 'min-h-11 gap-1 font-normal text-whd-text-muted hover:text-foreground',
         'table-sort-active':
           'min-h-11 gap-1 font-normal text-whd-pink-bright hover:text-foreground',

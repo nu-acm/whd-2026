@@ -11,6 +11,7 @@ export const bindings = env as unknown as {
   GAS_URL: string;
   GAS_SECRET: string;
   ADMIN_EMAILS: string;
+  JURY_EMAILS: string;
   REGISTRATION_DEADLINE: string;
   CF_LOGIN_PREFIX: string;
   PROCTORING_URL: string;

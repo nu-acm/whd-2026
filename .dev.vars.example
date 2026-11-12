@@ -30,3 +30,6 @@ GOOGLE_CLIENT_SECRET=
 
 # Comma-separated emails allowed into /admin and /checkin.
 ADMIN_EMAILS=
+
+# Comma-separated emails allowed into /jury.
+JURY_EMAILS=

@@ -15,15 +15,19 @@ import { isRegistrationOpen } from '@/lib/registration.server';
 import { Notice } from '@/components/ui/notice';
 import { getParticipant } from '@/lib/onboarding.server';
 import { safeInviteRedirect, validateRedirectSearch } from '@/lib/redirect';
+import { sessionIsJury } from '@/lib/jury.server';
+import { sessionIsAdmin } from '@/lib/admin.server';
 
 /**
  * Where a signed-in visitor belongs: onboarding until they have a profile,
- * the dashboard afterwards. Used both to bounce people away from /login and
- * to route them after a successful verification.
+ * the dashboard afterwards; admins and jurors go straight to their workspaces. Used both to bounce
+ * people away from /login and to route them after a successful verification.
  */
 const getPostLoginDestination = createServerFn({ method: 'GET' }).handler(async () => {
   const session = await getSession(getRequest());
   if (!session?.user) return null;
+  if (sessionIsAdmin(session)) return '/admin';
+  if (sessionIsJury(session)) return '/jury';
   const profile = await getParticipant(session.user.id);
   return profile ? '/dashboard' : '/onboarding';
 });

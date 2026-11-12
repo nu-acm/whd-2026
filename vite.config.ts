@@ -240,6 +240,7 @@ export default defineConfig({
               GAS_URL: 'https://mail.example.test/exec',
               GAS_SECRET: 'test-only-webhook-secret',
               ADMIN_EMAILS: 'admin@example.test',
+              JURY_EMAILS: '',
               REGISTRATION_DEADLINE: '2099-01-01T00:00:00Z',
               CF_LOGIN_PREFIX: 'team',
               PROCTORING_URL: 'https://proctoring.example.test',

@@ -40,6 +40,20 @@ export function AdminHeader({
               {t('navbar.dashboard')}
             </Link>
             <Link
+              to="/scoring"
+              className={navLinkClass}
+              activeProps={{ className: 'admin-nav-active' }}
+            >
+              {t('scoring.adminTitle')}
+            </Link>
+            <Link
+              to="/rankings"
+              className={navLinkClass}
+              activeProps={{ className: 'admin-nav-active' }}
+            >
+              {t('scoring.rankings')}
+            </Link>
+            <Link
               to="/admin"
               className={navLinkClass}
               activeProps={{

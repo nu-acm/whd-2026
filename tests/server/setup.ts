@@ -6,12 +6,17 @@ await applyD1Migrations(bindings.DB, bindings.TEST_MIGRATIONS);
 
 beforeEach(async () => {
   await bindings.DB.batch([
+    bindings.DB.prepare('DELETE FROM jury_assessment'),
+    bindings.DB.prepare(
+      "UPDATE scoring_state SET revision = 0, published_result = NULL WHERE id = 'event'",
+    ),
     bindings.DB.prepare('DELETE FROM user'),
     bindings.DB.prepare('DELETE FROM verification'),
     bindings.DB.prepare('DELETE FROM rate_limit'),
   ]);
   bindings.REGISTRATION_DEADLINE = '2099-01-01T00:00:00Z';
   bindings.ADMIN_EMAILS = 'admin@example.test';
+  bindings.JURY_EMAILS = '';
 });
 
 afterEach(() => {

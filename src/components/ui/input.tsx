@@ -4,7 +4,7 @@ import { NativeSelect } from '@/components/ui/native-select';
 
 type InputProps = Omit<InputPrimitive.Props, 'className'> & {
   className?: string;
-  variant?: 'default' | 'group';
+  variant?: 'default' | 'group' | 'score';
 };
 export function Input({ className, variant = 'default', ...props }: InputProps) {
   return (

@@ -36,6 +36,13 @@
       "when": 1793682926146,
       "tag": "0004_document_acknowledgment",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1794508613740,
+      "tag": "0005_scoring",
+      "breakpoints": true
     }
   ]
 }

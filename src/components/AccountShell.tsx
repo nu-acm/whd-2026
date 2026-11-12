@@ -21,6 +21,7 @@ export function AccountShell({
       <footer className="account-footer">
         <p>{t('footer.rights')}</p>
         <nav aria-label={t('footer.documents')}>
+          <Link to="/results">{t('scoring.resultsTitle')}</Link>
           <Link to="/faq">{t('navbar.faq')}</Link>
           <Link to="/privacy">{t('footer.privacy')}</Link>
           <Link to="/terms">{t('footer.terms')}</Link>
