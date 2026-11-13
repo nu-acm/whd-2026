@@ -12,6 +12,7 @@ interface App {
   expectedHttpErrors: Set<number>;
   setDeadline: (deadline: string) => Promise<void>;
   setJuryEmails: (emails: string) => Promise<void>;
+  setCheckinEmails: (emails: string) => Promise<void>;
   observe: (page: Page) => void;
 }
 
@@ -72,6 +73,7 @@ export const test = base.extend<{ app: App }>({
         GAS_URL: `http://127.0.0.1:${address.port}/exec`,
         GAS_SECRET: 'test-only-webhook-secret',
         ADMIN_EMAILS: 'admin@example.test',
+        CHECKIN_EMAILS: 'checkin@example.test',
         JURY_EMAILS: 'judge@example.test',
         REGISTRATION_DEADLINE: '2099-01-01T00:00:00Z',
       },
@@ -124,6 +126,11 @@ export const test = base.extend<{ app: App }>({
           await server?.update({ root, workers: [{ config }] });
           db = (await worker.getEnv()).DB;
         },
+        async setCheckinEmails(emails) {
+          config.vars.CHECKIN_EMAILS = emails;
+          await server?.update({ root, workers: [{ config }] });
+          db = (await worker.getEnv()).DB;
+        },
         observe(page) {
           page.on('pageerror', (error) => errors.push(error.message));
           page.on('console', (message) => {
@@ -168,7 +175,7 @@ export async function login(page: Page, codes: Map<string, string>, email: strin
   if (!otp) throw new Error('The mail stub did not receive an OTP');
   await page.getByRole('textbox', { name: 'Enter the code' }).fill(otp);
   await page.getByRole('button', { name: 'Verify', exact: true }).click();
-  await expect(page).toHaveURL(/\/(onboarding|dashboard|admin|jury)$/);
+  await expect(page).toHaveURL(/\/(onboarding|dashboard|admin|jury|checkin)$/);
 }
 
 export async function onboard(page: Page, name: string) {

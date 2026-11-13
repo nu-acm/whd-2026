@@ -1,12 +1,13 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, notFound, redirect } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 
 import { useAdminTable, type AdminColumnDef } from '@/components/admin/use-admin-table';
+import { AdminShell } from '@/components/admin/AdminShell';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Empty, EmptyDescription } from '@/components/ui/empty';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -17,6 +18,7 @@ import { ColumnToggleBar, AdminDataTable, StatCard } from '@/components/admin/ta
 import { MIN_TEAM_SIZE } from '@/db/schema';
 import { getSession } from '@/lib/auth.server';
 import { sessionIsAdmin } from '@/lib/admin.server';
+import { ensureCheckinAccess, sessionCanCheckin } from '@/lib/checkin-access.server';
 import { compareTeamNumbers, formatTeamNumber } from '@/lib/contest';
 import {
   getCheckinData,
@@ -26,20 +28,24 @@ import {
 } from '@/lib/checkin.server';
 import { useAdminRefresh } from '@/lib/use-admin-refresh';
 
-async function assertAdmin() {
+const access = createServerFn({ method: 'GET' }).handler(async () => {
   const session = await getSession(getRequest());
-  if (!sessionIsAdmin(session)) throw new Error('Forbidden');
-}
+  return {
+    signedIn: !!session,
+    allowed: sessionCanCheckin(session),
+    isAdmin: sessionIsAdmin(session),
+  };
+});
 
 const loadCheckin = createServerFn({ method: 'GET' }).handler(async () => {
-  await assertAdmin();
+  await ensureCheckinAccess(getRequest());
   return getCheckinData();
 });
 
 const setAttendanceFn = createServerFn({ method: 'POST' })
   .validator(z.object({ participantId: z.string().min(1), attended: z.boolean() }))
   .handler(async ({ data }) => {
-    await assertAdmin();
+    await ensureCheckinAccess(getRequest());
     return setAttendance(data.participantId, data.attended);
   });
 
@@ -53,10 +59,25 @@ const checkinQueryOptions = queryOptions({
   refetchOnWindowFocus: false,
 });
 
-export const Route = createFileRoute('/_admin/checkin')({
+export const Route = createFileRoute('/checkin')({
+  beforeLoad: async () => {
+    const state = await access();
+    if (!state.signedIn) throw redirect({ to: '/login' });
+    if (!state.allowed) throw notFound();
+    return { isAdmin: state.isAdmin };
+  },
   loader: ({ context }) => context.queryClient.ensureQueryData(checkinQueryOptions),
-  component: CheckinPage,
+  component: CheckinWorkspace,
 });
+
+function CheckinWorkspace() {
+  const { isAdmin } = Route.useRouteContext();
+  return (
+    <AdminShell isAdmin={isAdmin}>
+      <CheckinPage />
+    </AdminShell>
+  );
+}
 
 type Tab = 'participants' | 'teams';
 type AttendanceFilter = 'all' | 'attended' | 'not-attended';

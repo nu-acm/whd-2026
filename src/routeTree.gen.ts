@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as ProtectedRouteImport } from './routes/_protected'
+import { Route as CheckinRouteImport } from './routes/checkin'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as JuryRouteImport } from './routes/jury'
 import { Route as LoginRouteImport } from './routes/login'
@@ -20,7 +21,6 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminAdminRouteImport } from './routes/_admin/admin'
-import { Route as AdminCheckinRouteImport } from './routes/_admin/checkin'
 import { Route as AdminRankingsRouteImport } from './routes/_admin/rankings'
 import { Route as AdminScoringRouteImport } from './routes/_admin/scoring'
 import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
@@ -40,6 +40,11 @@ const AdminRoute = AdminRouteImport.update({
 } as any)
 const ProtectedRoute = ProtectedRouteImport.update({
   id: '/_protected',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckinRoute = CheckinRouteImport.update({
+  id: '/checkin',
+  path: '/checkin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -82,11 +87,6 @@ const AdminAdminRoute = AdminAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminCheckinRoute = AdminCheckinRouteImport.update({
-  id: '/checkin',
-  path: '/checkin',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminRankingsRoute = AdminRankingsRouteImport.update({
   id: '/rankings',
   path: '/rankings',
@@ -125,6 +125,7 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/checkin': typeof CheckinRoute
   '/faq': typeof FaqRoute
   '/jury': typeof JuryRoute
   '/login': typeof LoginRoute
@@ -133,7 +134,6 @@ export interface FileRoutesByFullPath {
   '/results': typeof ResultsRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AdminAdminRoute
-  '/checkin': typeof AdminCheckinRoute
   '/rankings': typeof AdminRankingsRoute
   '/scoring': typeof AdminScoringRoute
   '/dashboard': typeof ProtectedDashboardRoute
@@ -144,6 +144,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/checkin': typeof CheckinRoute
   '/faq': typeof FaqRoute
   '/jury': typeof JuryRoute
   '/login': typeof LoginRoute
@@ -152,7 +153,6 @@ export interface FileRoutesByTo {
   '/results': typeof ResultsRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AdminAdminRoute
-  '/checkin': typeof AdminCheckinRoute
   '/rankings': typeof AdminRankingsRoute
   '/scoring': typeof AdminScoringRoute
   '/dashboard': typeof ProtectedDashboardRoute
@@ -166,6 +166,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_admin': typeof AdminRouteWithChildren
   '/_protected': typeof ProtectedRouteWithChildren
+  '/checkin': typeof CheckinRoute
   '/faq': typeof FaqRoute
   '/jury': typeof JuryRoute
   '/login': typeof LoginRoute
@@ -174,7 +175,6 @@ export interface FileRoutesById {
   '/results': typeof ResultsRoute
   '/terms': typeof TermsRoute
   '/_admin/admin': typeof AdminAdminRoute
-  '/_admin/checkin': typeof AdminCheckinRoute
   '/_admin/rankings': typeof AdminRankingsRoute
   '/_admin/scoring': typeof AdminScoringRoute
   '/_protected/dashboard': typeof ProtectedDashboardRoute
@@ -187,6 +187,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/checkin'
     | '/faq'
     | '/jury'
     | '/login'
@@ -195,7 +196,6 @@ export interface FileRouteTypes {
     | '/results'
     | '/terms'
     | '/admin'
-    | '/checkin'
     | '/rankings'
     | '/scoring'
     | '/dashboard'
@@ -206,6 +206,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/checkin'
     | '/faq'
     | '/jury'
     | '/login'
@@ -214,7 +215,6 @@ export interface FileRouteTypes {
     | '/results'
     | '/terms'
     | '/admin'
-    | '/checkin'
     | '/rankings'
     | '/scoring'
     | '/dashboard'
@@ -227,6 +227,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_admin'
     | '/_protected'
+    | '/checkin'
     | '/faq'
     | '/jury'
     | '/login'
@@ -235,7 +236,6 @@ export interface FileRouteTypes {
     | '/results'
     | '/terms'
     | '/_admin/admin'
-    | '/_admin/checkin'
     | '/_admin/rankings'
     | '/_admin/scoring'
     | '/_protected/dashboard'
@@ -249,6 +249,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   ProtectedRoute: typeof ProtectedRouteWithChildren
+  CheckinRoute: typeof CheckinRoute
   FaqRoute: typeof FaqRoute
   JuryRoute: typeof JuryRoute
   LoginRoute: typeof LoginRoute
@@ -283,6 +284,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof ProtectedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkin': {
+      id: '/checkin'
+      path: '/checkin'
+      fullPath: '/checkin'
+      preLoaderRoute: typeof CheckinRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq': {
@@ -341,13 +349,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/checkin': {
-      id: '/_admin/checkin'
-      path: '/checkin'
-      fullPath: '/checkin'
-      preLoaderRoute: typeof AdminCheckinRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/_admin/rankings': {
       id: '/_admin/rankings'
       path: '/rankings'
@@ -402,14 +403,12 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminAdminRoute: typeof AdminAdminRoute
-  AdminCheckinRoute: typeof AdminCheckinRoute
   AdminRankingsRoute: typeof AdminRankingsRoute
   AdminScoringRoute: typeof AdminScoringRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAdminRoute: AdminAdminRoute,
-  AdminCheckinRoute: AdminCheckinRoute,
   AdminRankingsRoute: AdminRankingsRoute,
   AdminScoringRoute: AdminScoringRoute,
 }
@@ -432,6 +431,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   ProtectedRoute: ProtectedRouteWithChildren,
+  CheckinRoute: CheckinRoute,
   FaqRoute: FaqRoute,
   JuryRoute: JuryRoute,
   LoginRoute: LoginRoute,

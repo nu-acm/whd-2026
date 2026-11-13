@@ -17,6 +17,7 @@ import { getParticipant } from '@/lib/onboarding.server';
 import { safeInviteRedirect, validateRedirectSearch } from '@/lib/redirect';
 import { sessionIsJury } from '@/lib/jury.server';
 import { sessionIsAdmin } from '@/lib/admin.server';
+import { sessionCanCheckin } from '@/lib/checkin-access.server';
 
 /**
  * Where a signed-in visitor belongs: onboarding until they have a profile,
@@ -27,6 +28,7 @@ const getPostLoginDestination = createServerFn({ method: 'GET' }).handler(async 
   const session = await getSession(getRequest());
   if (!session?.user) return null;
   if (sessionIsAdmin(session)) return '/admin';
+  if (sessionCanCheckin(session)) return '/checkin';
   if (sessionIsJury(session)) return '/jury';
   const profile = await getParticipant(session.user.id);
   return profile ? '/dashboard' : '/onboarding';

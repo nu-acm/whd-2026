@@ -14,7 +14,8 @@ export function AdminHeader({
   onRefresh,
   isRefreshing,
   refreshCooldownSeconds = 0,
-}: AdminHeaderControls & { onSignOut: () => void }) {
+  isAdmin,
+}: AdminHeaderControls & { onSignOut: () => void; isAdmin: boolean }) {
   const { t } = useTranslation();
 
   return (
@@ -36,32 +37,36 @@ export function AdminHeader({
             />
           </Link>
           <nav className="flex items-center gap-1 overflow-x-auto">
-            <Link to="/dashboard" className={navLinkClass}>
-              {t('navbar.dashboard')}
-            </Link>
-            <Link
-              to="/scoring"
-              className={navLinkClass}
-              activeProps={{ className: 'admin-nav-active' }}
-            >
-              {t('scoring.adminTitle')}
-            </Link>
-            <Link
-              to="/rankings"
-              className={navLinkClass}
-              activeProps={{ className: 'admin-nav-active' }}
-            >
-              {t('scoring.rankings')}
-            </Link>
-            <Link
-              to="/admin"
-              className={navLinkClass}
-              activeProps={{
-                className: 'admin-nav-active',
-              }}
-            >
-              {t('admin.navReport')}
-            </Link>
+            {isAdmin && (
+              <>
+                <Link to="/dashboard" className={navLinkClass}>
+                  {t('navbar.dashboard')}
+                </Link>
+                <Link
+                  to="/scoring"
+                  className={navLinkClass}
+                  activeProps={{ className: 'admin-nav-active' }}
+                >
+                  {t('scoring.adminTitle')}
+                </Link>
+                <Link
+                  to="/rankings"
+                  className={navLinkClass}
+                  activeProps={{ className: 'admin-nav-active' }}
+                >
+                  {t('scoring.rankings')}
+                </Link>
+                <Link
+                  to="/admin"
+                  className={navLinkClass}
+                  activeProps={{
+                    className: 'admin-nav-active',
+                  }}
+                >
+                  {t('admin.navReport')}
+                </Link>
+              </>
+            )}
             <Link
               to="/checkin"
               className={navLinkClass}
