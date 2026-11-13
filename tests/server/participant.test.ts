@@ -3,7 +3,6 @@ import { uploadCv, deleteCv } from '@/lib/cv.server';
 import { CV_ERRORS, CV_MAX_BYTES, driveFileUrl } from '@/lib/cv';
 import { getParticipant, upsertParticipant } from '@/lib/onboarding.server';
 import { createTeam } from '@/lib/team.server';
-import { setAttendance } from '@/lib/checkin.server';
 import { Route } from '@/routes/api/cv';
 import { bindings, mockWebhook, profile, seedParticipant, signIn } from './support';
 import { DOCUMENTS_POLICY_VERSION, REGISTRATION_POLICY_VERSION } from '@/lib/consent';
@@ -42,11 +41,10 @@ async function dispatch(
 it('edits profile fields without resetting membership, attendance, CV, or registration time', async () => {
   await seedParticipant('owner');
   const team = await createTeam('owner', 'Profile Team');
-  await setAttendance('owner', true);
   mockWebhook();
   await uploadCv('owner', new File(['%PDF-1.7\ncontent'], 'cv.pdf'));
   await bindings.DB.prepare(
-    'UPDATE participant SET consented_at = 1, documents_acknowledged_at = 2 WHERE id = ?',
+    'UPDATE participant SET attended = 1, consented_at = 1, documents_acknowledged_at = 2 WHERE id = ?',
   )
     .bind('owner')
     .run();

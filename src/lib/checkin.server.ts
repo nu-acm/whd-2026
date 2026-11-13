@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:workers';
-import { count, eq, isNotNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { getDb } from '@/db';
-import { MIN_TEAM_SIZE, participant, team } from '@/db/schema';
+import { participant, team } from '@/db/schema';
 
 interface AppEnv {
   DB: D1Database;
@@ -41,7 +41,7 @@ export type CheckinTeam = {
   members: CheckinTeamMember[];
 };
 
-/** Only people in eligible teams (exactly MIN_TEAM_SIZE members) are checked in. */
+/** Only people in finalized teams with assigned table numbers are checked in. */
 export type CheckinData = {
   participants: CheckinParticipant[];
   teams: CheckinTeam[];
@@ -53,27 +53,20 @@ const byName = (a: { fullName: string }, b: { fullName: string }) =>
 export async function getCheckinData(): Promise<CheckinData> {
   const db = getAppDb();
 
-  // Eligible teams are computed in SQL, so ineligible rosters are never read.
-  const eligible = db
-    .$with('eligible')
-    .as(
-      db
-        .select({ teamId: participant.teamId })
-        .from(participant)
-        .where(isNotNull(participant.teamId))
-        .groupBy(participant.teamId)
-        .having(eq(count(), MIN_TEAM_SIZE)),
-    );
+  // Finalized teams are selected in SQL, so other rosters are never read.
+  const finalized = db
+    .$with('finalized')
+    .as(db.select({ teamId: team.id }).from(team).where(isNotNull(team.number)));
 
   const teamsQuery = db
-    .with(eligible)
+    .with(finalized)
     .select({ id: team.id, name: team.name, number: team.number, captainId: team.captainId })
     .from(team)
-    .innerJoin(eligible, eq(team.id, eligible.teamId))
+    .innerJoin(finalized, eq(team.id, finalized.teamId))
     .orderBy(sql`${team.name} collate nocase`);
 
   const membersQuery = db
-    .with(eligible)
+    .with(finalized)
     .select({
       id: participant.id,
       fullName: participant.fullName,
@@ -85,7 +78,7 @@ export async function getCheckinData(): Promise<CheckinData> {
       educationLevel: participant.educationLevel,
     })
     .from(participant)
-    .innerJoin(eligible, eq(participant.teamId, eligible.teamId));
+    .innerJoin(finalized, eq(participant.teamId, finalized.teamId));
 
   const [teamRows, memberRows] = await db.batch([teamsQuery, membersQuery]);
 
@@ -134,7 +127,7 @@ export async function getCheckinData(): Promise<CheckinData> {
   return { participants, teams };
 }
 
-/** Mark a participant present or absent at the venue. */
+/** Mark a participant in a finalized team present or absent at the venue. */
 export async function setAttendance(
   participantId: string,
   attended: boolean,
@@ -143,8 +136,16 @@ export async function setAttendance(
   const [row] = await db
     .update(participant)
     .set({ attended, updatedAt: new Date() })
-    .where(eq(participant.id, participantId))
+    .where(
+      and(
+        eq(participant.id, participantId),
+        inArray(
+          participant.teamId,
+          db.select({ id: team.id }).from(team).where(isNotNull(team.number)),
+        ),
+      ),
+    )
     .returning({ id: participant.id, attended: participant.attended });
-  if (!row) throw new Error('Participant not found');
+  if (!row) throw new Error('Participant not found in a finalized team');
   return row;
 }

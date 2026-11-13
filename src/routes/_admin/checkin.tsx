@@ -388,9 +388,7 @@ function CheckinPage() {
           <h1 className="text-3xl font-bold text-foreground md:text-4xl">
             {t('admin.checkinTitle')}
           </h1>
-          <p className="mt-2 text-sm text-whd-text-muted">
-            {t('admin.checkinScope', { min: MIN_TEAM_SIZE })}
-          </p>
+          <p className="mt-2 text-sm text-whd-text-muted">{t('admin.checkinScope')}</p>
         </div>
 
         <div className="mb-8 grid gap-4 sm:grid-cols-2">
