@@ -21,7 +21,12 @@ const points = (max: number) =>
 export const roundScoresSchema = z.object({
   teamId: z.string().min(1),
   icpc: points(ROUND_MAX.icpc).nullable(),
-  math: points(ROUND_MAX.math).nullable(),
+  math: z
+    .number()
+    .min(0)
+    .max(ROUND_MAX.math)
+    .multipleOf(0.1, { error: 'scoring.errors.mathPrecision' })
+    .nullable(),
 });
 
 export const juryScoresSchema = z.object({
@@ -57,7 +62,7 @@ export type RankedTeam = {
   assigned: number;
 };
 
-/** Scale whole-number scores before dividing so equivalent totals share a rank exactly. */
+/** Scale scores to integer units before dividing so equivalent totals share a rank exactly. */
 export function calculateRankings(teams: ScoringTeam[]): RankedTeam[] {
   const rows = teams.map((team): RankedTeam => {
     const product = team.assessment?.scores?.reduce((sum, score) => sum + score, 0) ?? null;

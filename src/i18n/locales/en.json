@@ -529,7 +529,7 @@
     "team": "Team",
     "juryProgress": "Jury submissions",
     "pending": "Pending",
-    "roundScoreHint": "Whole-number scores: ICPC 0 to {{icpc}}, Math 0 to {{math}}. Leave blank if not yet available.",
+    "roundScoreHint": "ICPC: whole numbers from 0 to {{icpc}}. Math: 0 to {{math}}, with up to one decimal place. Leave blank if not yet available.",
     "saveRoundScores": "Save round scores",
     "assignedJury": "Assigned juror",
     "submitted": "Submitted",
@@ -560,6 +560,7 @@
     },
     "errors": {
       "precision": "Enter whole numbers only.",
+      "mathPrecision": "Math scores can have at most one decimal place.",
       "criteria": "Enter all five scores within the criterion limits.",
       "published": "Results are published. Unpublish them before changing scores or jury assignments.",
       "unavailable": "This team, juror or assignment is unavailable. Refresh and try again.",

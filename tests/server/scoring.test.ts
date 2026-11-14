@@ -166,6 +166,29 @@ it('persists raw round maxima and rejects scores above them without changing sav
   }
 });
 
+it('persists decimal math scores and includes them in published totals', async () => {
+  const { admin, judge, team } = await setup();
+  await saveRoundScores(admin, { teamId: team.id, icpc: 480, math: 54.5 });
+  expect((await loadScoringAdmin(admin)).teams[0]).toMatchObject({ icpc: 480, math: 54.5 });
+  expect(
+    await bindings.DB.prepare(
+      'SELECT math, typeof(math) AS storage FROM round_score WHERE team_id = ?',
+    )
+      .bind(team.id)
+      .first(),
+  ).toEqual({ math: 54.5, storage: 'real' });
+  for (const math of [54.55, 60.1])
+    await expect(saveRoundScores(admin, { teamId: team.id, icpc: 480, math })).rejects.toThrow();
+  expect((await loadScoringAdmin(admin)).teams[0].math).toBe(54.5);
+  await submitJuryScores(judge, { teamId: team.id, scores: perfect });
+  await publishResults(admin);
+  expect((await getPublishedResults())?.rows[0]).toMatchObject({
+    math: 54.5,
+    total: 91.25,
+    rank: 1,
+  });
+});
+
 it('shares equal places, skips the next place, and treats equivalent normalized scores as ties', () => {
   const team = (id: string, number: number, score: number): ScoringTeam => ({
     id,
@@ -195,15 +218,30 @@ it('shares equal places, skips the next place, and treats equivalent normalized 
     [0.5, 1],
     [0.5, 1],
   ]);
+  const fractional = calculateRankings([
+    { ...team('decimal-math', 2, 480), math: 54.5 },
+    { ...team('equivalent-icpc', 1, 485), math: 54 },
+    { ...team('lower', 3, 480), math: 54.4 },
+  ]);
+  expect(fractional.map((row) => [row.id, row.total, row.rank])).toEqual([
+    ['equivalent-icpc', 91.25, 1],
+    ['decimal-math', 91.25, 1],
+    ['lower', 91.2, 3],
+  ]);
 });
 
-it('accepts only whole scores within each round and criterion limit', () => {
+it('accepts math to one decimal place and whole ICPC and criterion scores within their limits', () => {
   for (const score of [-1, NaN, Infinity, 0.72, 99.99, 1.001])
     for (const round of ['icpc', 'math'])
       expect(
         roundScoresSchema.safeParse({ teamId: 'a', icpc: 0, math: 0, [round]: score }).success,
       ).toBe(false);
   expect(roundScoresSchema.safeParse({ teamId: 'a', icpc: 600, math: 60 }).success).toBe(true);
+  for (const math of [0, 0.1, 1.5, 54.5, 59.9, 60])
+    expect(roundScoresSchema.safeParse({ teamId: 'a', icpc: 0, math }).success).toBe(true);
+  for (const icpc of [0.1, 1.5])
+    expect(roundScoresSchema.safeParse({ teamId: 'a', icpc, math: 0 }).success).toBe(false);
+  expect(roundScoresSchema.safeParse({ teamId: 'a', icpc: null, math: 54.5 }).success).toBe(true);
   expect(roundScoresSchema.safeParse({ teamId: 'a', icpc: 101, math: null }).success).toBe(true);
   expect(roundScoresSchema.safeParse({ teamId: 'a', icpc: 601, math: 60 }).success).toBe(false);
   expect(roundScoresSchema.safeParse({ teamId: 'a', icpc: 600, math: 61 }).success).toBe(false);
@@ -216,6 +254,7 @@ it('accepts only whole scores within each round and criterion limit', () => {
     [20, 25, 20, 25, NaN],
     [1.001, 0, 0, 0, 0],
     [0.72, 0, 0, 0, 0],
+    [0.5, 0, 0, 0, 0],
   ])
     expect(juryScoresSchema.safeParse({ teamId: 'a', scores }).success).toBe(false);
 });

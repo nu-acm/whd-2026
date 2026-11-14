@@ -173,6 +173,7 @@ function RoundScoreCells({
               name={round.key}
               form={formId}
               max={ROUND_MAX[round.key]}
+              decimal={round.key === 'math'}
               aria-describedby={hintId}
               disabled={disabled}
               value={round.value}

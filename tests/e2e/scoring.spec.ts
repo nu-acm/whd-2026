@@ -51,7 +51,7 @@ test('keeps ICPC and Math with admins, Product Design with jury, and publishes c
   await expect(page).toHaveURL(/\/admin$/);
   await page.goto('/scoring');
   await page.getByRole('textbox', { name: en.scoring.icpc, exact: true }).fill('480');
-  await page.getByRole('textbox', { name: en.scoring.math, exact: true }).fill('54');
+  await page.getByRole('textbox', { name: en.scoring.math, exact: true }).fill('54.5');
   await page.getByRole('button', { name: en.scoring.saveRoundScores }).click();
   await expect(page.getByText(en.scoring.saved, { exact: true })).toBeVisible();
   await expect(page.getByRole('table', { name: en.scoring.rankings, exact: true })).toHaveCount(0);
@@ -114,12 +114,12 @@ test('keeps ICPC and Math with admins, Product Design with jury, and publishes c
       '480',
     );
     await expect(table.getByRole('textbox', { name: en.scoring.math, exact: true })).toHaveValue(
-      '54',
+      '54.5',
     );
     for (const label of Object.values(en.scoring.criteria))
       await expect(table.getByRole('textbox', { name: label })).toHaveCount(0);
     await page.getByRole('link', { name: en.scoring.rankings, exact: true }).click();
-    await expect(page.getByRole('cell', { name: '91.00', exact: true })).toBeVisible();
+    await expect(page.getByRole('cell', { name: '91.25', exact: true })).toBeVisible();
     await page.getByRole('button', { name: en.scoring.publish, exact: true }).click();
     await page
       .getByRole('alertdialog')
@@ -137,7 +137,7 @@ test('keeps ICPC and Math with admins, Product Design with jury, and publishes c
     await page.getByRole('link', { name: en.scoring.rankings, exact: true }).click();
     await jury.goto('/results');
     await expect(jury.getByText('Private jury feedback')).toHaveCount(0);
-    await expect(jury.getByRole('cell', { name: '91.00', exact: true })).toBeVisible();
+    await expect(jury.getByRole('cell', { name: '91.25', exact: true })).toBeVisible();
     await page.getByRole('button', { name: en.scoring.unpublish, exact: true }).click();
     await page
       .getByRole('alertdialog')
@@ -182,18 +182,27 @@ test('saves admin round scores independently and validates table forms', async (
   const first = table.getByRole('row', { name: 'Table 01 · Eligible Team', exact: true });
   const second = table.getByRole('row', { name: 'Table 02 · Second Team', exact: true });
   await first.getByRole('textbox', { name: 'ICPC', exact: true }).fill('0');
-  await first.getByRole('textbox', { name: 'Math', exact: true }).fill('60');
   const firstMath = first.getByRole('textbox', { name: 'Math', exact: true });
-  await expect(firstMath).toHaveAttribute('pattern', '[0-9]{1,2}');
-  for (const value of ['61', '100', '-1', '0.5', '1e1', 'abc']) {
+  await expect(firstMath).toHaveAttribute('pattern', '[0-9]{1,2}([.][0-9])?');
+  await expect(firstMath).toHaveAttribute('inputmode', 'decimal');
+  await firstMath.fill('54');
+  await firstMath.pressSequentially('.5');
+  await expect(firstMath).toHaveValue('54.5');
+  for (const value of ['61', '60.1', '100', '-1', '0.55', '1.001', '1e1', 'abc']) {
     await firstMath.fill(value);
-    await expect(firstMath).toHaveValue('60');
+    await expect(firstMath).toHaveValue('54.5');
   }
+  await firstMath.fill('60.0');
+  await expect(firstMath).toHaveValue('60.0');
+  await firstMath.fill('0.1');
+  await expect(firstMath).toHaveValue('0.1');
+  await firstMath.fill('54,5');
+  await expect(firstMath).toHaveValue('54.5');
   await second.getByRole('textbox', { name: 'ICPC', exact: true }).fill('55');
   await first.getByRole('textbox', { name: 'Math', exact: true }).press('Enter');
   await expect(page.getByText(en.scoring.saved, { exact: true })).toBeVisible();
   expect(await app.db.prepare('SELECT team_id, icpc, math FROM round_score').all()).toMatchObject({
-    results: [{ team_id: 'eligible-team', icpc: 0, math: 60 }],
+    results: [{ team_id: 'eligible-team', icpc: 0, math: 54.5 }],
   });
   await expect(second.getByRole('textbox', { name: 'ICPC', exact: true })).toHaveValue('55');
   const secondIcpc = second.getByRole('textbox', { name: 'ICPC', exact: true });
@@ -220,6 +229,10 @@ test('saves admin round scores independently and validates table forms', async (
       .prepare("SELECT icpc, math FROM round_score WHERE team_id = 'second-team'")
       .first(),
   ).toEqual({ icpc: 55, math: null });
+  await page.reload();
+  await expect(
+    page.getByRole('textbox', { name: en.scoring.math, exact: true }).first(),
+  ).toHaveValue('54.5');
 });
 
 test('saves jury Product Design rows independently and enforces criterion limits', async ({

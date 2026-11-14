@@ -4,26 +4,32 @@ import { Input } from '@/components/ui/input';
 type ScoreInputProps = Omit<ComponentProps<typeof Input>, 'value' | 'onChange' | 'max'> & {
   value: string;
   max: number;
+  decimal?: boolean;
   onValueChange: (value: string) => void;
 };
 
-export function ScoreInput({ value, max, onValueChange, ...props }: ScoreInputProps) {
+export function ScoreInput({
+  value,
+  max,
+  decimal = false,
+  onValueChange,
+  ...props
+}: ScoreInputProps) {
   const digits = String(max).length;
+  const pattern = `[0-9]{1,${digits}}${decimal ? '([.][0-9])?' : ''}`;
+  const editingPattern = new RegExp(`^[0-9]{1,${digits}}${decimal ? '([.][0-9]?)?' : ''}$`);
   return (
     <Input
       {...props}
       type="text"
       variant="score"
-      inputMode="numeric"
+      inputMode={decimal ? 'decimal' : 'numeric'}
       autoComplete="off"
-      pattern={`[0-9]{1,${digits}}`}
+      pattern={pattern}
       value={value}
       onChange={(event) => {
-        const next = event.target.value;
-        if (
-          next === '' ||
-          (/^[0-9]+$/.test(next) && next.length <= digits && Number(next) <= max)
-        ) {
+        const next = decimal ? event.target.value.replace(',', '.') : event.target.value;
+        if (next === '' || (editingPattern.test(next) && Number(next) <= max)) {
           onValueChange(next);
         }
       }}
